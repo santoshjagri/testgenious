@@ -1,7 +1,9 @@
+
 'use server';
 
 /**
- * @fileOverview Generates a diverse set of questions (MCQs, short, long) based on the specified subject and class level.
+ * @fileOverview Generates a diverse set of questions (MCQs, Fill in the Blanks, True/False, short, long, numerical/practical) 
+ * based on the specified subject, class level, and other paper parameters.
  *
  * - generateQuestions - A function that generates questions for a question paper.
  * - GenerateQuestionsInput - The input type for the generateQuestions function.
@@ -18,17 +20,26 @@ const GenerateQuestionsInputSchema = z.object({
   passMarks: z.number().describe('The pass marks for the question paper.'),
   timeLimit: z.string().describe('The time limit for the question paper (e.g., 2 hours, 90 minutes).'),
   instructions: z.string().describe('Any specific instructions for the question paper.'),
+  examType: z.string().describe('The type of exam (e.g., Final, Unit Test, Entrance Exam).'),
+  institutionName: z.string().optional().describe('The name of the institution. Defaults to "TestPaperGenius Institute" if not provided by user.'),
+  subjectCode: z.string().optional().describe('The subject code for the paper.'),
   mcqCount: z.number().default(5).describe('Number of Multiple Choice Questions to generate.'),
+  fillInTheBlanksCount: z.number().default(0).describe('Number of Fill in the Blanks questions to generate.'),
+  trueFalseCount: z.number().default(0).describe('Number of True/False questions to generate.'),
   shortQuestionCount: z.number().default(3).describe('Number of Short Questions to generate.'),
   longQuestionCount: z.number().default(2).describe('Number of Long Questions to generate.'),
+  numericalPracticalCount: z.number().default(0).describe('Number of Numerical or Practical questions to generate (if applicable for the subject).'),
 });
 
 export type GenerateQuestionsInput = z.infer<typeof GenerateQuestionsInputSchema>;
 
 const GenerateQuestionsOutputSchema = z.object({
-  mcqs: z.array(z.string()).describe('An array of multiple-choice questions.'),
-  shortQuestions: z.array(z.string()).describe('An array of short questions.'),
-  longQuestions: z.array(z.string()).describe('An array of long questions.'),
+  mcqs: z.array(z.string()).describe('An array of multiple-choice questions. Each question string should include its allocated marks, e.g., "What is 2+2? (1 mark)".'),
+  fillInTheBlanks: z.array(z.string()).optional().describe('An array of fill-in-the-blanks questions. Each question string should include its allocated marks. Include this array only if fillInTheBlanksCount > 0.'),
+  trueFalseQuestions: z.array(z.string()).optional().describe('An array of true/false questions. Each question string should include "(True/False)" and its allocated marks. Include this array only if trueFalseCount > 0.'),
+  shortQuestions: z.array(z.string()).describe('An array of short answer questions. Each question string should include its allocated marks.'),
+  longQuestions: z.array(z.string()).describe('An array of long answer questions. Each question string should include its allocated marks.'),
+  numericalPracticalQuestions: z.array(z.string()).optional().describe('An array of numerical or practical questions. Each question string should include its allocated marks. Include this array only if numericalPracticalCount > 0.'),
 });
 
 export type GenerateQuestionsOutput = z.infer<typeof GenerateQuestionsOutputSchema>;
@@ -41,24 +52,38 @@ const generateQuestionsPrompt = ai.definePrompt({
   name: 'generateQuestionsPrompt',
   input: {schema: GenerateQuestionsInputSchema},
   output: {schema: GenerateQuestionsOutputSchema},
-  prompt: `You are an experienced teacher creating a question paper for {{classLevel}} in {{subject}}.
+  prompt: `You are an expert educator tasked with creating a comprehensive and well-structured question paper.
+The paper is for:
+- Institution: {{#if institutionName}}{{institutionName}}{{else}}TestPaperGenius Institute{{/if}}
+- Class/Level: {{classLevel}}
+- Subject: {{subject}}{{#if subjectCode}} (Code: {{subjectCode}}){{/if}}
+- Exam Type: {{examType}}
+- Total Marks: {{totalMarks}}
+- Pass Marks: {{passMarks}}
+- Time Limit: {{timeLimit}}
 
-  Total Marks: {{totalMarks}}
-  Pass Marks: {{passMarks}}
-  Time Limit: {{timeLimit}}
+General Instructions for Students (to be included in the paper):
+{{{instructions}}}
 
-  Instructions: {{instructions}}
+You need to generate questions for the following sections based on the counts provided.
+The sum of marks for all generated questions should ideally align with the 'Total Marks'.
+Ensure questions cover the syllabus for the given subject and class level proportionally and include a balance of easy, medium, and hard difficulty levels.
+For each question you generate, YOU MUST clearly indicate the marks allocated within the question string itself, for example: "What is photosynthesis? (2 marks)" or "Define force. (3 marks)".
+For True/False questions, include "(True/False)" in the question string, like "The sun is a planet. (True/False) (1 mark)".
 
-  Generate {{mcqCount}} multiple-choice questions, {{shortQuestionCount}} short questions, and {{longQuestionCount}} long questions relevant to the subject and class level.
+Generate the following number of questions:
+- Multiple Choice Questions: {{mcqCount}}
+- Fill in the Blanks Questions: {{fillInTheBlanksCount}}
+- True/False Questions: {{trueFalseCount}}
+- Short Answer Questions: {{shortQuestionCount}}
+- Long Answer Questions: {{longQuestionCount}}
+- Numerical/Practical Questions: {{numericalPracticalCount}} (Generate these only if applicable to the subject. If not applicable, or if the count is 0, omit this section from the output.)
 
-  Ensure the questions are diverse and cover a range of topics within the subject.
 
-  The question paper sections are defined as follows:
-  - mcqs: An array of multiple-choice questions.
-  - shortQuestions: An array of short questions.
-  - longQuestions: An array of long questions.
-
-  Output the questions in JSON format.
+The output must be a JSON object strictly adhering to the 'GenerateQuestionsOutputSchema'.
+Each array in the JSON should contain the question strings as described.
+Only include arrays for 'fillInTheBlanks', 'trueFalseQuestions', and 'numericalPracticalQuestions' in the output JSON if their respective counts (fillInTheBlanksCount, trueFalseCount, numericalPracticalCount) are greater than 0. The 'mcqs', 'shortQuestions', and 'longQuestions' arrays should always be present, even if empty (if their count is 0).
+Present questions with standard academic formatting. Start questions with a number if appropriate within their section (e.g., "1. Question text...").
   `,
 });
 
@@ -70,6 +95,19 @@ const generateQuestionsFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await generateQuestionsPrompt(input);
-    return output!;
+    // Ensure optional fields are present as empty arrays if not returned by AI but count > 0 (though prompt asks AI to omit if count is 0)
+    // This is more of a fallback, the prompt should guide the AI correctly.
+    const result = output!;
+    if (input.fillInTheBlanksCount > 0 && !result.fillInTheBlanks) {
+      result.fillInTheBlanks = [];
+    }
+    if (input.trueFalseCount > 0 && !result.trueFalseQuestions) {
+      result.trueFalseQuestions = [];
+    }
+    if (input.numericalPracticalCount > 0 && !result.numericalPracticalQuestions) {
+      result.numericalPracticalQuestions = [];
+    }
+    return result;
   }
 );
+

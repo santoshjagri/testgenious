@@ -4,12 +4,12 @@
 import type * as React from 'react';
 import type { GenerateQuestionsOutput, GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ListOrdered, FileText, FileSignature, Printer } from 'lucide-react';
+import { ListOrdered, FileText, FileSignature, Printer, PencilLine, ClipboardCheck, CalculatorIcon, Info } from 'lucide-react';
 
 interface QuestionPaperDisplayProps {
-  formData: Omit<GenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount'>;
+  formData: Omit<GenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'>;
   questions: GenerateQuestionsOutput;
 }
 
@@ -18,87 +18,162 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     window.print();
   };
 
+  let sectionCounter = 0;
+  const getSectionLetter = () => String.fromCharCode(65 + sectionCounter++);
+
+
   return (
     <div className="mt-12">
-      <Button onClick={handlePrint} variant="outline" className="mb-6 w-full md:w-auto no-print bg-accent hover:bg-accent/90 text-accent-foreground">
+      <Button onClick={handlePrint} variant="outline" className="mb-6 w-full md:w-auto no-print bg-accent hover:bg-accent/90 text-accent-foreground shadow-md">
         <Printer className="mr-2 h-5 w-5" />
         Download / Print Question Paper
       </Button>
 
-      <Card className="printable-area shadow-2xl rounded-lg border-2 border-primary/20" id="question-paper">
-        <CardHeader className="bg-primary text-primary-foreground p-6 rounded-t-lg">
-          <CardTitle className="text-4xl font-headline text-center">Question Paper</CardTitle>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-sm">
-            <p><strong className="font-semibold">Class/Level:</strong> {formData.classLevel}</p>
-            <p><strong className="font-semibold">Subject:</strong> {formData.subject}</p>
-            <p><strong className="font-semibold">Total Marks:</strong> {formData.totalMarks}</p>
-            <p><strong className="font-semibold">Pass Marks:</strong> {formData.passMarks}</p>
-          </div>
-          <p className="mt-2 text-center"><strong className="font-semibold">Time Limit:</strong> {formData.timeLimit}</p>
+      <Card className="printable-area shadow-2xl rounded-lg border-2 border-primary/20 bg-white text-black" id="question-paper">
+        <CardHeader className="p-6 border-b-2 border-black">
+            <h1 className="text-3xl font-bold text-center mb-1">{formData.institutionName || "TestPaperGenius Institute"}</h1>
+            <h2 className="text-xl font-semibold text-center mb-3">{formData.examType} - {new Date().getFullYear()}</h2>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+                <div><strong>Subject:</strong> {formData.subject}</div>
+                {formData.subjectCode && <div><strong>Subject Code:</strong> {formData.subjectCode}</div>}
+                <div><strong>Class/Level:</strong> {formData.classLevel}</div>
+                <div><strong>Full Marks:</strong> {formData.totalMarks}</div>
+                <div><strong>Time Allowed:</strong> {formData.timeLimit}</div>
+                <div><strong>Pass Marks:</strong> {formData.passMarks}</div>
+            </div>
+             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                <div><strong>Student Name:</strong> ..........................................</div>
+                <div><strong>Roll No.:</strong> ................................</div>
+             </div>
         </CardHeader>
 
-        <CardContent className="p-6 md:p-8 space-y-8">
+        <CardContent className="p-6 md:p-8 space-y-6">
           {formData.instructions && (
-            <div className="bg-secondary/30 p-4 rounded-md border border-secondary">
-              <h3 className="text-lg font-semibold text-primary mb-2">Instructions:</h3>
-              <p className="whitespace-pre-line text-sm">{formData.instructions}</p>
+            <div className="mb-6 p-3 border border-gray-300 rounded-md bg-gray-50">
+              <div className="flex items-center mb-2">
+                <Info className="h-5 w-5 mr-2 text-blue-600" />
+                <h3 className="text-md font-semibold text-gray-700">Instructions for Students:</h3>
+              </div>
+              <p className="whitespace-pre-line text-xs text-gray-600">{formData.instructions}</p>
             </div>
           )}
 
           {questions.mcqs && questions.mcqs.length > 0 && (
             <section aria-labelledby="mcq-section-title">
-              <div className="flex items-center mb-4">
-                <ListOrdered className="h-7 w-7 mr-3 text-primary" />
-                <h2 id="mcq-section-title" className="text-2xl font-headline text-primary">Multiple Choice Questions</h2>
+              <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
+                <ListOrdered className="h-6 w-6 mr-3 text-gray-700" />
+                <h2 id="mcq-section-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Multiple Choice Questions</h2>
               </div>
-              <ul className="space-y-4 list-decimal list-inside pl-2">
+              <ol className="space-y-3 list-decimal list-inside pl-4 text-sm">
                 {questions.mcqs.map((mcq, index) => (
-                  <li key={`mcq-${index}`} className="text-base mb-2 pb-2 border-b border-dashed">
+                  <li key={`mcq-${index}`} className="pb-1">
                     {mcq}
                   </li>
                 ))}
-              </ul>
+              </ol>
             </section>
           )}
 
-          <Separator className="my-8 border-primary/50" />
-
-          {questions.shortQuestions && questions.shortQuestions.length > 0 && (
-            <section aria-labelledby="short-questions-title">
-              <div className="flex items-center mb-4">
-                <FileText className="h-7 w-7 mr-3 text-primary" />
-                <h2 id="short-questions-title" className="text-2xl font-headline text-primary">Short Answer Questions</h2>
+          {questions.fillInTheBlanks && questions.fillInTheBlanks.length > 0 && (
+            <>
+            <Separator className="my-6 border-gray-300" />
+            <section aria-labelledby="fitb-section-title">
+              <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
+                <PencilLine className="h-6 w-6 mr-3 text-gray-700" />
+                <h2 id="fitb-section-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Fill in the Blanks</h2>
               </div>
-              <ul className="space-y-6">
-                {questions.shortQuestions.map((question, index) => (
-                  <li key={`short-${index}`} className="text-base mb-2 pb-2 border-b border-dashed">
-                    {index + 1}. {question}
+              <ol className="space-y-3 list-decimal list-inside pl-4 text-sm">
+                {questions.fillInTheBlanks.map((fitb, index) => (
+                  <li key={`fitb-${index}`} className="pb-1">
+                    {fitb}
                   </li>
                 ))}
-              </ul>
+              </ol>
             </section>
+            </>
           )}
 
-          <Separator className="my-8 border-primary/50" />
+          {questions.trueFalseQuestions && questions.trueFalseQuestions.length > 0 && (
+            <>
+            <Separator className="my-6 border-gray-300" />
+            <section aria-labelledby="tf-section-title">
+              <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
+                <ClipboardCheck className="h-6 w-6 mr-3 text-gray-700" />
+                <h2 id="tf-section-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: True or False</h2>
+              </div>
+              <ol className="space-y-3 list-decimal list-inside pl-4 text-sm">
+                {questions.trueFalseQuestions.map((tf, index) => (
+                  <li key={`tf-${index}`} className="pb-1">
+                    {tf}
+                  </li>
+                ))}
+              </ol>
+            </section>
+            </>
+          )}
+          
+          {questions.shortQuestions && questions.shortQuestions.length > 0 && (
+            <>
+            <Separator className="my-6 border-gray-300" />
+            <section aria-labelledby="short-questions-title">
+              <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
+                <FileText className="h-6 w-6 mr-3 text-gray-700" />
+                <h2 id="short-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Short Answer Questions</h2>
+              </div>
+              <ol className="space-y-4 list-decimal list-inside pl-4 text-sm">
+                {questions.shortQuestions.map((question, index) => (
+                  <li key={`short-${index}`} className="pb-1">
+                    {question}
+                  </li>
+                ))}
+              </ol>
+            </section>
+            </>
+          )}
 
           {questions.longQuestions && questions.longQuestions.length > 0 && (
+            <>
+            <Separator className="my-6 border-gray-300" />
             <section aria-labelledby="long-questions-title">
-              <div className="flex items-center mb-4">
-                <FileSignature className="h-7 w-7 mr-3 text-primary" />
-                <h2 id="long-questions-title" className="text-2xl font-headline text-primary">Long Answer Questions</h2>
+              <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
+                <FileSignature className="h-6 w-6 mr-3 text-gray-700" />
+                <h2 id="long-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Long Answer Questions</h2>
               </div>
-              <ul className="space-y-8">
+              <ol className="space-y-5 list-decimal list-inside pl-4 text-sm">
                 {questions.longQuestions.map((question, index) => (
-                  <li key={`long-${index}`} className="text-base mb-2 pb-2">
-                     {index + 1}. {question}
+                  <li key={`long-${index}`} className="pb-1">
+                     {question}
                   </li>
                 ))}
-              </ul>
+              </ol>
             </section>
+            </>
+          )}
+
+          {questions.numericalPracticalQuestions && questions.numericalPracticalQuestions.length > 0 && (
+            <>
+            <Separator className="my-6 border-gray-300" />
+            <section aria-labelledby="num-prac-questions-title">
+              <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
+                <CalculatorIcon className="h-6 w-6 mr-3 text-gray-700" />
+                <h2 id="num-prac-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Numerical / Practical Questions</h2>
+              </div>
+              <ol className="space-y-4 list-decimal list-inside pl-4 text-sm">
+                {questions.numericalPracticalQuestions.map((question, index) => (
+                  <li key={`num-prac-${index}`} className="pb-1">
+                    {question}
+                  </li>
+                ))}
+              </ol>
+            </section>
+            </>
           )}
         </CardContent>
-        <CardFooter className="p-6 border-t text-center text-muted-foreground text-sm">
-          <p>Generated by TestPaperGenius &copy; {new Date().getFullYear()}</p>
+        <CardFooter className="p-4 border-t border-gray-300 text-center text-xs text-gray-500">
+            <div className="w-full">
+                <p className="mb-2">*** END OF QUESTION PAPER ***</p>
+                <p>Generated by TestPaperGenius &copy; {new Date().getFullYear()}</p>
+            </div>
         </CardFooter>
       </Card>
     </div>

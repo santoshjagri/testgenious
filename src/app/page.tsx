@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -14,7 +15,7 @@ const LOCAL_STORAGE_KEY = "questionPaperHistory";
 export default function Home() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [generatedPaper, setGeneratedPaper] = React.useState<GenerateQuestionsOutput | null>(null);
-  const [formSnapshot, setFormSnapshot] = React.useState<Omit<GenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount'> | null>(null);
+  const [formSnapshot, setFormSnapshot] = React.useState<Omit<GenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'> | null>(null);
   const { toast } = useToast();
 
   const handleFormSubmit = async (values: QuestionPaperFormValues) => {
@@ -27,21 +28,35 @@ export default function Home() {
       totalMarks: values.totalMarks,
       passMarks: values.passMarks,
       timeLimit: values.timeLimit,
-      instructions: values.instructions || '',
+      instructions: values.instructions || 'All questions are compulsory.',
+      examType: values.examType,
+      institutionName: values.institutionName || 'TestPaperGenius Institute',
+      subjectCode: values.subjectCode || '',
       mcqCount: values.mcqCount,
       shortQuestionCount: values.shortQuestionCount,
       longQuestionCount: values.longQuestionCount,
+      fillInTheBlanksCount: values.fillInTheBlanksCount,
+      trueFalseCount: values.trueFalseCount,
+      numericalPracticalCount: values.numericalPracticalCount,
     };
 
     try {
       const result = await generateQuestions(aiInput);
       setGeneratedPaper(result);
-      const { mcqCount, shortQuestionCount, longQuestionCount, ...restOfInput } = aiInput;
+      
+      const { 
+        mcqCount, 
+        shortQuestionCount, 
+        longQuestionCount, 
+        fillInTheBlanksCount,
+        trueFalseCount,
+        numericalPracticalCount,
+        ...restOfInput 
+      } = aiInput;
       setFormSnapshot(restOfInput);
       
-      // Save to history
       const newPaperEntry: StoredQuestionPaper = {
-        id: Date.now().toString(), // Simple unique ID
+        id: Date.now().toString(), 
         dateGenerated: new Date().toISOString(),
         formSnapshot: restOfInput,
         generatedPaper: result,
@@ -52,14 +67,13 @@ export default function Home() {
           const existingHistoryString = localStorage.getItem(LOCAL_STORAGE_KEY);
           const existingHistory: StoredQuestionPaper[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
           const updatedHistory = [newPaperEntry, ...existingHistory];
-          // Limit history to a reasonable number, e.g., 20 items
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory.slice(0, 20)));
         } catch (storageError) {
           console.error("Error saving to local storage:", storageError);
           toast({
             title: "Warning",
             description: "Question paper generated, but failed to save to history.",
-            variant: "destructive", // Or a less severe variant
+            variant: "destructive", 
           });
         }
       }
@@ -72,9 +86,13 @@ export default function Home() {
 
     } catch (error) {
       console.error("Error generating question paper:", error);
+      let errorMessage = "Failed to generate question paper. Please try again.";
+      if (error instanceof Error) {
+        errorMessage = error.message.substring(0, 200); // Cap length for toast
+      }
       toast({
-        title: "Error",
-        description: "Failed to generate question paper. Please try again.",
+        title: "Error Generating Paper",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -95,7 +113,7 @@ export default function Home() {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               <p className="text-lg text-primary font-medium">Generating your masterpiece...</p>
-              <p className="text-sm text-muted-foreground">This might take a moment.</p>
+              <p className="text-sm text-muted-foreground">This might take a moment. The AI is thinking hard!</p>
             </div>
           </div>
         )}
@@ -111,7 +129,7 @@ export default function Home() {
             <Terminal className="h-5 w-5" />
             <AlertTitle className="font-headline">Welcome to TestPaperGenius!</AlertTitle>
             <AlertDescription>
-              Fill out the form above to generate your custom question paper. The AI will craft questions based on your specifications.
+              Fill out the form above to generate your custom question paper. The AI will craft questions based on your specifications, complete with sections and mark allocations.
             </AlertDescription>
           </Alert>
         )}
