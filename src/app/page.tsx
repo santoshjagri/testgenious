@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
-import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, SupportedLanguages } from '@/lib/types';
+import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, AppGenerateQuestionsInput } from '@/lib/types'; // Updated import
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -53,20 +53,32 @@ export default function Home() {
       }
     }
 
-    const snapshotForStorageAndDisplay: QuestionPaperDisplayFormData = {
+    // Use AppGenerateQuestionsInput for the snapshot to include new fields
+    const snapshotForStorageAndDisplay: AppGenerateQuestionsInput = {
       classLevel: values.classLevel,
       subject: values.subject,
       totalMarks: values.totalMarks,
       passMarks: values.passMarks,
       timeLimit: values.timeLimit,
       instructions: values.instructions || 'All questions are compulsory.',
-      examType: values.examType || 'Final Examination',
+      examType: values.examType, // examType is now from enum
       institutionName: values.institutionName || 'TestPaperGenius Institute',
       institutionAddress: values.institutionAddress || '',
       subjectCode: values.subjectCode || '',
       logoDataUri: logoDataUri,
       language: values.language,
+      totalQuestionNumber: values.totalQuestionNumber, // New field
+      customPrompt: values.customPrompt, // New field
+      // AI counts are not part of AppGenerateQuestionsInput directly for snapshot if it's generic
+      // but will be used for AIInput if mode is 'ai'
     };
+    
+    // Explicitly cast to QuestionPaperDisplayFormData for the display component if types differ
+    const displayData: QuestionPaperDisplayFormData = {
+        ...snapshotForStorageAndDisplay,
+        // ensure all required fields for QuestionPaperDisplayFormData are present
+    };
+
 
     try {
       let result: GenerateQuestionsOutput;
@@ -101,12 +113,14 @@ export default function Home() {
           passMarks: values.passMarks,
           timeLimit: values.timeLimit,
           instructions: values.instructions || 'All questions are compulsory.',
-          examType: values.examType || 'Final Examination',
+          examType: values.examType, // Use enum value
           institutionName: values.institutionName || 'TestPaperGenius Institute',
           institutionAddress: values.institutionAddress || '',
           subjectCode: values.subjectCode || '',
           logoDataUri: logoDataUri,
-          language: values.language,
+          language: values.language, // Use enum value
+          totalQuestionNumber: values.totalQuestionNumber, // New field
+          customPrompt: values.customPrompt, // New field
           mcqCount: values.mcqCount,
           veryShortQuestionCount: values.veryShortQuestionCount,
           shortQuestionCount: values.shortQuestionCount,
@@ -124,13 +138,26 @@ export default function Home() {
       }
       
       setGeneratedPaper(result);
-      setFormSnapshotForDisplay(snapshotForStorageAndDisplay);
+      setFormSnapshotForDisplay(displayData); // Use displayData for the display component
       
       const newPaperEntry: StoredQuestionPaper = {
         id: Date.now().toString(), 
         dateGenerated: new Date().toISOString(),
-        formSnapshot: {
-          ...snapshotForStorageAndDisplay, // Contains language
+        formSnapshot: { // Ensure this matches the StoredQuestionPaper.formSnapshot structure
+          classLevel: snapshotForStorageAndDisplay.classLevel,
+          subject: snapshotForStorageAndDisplay.subject,
+          totalMarks: snapshotForStorageAndDisplay.totalMarks,
+          passMarks: snapshotForStorageAndDisplay.passMarks,
+          timeLimit: snapshotForStorageAndDisplay.timeLimit,
+          instructions: snapshotForStorageAndDisplay.instructions,
+          examType: snapshotForStorageAndDisplay.examType,
+          institutionName: snapshotForStorageAndDisplay.institutionName,
+          institutionAddress: snapshotForStorageAndDisplay.institutionAddress,
+          subjectCode: snapshotForStorageAndDisplay.subjectCode,
+          logoDataUri: snapshotForStorageAndDisplay.logoDataUri,
+          language: snapshotForStorageAndDisplay.language,
+          totalQuestionNumber: snapshotForStorageAndDisplay.totalQuestionNumber,
+          customPrompt: snapshotForStorageAndDisplay.customPrompt,
           generationMode: values.generationMode,
         },
         generatedPaper: result,
@@ -220,3 +247,4 @@ export default function Home() {
     </main>
   );
 }
+

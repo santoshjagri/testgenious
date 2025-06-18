@@ -4,7 +4,7 @@
 import type * as React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguages } from '@/lib/types';
+import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguages, ExamTypes } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3 } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Sigma, Lightbulb, MessageSquareText } from 'lucide-react';
 
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
@@ -41,9 +41,11 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
       examType: 'Final Examination',
       totalMarks: 70,
       passMarks: 23,
+      totalQuestionNumber: undefined, // Default to undefined or a number like 20
       timeLimit: '2 hours',
       instructions: '1. All questions are compulsory.\n2. Marks are indicated against each question.\n3. Write neatly and legibly.',
       language: "English",
+      customPrompt: '',
       generationMode: 'ai',
       mcqCount: 5,
       veryShortQuestionCount: 0,
@@ -120,173 +122,53 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="institutionName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4" />Institution Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Springfield High School" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="logo"
-                render={({ field: { onChange, value, ...rest } }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center"><ImagePlus className="mr-2 h-4 w-4" />Institution Logo (Optional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={(e) => onChange(e.target.files?.[0])}
-                        {...rest} 
-                        className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-                      />
-                    </FormControl>
-                    <FormDescription>Upload your institution's logo (PNG, JPG, GIF).</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
             
-            <FormField
-              control={form.control}
-              name="institutionAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Institution Address (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="e.g., 123 Main Street, Anytown, USA" className="resize-y min-h-[60px]" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="classLevel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Class / Level</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Class 10, Grade 5" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="subject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Subject</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Mathematics, Science" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="subjectCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center"><Code className="mr-2 h-4 w-4" />Subject Code (Optional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., MATH101, SCI-05" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="examType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center"><Type className="mr-2 h-4 w-4" />Exam Type</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Final, Unit Test, Midterm" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-             <FormField
-                control={form.control}
-                name="language"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center"><LanguagesIcon className="mr-2 h-4 w-4" />Language for Questions</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+            {/* Institution Details */}
+            <div className="space-y-6">
+              <CardTitle className="text-xl font-semibold border-b pb-2 text-primary/90">Institution Details</CardTitle>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="institutionName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4" />Institution Name</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select language for questions" />
-                        </SelectTrigger>
+                        <Input placeholder="e.g., Springfield High School" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        {SupportedLanguages.map(lang => (
-                          <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>AI will generate questions in this language. For manual entry, type in your chosen language.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="logo"
+                  render={({ field: { onChange, value, ...rest } }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><ImagePlus className="mr-2 h-4 w-4" />Institution Logo (Optional)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={(e) => onChange(e.target.files?.[0])}
+                          {...rest} 
+                          className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                        />
+                      </FormControl>
+                      <FormDescription>Upload your institution's logo (PNG, JPG, GIF).</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
-                name="totalMarks"
+                name="institutionAddress"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Total Marks</FormLabel>
+                    <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Institution Address (Optional)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="e.g., 100" {...field} onChange={e => field.onChange(parseInt(e.target.value,10) || 0)} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="passMarks"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pass Marks</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g., 33" {...field} onChange={e => field.onChange(parseInt(e.target.value,10) || 0)} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="timeLimit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Time Limit</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., 2 hours, 90 minutes" {...field} />
+                      <Textarea placeholder="e.g., 123 Main Street, Anytown, USA" className="resize-y min-h-[60px]" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -294,12 +176,168 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
               />
             </div>
 
+            {/* Paper Basics */}
+            <div className="space-y-6">
+              <CardTitle className="text-xl font-semibold border-b pb-2 text-primary/90">Paper Basics</CardTitle>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="classLevel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Class / Level</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Class 10, Grade 5" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="subject"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Subject</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Mathematics, Science" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="subjectCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><Code className="mr-2 h-4 w-4" />Subject Code (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., MATH101, SCI-05" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="examType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><Type className="mr-2 h-4 w-4" />Exam Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select exam type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {ExamTypes.map(type => (
+                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                  control={form.control}
+                  name="language"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><LanguagesIcon className="mr-2 h-4 w-4" />Language for Questions</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select language for questions" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {SupportedLanguages.map(lang => (
+                            <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>AI will generate questions in this language. For manual entry, type in your chosen language.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
+
+            {/* Marks, Questions & Time */}
+            <div className="space-y-6">
+              <CardTitle className="text-xl font-semibold border-b pb-2 text-primary/90">Marks, Questions & Time</CardTitle>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <FormField
+                  control={form.control}
+                  name="totalMarks"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Total Marks</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g., 100" {...field} onChange={e => field.onChange(parseInt(e.target.value,10) || 0)} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="passMarks"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pass Marks</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g., 33" {...field} onChange={e => field.onChange(parseInt(e.target.value,10) || 0)} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="timeLimit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Time Limit</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., 2 hours, 90 minutes" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+               <FormField
+                  control={form.control}
+                  name="totalQuestionNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><Sigma className="mr-2 h-4 w-4" />Total Number of Questions (Optional)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g., 20 (Informational for AI)" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10) || 0)} />
+                      </FormControl>
+                      <FormDescription>Desired total question count. AI will use this as a guideline.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
+            
+            {/* Instructions */}
             <FormField
               control={form.control}
               name="instructions"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Instructions for Students</FormLabel>
+                  <FormLabel className="flex items-center"><MessageSquareText className="mr-2 h-4 w-4" />Instructions for Students</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="e.g., All questions are compulsory. Marks are indicated..."
@@ -312,12 +350,13 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
               )}
             />
 
+            {/* Question Generation Method */}
             <FormField
               control={form.control}
               name="generationMode"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel className="text-base font-semibold">Question Generation Method</FormLabel>
+                  <FormLabel className="text-base font-semibold flex items-center"><Brain className="mr-2 h-5 w-5 text-primary" />Question Generation Method</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -328,13 +367,13 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                         <FormControl>
                           <RadioGroupItem value="ai" />
                         </FormControl>
-                        <FormLabel className="font-normal flex items-center"><Brain className="mr-2 h-4 w-4 text-primary"/>AI Generate Questions</FormLabel>
+                        <FormLabel className="font-normal flex items-center"><Brain className="mr-2 h-4 w-4"/>AI Generate Questions</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
                           <RadioGroupItem value="manual" />
                         </FormControl>
-                        <FormLabel className="font-normal flex items-center"><Edit3 className="mr-2 h-4 w-4 text-primary"/>Manually Enter Questions</FormLabel>
+                        <FormLabel className="font-normal flex items-center"><Edit3 className="mr-2 h-4 w-4"/>Manually Enter Questions</FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
@@ -343,13 +382,33 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
               )}
             />
             
+            {/* AI Specific Fields */}
             {generationMode === 'ai' && (
               <Card className="bg-secondary/30 p-4 border border-primary/20">
                 <CardHeader className="p-2">
-                   <CardTitle className="text-xl font-headline text-primary">AI Question Distribution</CardTitle>
-                   <CardDescription>Specify the number of questions for each type for AI generation.</CardDescription>
+                   <CardTitle className="text-xl font-headline text-primary">AI Question Settings</CardTitle>
                 </CardHeader>
-                <CardContent className="p-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <CardContent className="p-2 space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="customPrompt"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center"><Lightbulb className="mr-2 h-4 w-4" />Specific Instructions/Topics for AI (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="e.g., Focus on Chapter 5, or include questions about renewable energy."
+                              className="min-h-[80px] resize-y"
+                              {...field}
+                            />
+                          </FormControl>
+                           <FormDescription>Provide keywords, topics, or specific instructions to guide the AI.</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                   <CardDescription className="pt-4 border-t">Specify the number of questions for each type for AI generation.</CardDescription>
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {aiCountField("mcqCount", "MCQs", <ListOrdered className="mr-2 h-4 w-4" />)}
                     {aiCountField("veryShortQuestionCount", "Very Short Answer", <FileQuestion className="mr-2 h-4 w-4" />)}
                     {aiCountField("fillInTheBlanksCount", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />)}
@@ -357,10 +416,12 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                     {aiCountField("shortQuestionCount", "Short Answer", <FileText className="mr-2 h-4 w-4" />)}
                     {aiCountField("longQuestionCount", "Long Answer", <FileSignature className="mr-2 h-4 w-4" />)}
                     {aiCountField("numericalPracticalCount", "Numerical/Practical", <CalculatorIcon className="mr-2 h-4 w-4" />, "If applicable to subject.")}
+                   </div>
                 </CardContent>
               </Card>
             )}
 
+            {/* Manual Entry Fields */}
             {generationMode === 'manual' && (
               <Card className="bg-secondary/30 p-4 border border-primary/20">
                 <CardHeader className="p-2">
@@ -396,3 +457,4 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
     </Card>
   );
 }
+

@@ -12,7 +12,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type { SupportedLanguages } from '@/lib/types'; // Import the type
+import type { SupportedLanguages, ExamTypes } from '@/lib/types';
 
 const GenerateQuestionsInputSchema = z.object({
   classLevel: z.string().describe('The class level for which to generate questions (e.g., Class 10, Level 3).'),
@@ -21,12 +21,14 @@ const GenerateQuestionsInputSchema = z.object({
   passMarks: z.number().describe('The pass marks for the question paper.'),
   timeLimit: z.string().describe('The time limit for the question paper (e.g., 2 hours, 90 minutes).'),
   instructions: z.string().describe('Any specific instructions for the question paper.'),
-  examType: z.string().describe('The type of exam (e.g., Final, Unit Test, Entrance Exam).'),
+  examType: z.string().describe('The type of exam (e.g., First Term, Mid Term, Final Examination).'), // Kept as string for broader AI understanding but UI will use enum
   institutionName: z.string().optional().describe('The name of the institution. Defaults to "TestPaperGenius Institute" if not provided by user.'),
   institutionAddress: z.string().optional().describe('The address of the institution. e.g., "123 Main Street, Anytown, ST 12345".'),
   logoDataUri: z.string().optional().describe("A data URI of the institution's logo, if provided by the user."),
   subjectCode: z.string().optional().describe('The subject code for the paper.'),
   language: z.string().describe('The language in which the questions should be generated (e.g., English, Nepali, Hindi).'),
+  totalQuestionNumber: z.number().optional().describe('The desired total number of questions for the paper. This is informational for the AI to help guide question distribution if provided.'),
+  customPrompt: z.string().optional().describe('Specific instructions, topics, or keywords provided by the user to guide question generation.'),
   mcqCount: z.number().default(5).describe('Number of Multiple Choice Questions to generate.'),
   veryShortQuestionCount: z.number().default(0).describe('Number of Very Short Answer Questions to generate.'),
   fillInTheBlanksCount: z.number().default(0).describe('Number of Fill in the Blanks questions to generate.'),
@@ -67,11 +69,18 @@ The paper is for:
 - Exam Type: {{examType}}
 - Total Marks: {{totalMarks}}
 - Pass Marks: {{passMarks}}
+{{#if totalQuestionNumber}}- Desired Total Number of Questions: {{totalQuestionNumber}} (Use this as a guideline for distributing question counts if possible, but prioritize the specific counts provided below for each question type.){{/if}}
 - Time Limit: {{timeLimit}}
 - Language for Questions: {{language}}
 
 General Instructions for Students (to be included in the paper):
 {{{instructions}}}
+
+{{#if customPrompt}}
+User's Specific Instructions/Topics to guide generation:
+{{{customPrompt}}}
+Focus on these instructions when generating questions.
+{{/if}}
 
 Generate all output text, including all questions, strictly in the {{language}} language.
 
@@ -125,3 +134,4 @@ const generateQuestionsFlow = ai.defineFlow(
     return result;
   }
 );
+

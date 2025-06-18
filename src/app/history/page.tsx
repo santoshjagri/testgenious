@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { History as HistoryIcon, Trash2, Eye, ArrowLeft, LanguagesIcon } from "lucide-react";
-import type { StoredQuestionPaper } from '@/lib/types'; 
+import type { StoredQuestionPaper, ExamTypes } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -96,6 +96,14 @@ export default function HistoryPage() {
   };
 
   if (selectedPaperForView) {
+    // Ensure formSnapshot is compatible with QuestionPaperDisplayFormData
+    // This might require mapping or ensuring StoredQuestionPaper.formSnapshot is directly usable
+    const displayFormData = {
+        ...selectedPaperForView.formSnapshot,
+        // Explicitly handle any fields that might be missing or need transformation
+        examType: selectedPaperForView.formSnapshot.examType as (typeof ExamTypes)[number], // Cast if necessary
+    };
+
     return (
       <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8">
         <Button 
@@ -106,7 +114,7 @@ export default function HistoryPage() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to History
         </Button>
         <QuestionPaperDisplay 
-          formData={selectedPaperForView.formSnapshot} 
+          formData={displayFormData} 
           questions={selectedPaperForView.generatedPaper} 
         />
       </div>
@@ -169,6 +177,7 @@ export default function HistoryPage() {
               <CardContent className="space-y-1 text-sm flex-grow">
                 <p><span className="font-medium">Total Marks:</span> {item.formSnapshot.totalMarks}</p>
                 <p><span className="font-medium">Pass Marks:</span> {item.formSnapshot.passMarks}</p>
+                {item.formSnapshot.totalQuestionNumber && <p><span className="font-medium">Total Qs:</span> {item.formSnapshot.totalQuestionNumber}</p>}
                 <p><span className="font-medium">Time:</span> {item.formSnapshot.timeLimit}</p>
                 <hr className="my-2"/>
                 <p className="text-xs text-muted-foreground">Question Counts:</p>
@@ -219,3 +228,4 @@ export default function HistoryPage() {
     </div>
   );
 }
+
