@@ -22,6 +22,9 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
 
   let sectionCounter = 0;
   const getSectionLetter = () => String.fromCharCode(65 + sectionCounter++);
+  const currentDate = new Date().toLocaleDateString(undefined, {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
 
 
   return (
@@ -49,7 +52,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <h2 className="text-xl font-semibold mb-3">{formData.examType} - {new Date().getFullYear()}</h2>
             </div>
             
-            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm mb-2">
                 <div><strong>Subject:</strong> {formData.subject}</div>
                 {formData.subjectCode && <div><strong>Subject Code:</strong> {formData.subjectCode}</div>}
                 <div><strong>Class/Level:</strong> {formData.classLevel}</div>
@@ -57,11 +60,8 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <div><strong>Time Allowed:</strong> {formData.timeLimit}</div>
                 <div><strong>Pass Marks:</strong> {formData.passMarks}</div>
             </div>
-             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                <div><strong>Student Name:</strong> ..........................................</div>
-                <div><strong>Roll No.:</strong> ................................</div>
-                <div><strong>Date:</strong> ................................</div>
-                <div><strong>Invigilator's Signature:</strong> ................................</div>
+             <div className="mt-2 text-sm">
+                <div><strong>Date:</strong> {currentDate}</div>
              </div>
         </CardHeader>
 
