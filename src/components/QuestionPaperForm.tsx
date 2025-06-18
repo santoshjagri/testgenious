@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin } from 'lucide-react';
 
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
@@ -31,6 +31,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
     resolver: zodResolver(questionPaperFormSchema),
     defaultValues: {
       institutionName: 'TestPaperGenius Institute',
+      institutionAddress: '',
       classLevel: '',
       subject: '',
       subjectCode: '',
@@ -70,6 +71,20 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                   <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4" />Institution Name</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., Springfield High School" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="institutionAddress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Institution Address (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="e.g., 123 Main Street, Anytown, USA" className="resize-y min-h-[60px]" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

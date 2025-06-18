@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 export const questionPaperFormSchema = z.object({
   institutionName: z.string().optional(),
+  institutionAddress: z.string().optional(),
   classLevel: z.string().min(1, "Class/Level is required."),
   subject: z.string().min(1, "Subject is required."),
   subjectCode: z.string().optional(),

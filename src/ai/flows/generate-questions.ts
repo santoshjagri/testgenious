@@ -22,6 +22,7 @@ const GenerateQuestionsInputSchema = z.object({
   instructions: z.string().describe('Any specific instructions for the question paper.'),
   examType: z.string().describe('The type of exam (e.g., Final, Unit Test, Entrance Exam).'),
   institutionName: z.string().optional().describe('The name of the institution. Defaults to "TestPaperGenius Institute" if not provided by user.'),
+  institutionAddress: z.string().optional().describe('The address of the institution. e.g., "123 Main Street, Anytown, ST 12345".'),
   subjectCode: z.string().optional().describe('The subject code for the paper.'),
   mcqCount: z.number().default(5).describe('Number of Multiple Choice Questions to generate.'),
   fillInTheBlanksCount: z.number().default(0).describe('Number of Fill in the Blanks questions to generate.'),
@@ -55,6 +56,7 @@ const generateQuestionsPrompt = ai.definePrompt({
   prompt: `You are an expert educator tasked with creating a comprehensive and well-structured question paper.
 The paper is for:
 - Institution: {{#if institutionName}}{{institutionName}}{{else}}TestPaperGenius Institute{{/if}}
+{{#if institutionAddress}}- Address: {{institutionAddress}}{{/if}}
 - Class/Level: {{classLevel}}
 - Subject: {{subject}}{{#if subjectCode}} (Code: {{subjectCode}}){{/if}}
 - Exam Type: {{examType}}

@@ -29,8 +29,9 @@ export default function Home() {
       passMarks: values.passMarks,
       timeLimit: values.timeLimit,
       instructions: values.instructions || 'All questions are compulsory.',
-      examType: values.examType || 'Final Examination', // Added fallback
+      examType: values.examType || 'Final Examination',
       institutionName: values.institutionName || 'TestPaperGenius Institute',
+      institutionAddress: values.institutionAddress || '',
       subjectCode: values.subjectCode || '',
       mcqCount: values.mcqCount,
       shortQuestionCount: values.shortQuestionCount,
