@@ -4,11 +4,12 @@
 import * as React from 'react';
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
-import type { QuestionPaperFormValues, StoredQuestionPaper, AppGenerateQuestionsInput, QuestionPaperDisplayFormData } from '@/lib/types';
+import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData } from '@/lib/types';
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Terminal, FileJson } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 
@@ -60,7 +61,7 @@ export default function Home() {
       institutionName: values.institutionName || 'TestPaperGenius Institute',
       institutionAddress: values.institutionAddress || '',
       subjectCode: values.subjectCode || '',
-      logoDataUri: logoDataUri, // Pass to AI flow
+      logoDataUri: logoDataUri,
       mcqCount: values.mcqCount,
       veryShortQuestionCount: values.veryShortQuestionCount,
       shortQuestionCount: values.shortQuestionCount,
@@ -81,7 +82,7 @@ export default function Home() {
       institutionName: values.institutionName || 'TestPaperGenius Institute',
       institutionAddress: values.institutionAddress || '',
       subjectCode: values.subjectCode || '',
-      logoDataUri: logoDataUri, // Store for display and history
+      logoDataUri: logoDataUri,
     };
 
 
@@ -93,7 +94,7 @@ export default function Home() {
       const newPaperEntry: StoredQuestionPaper = {
         id: Date.now().toString(), 
         dateGenerated: new Date().toISOString(),
-        formSnapshot: snapshotForStorageAndDisplay, // Save snapshot with logoDataUri
+        formSnapshot: snapshotForStorageAndDisplay,
         generatedPaper: result,
       };
 
@@ -102,7 +103,7 @@ export default function Home() {
           const existingHistoryString = localStorage.getItem(LOCAL_STORAGE_KEY);
           const existingHistory: StoredQuestionPaper[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
           const updatedHistory = [newPaperEntry, ...existingHistory];
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory.slice(0, 20))); // Limit history to 20 items
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory.slice(0, 20))); 
         } catch (storageError) {
           console.error("Error saving to local storage:", storageError);
           toast({
@@ -135,6 +136,51 @@ export default function Home() {
     }
   };
 
+  const downloadCurrentPaperData = () => {
+    if (!formSnapshotForDisplay || !generatedPaper) {
+      toast({
+        title: "Error",
+        description: "No paper data available to download.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const paperDataToDownload: StoredQuestionPaper = {
+      id: `current_${Date.now().toString()}`,
+      dateGenerated: new Date().toISOString(),
+      formSnapshot: formSnapshotForDisplay,
+      generatedPaper: generatedPaper,
+    };
+
+    try {
+      const jsonData = JSON.stringify(paperDataToDownload, null, 2); // Pretty print JSON
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeSubject = formSnapshotForDisplay.subject?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'untitled';
+      const safeClassLevel = formSnapshotForDisplay.classLevel?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'level';
+      const filename = `paperdata-${safeSubject}-${safeClassLevel}-current.json`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({
+        title: "Data Downloaded",
+        description: `${filename} has been downloaded.`,
+      });
+    } catch (error) {
+      console.error("Failed to download current paper data:", error);
+      toast({
+        title: "Error Downloading Data",
+        description: "Could not prepare the paper data for download.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
       <div className="w-full max-w-4xl space-y-12">
@@ -155,6 +201,11 @@ export default function Home() {
 
         {!isLoading && generatedPaper && formSnapshotForDisplay && (
           <div className="animate-fadeInUp">
+            <div className="flex justify-end mb-4 no-print">
+              <Button variant="outline" onClick={downloadCurrentPaperData} className="text-green-600 hover:bg-green-600/10 hover:text-green-700 border-green-600/50">
+                <FileJson className="mr-2 h-4 w-4" /> Download Paper Data (JSON)
+              </Button>
+            </div>
             <QuestionPaperDisplay formData={formSnapshotForDisplay} questions={generatedPaper} />
           </div>
         )}
