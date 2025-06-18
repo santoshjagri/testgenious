@@ -6,7 +6,7 @@ import type { GenerateQuestionsOutput, GenerateQuestionsInput } from '@/ai/flows
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ListOrdered, FileText, FileSignature, Printer, Download } from 'lucide-react';
+import { ListOrdered, FileText, FileSignature, Printer } from 'lucide-react';
 
 interface QuestionPaperDisplayProps {
   formData: Omit<GenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount'>;
@@ -55,13 +55,6 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 {questions.mcqs.map((mcq, index) => (
                   <li key={`mcq-${index}`} className="text-base mb-2 pb-2 border-b border-dashed">
                     {mcq}
-                    <div className="mt-3 space-y-1 text-sm">
-                      <p>(A) ____________</p>
-                      <p>(B) ____________</p>
-                      <p>(C) ____________</p>
-                      <p>(D) ____________</p>
-                    </div>
-                    <div className="mt-4 h-8"> {/* Answer space */} </div>
                   </li>
                 ))}
               </ul>
@@ -80,9 +73,6 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 {questions.shortQuestions.map((question, index) => (
                   <li key={`short-${index}`} className="text-base mb-2 pb-2 border-b border-dashed">
                     {index + 1}. {question}
-                    <div className="mt-4 h-24 bg-gray-100/50 border border-dashed border-gray-300 rounded-md p-2">
-                      {/* Placeholder for answer space */}
-                    </div>
                   </li>
                 ))}
               </ul>
@@ -101,9 +91,6 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 {questions.longQuestions.map((question, index) => (
                   <li key={`long-${index}`} className="text-base mb-2 pb-2">
                      {index + 1}. {question}
-                    <div className="mt-4 h-48 bg-gray-100/50 border border-dashed border-gray-300 rounded-md p-2">
-                      {/* Placeholder for answer space */}
-                    </div>
                   </li>
                 ))}
               </ul>
