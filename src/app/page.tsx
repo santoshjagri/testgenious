@@ -2,27 +2,20 @@
 "use client";
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation'; // For navigation
+import { useRouter } from 'next/navigation'; 
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
-import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, StorableQuestionPaperFormValues, AppGenerateQuestionsInput } from '@/lib/types';
+import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, StorableQuestionPaperFormValues } from '@/lib/types';
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, Edit3 } from "lucide-react"; // Added Edit3 for potential use
+import { Terminal, Edit3 } from "lucide-react"; 
 import { Button } from '@/components/ui/button';
+import { fileToDataUri } from '@/lib/utils'; 
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 const EDIT_PAPER_ID_KEY = "editPaperId";
 
-const fileToDataUri = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-};
 
 const parseManualQuestions = (text?: string): string[] => {
   if (!text || text.trim() === "") return [];
@@ -316,4 +309,3 @@ export default function Home() {
     </main>
   );
 }
-

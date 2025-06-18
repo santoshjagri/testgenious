@@ -2,7 +2,7 @@
 "use client";
 
 import type * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguages, ExamTypes } from '@/lib/types';
@@ -22,21 +22,27 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles } from 'lucide-react';
+import { generateQuestions, type GenerateQuestionsInput, type GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
+import { useToast } from '@/hooks/use-toast';
+import { fileToDataUri } from '@/lib/utils';
+
 
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
   isLoading: boolean;
-  initialValues?: QuestionPaperFormValues; // For editing
+  initialValues?: QuestionPaperFormValues; 
 }
 
 export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: QuestionPaperFormProps) {
+  const [isProcessingAiToManual, setIsProcessingAiToManual] = useState(false);
+  const { toast } = useToast();
+
   const form = useForm<QuestionPaperFormValues>({
     resolver: zodResolver(questionPaperFormSchema),
-    defaultValues: initialValues || { // Use initialValues if provided, otherwise fallback to defaults
+    defaultValues: initialValues || { 
       institutionName: 'TestPaperGenius Institute',
       institutionAddress: '',
-      // logo: undefined, // File input cannot be set programmatically
       classLevel: '',
       subject: '',
       subjectCode: '',
@@ -65,12 +71,10 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     },
   });
 
-  // Effect to reset form when initialValues change (e.g., when loading a paper for editing)
   useEffect(() => {
     if (initialValues) {
       form.reset(initialValues);
     } else {
-      // Reset to default when not editing (e.g., "Create New Instead" is clicked)
       form.reset({
         institutionName: 'TestPaperGenius Institute',
         institutionAddress: '',
@@ -110,6 +114,81 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     name: 'generationMode',
   });
 
+  const handleProcessAiToManual = async () => {
+    setIsProcessingAiToManual(true);
+    const values = form.getValues();
+    let logoDataUriFromForm: string | undefined = undefined;
+
+    if (values.logo) {
+      try {
+        logoDataUriFromForm = await fileToDataUri(values.logo);
+      } catch (error) {
+        console.error("Error converting logo for AI processing:", error);
+        toast({
+          title: "Logo Error",
+          description: "Could not process logo for AI draft. Continuing without it.",
+          variant: "destructive",
+        });
+      }
+    }
+
+    const aiInput: GenerateQuestionsInput = {
+      classLevel: values.classLevel,
+      subject: values.subject,
+      totalMarks: values.totalMarks,
+      passMarks: values.passMarks,
+      timeLimit: values.timeLimit,
+      instructions: values.instructions || 'All questions are compulsory.',
+      examType: values.examType,
+      institutionName: values.institutionName || 'TestPaperGenius Institute',
+      institutionAddress: values.institutionAddress || '',
+      subjectCode: values.subjectCode || '',
+      logoDataUri: logoDataUriFromForm, // Use processed logo or undefined
+      language: values.language,
+      customPrompt: values.customPrompt,
+      mcqCount: values.mcqCount,
+      veryShortQuestionCount: values.veryShortQuestionCount,
+      shortQuestionCount: values.shortQuestionCount,
+      longQuestionCount: values.longQuestionCount,
+      fillInTheBlanksCount: values.fillInTheBlanksCount,
+      trueFalseCount: values.trueFalseCount,
+      numericalPracticalCount: values.numericalPracticalCount,
+    };
+
+    try {
+      const result: GenerateQuestionsOutput = await generateQuestions(aiInput);
+      
+      form.setValue('manualMcqs', result.mcqs?.join('\n') || '');
+      form.setValue('manualVeryShortQuestions', result.veryShortQuestions?.join('\n') || '');
+      form.setValue('manualFillInTheBlanks', result.fillInTheBlanks?.join('\n') || '');
+      form.setValue('manualTrueFalseQuestions', result.trueFalseQuestions?.join('\n') || '');
+      form.setValue('manualShortQuestions', result.shortQuestions?.join('\n') || '');
+      form.setValue('manualLongQuestions', result.longQuestions?.join('\n') || '');
+      form.setValue('manualNumericalPracticalQuestions', result.numericalPracticalQuestions?.join('\n') || '');
+      
+      form.setValue('generationMode', 'manual');
+      toast({
+        title: "AI Draft Complete!",
+        description: "Questions populated in manual fields. Review and edit as needed, then click 'Update/Generate Question Paper'.",
+      });
+
+    } catch (error) {
+      console.error("Error processing AI to manual:", error);
+      let errorMessage = "Failed to get AI draft. Please try again.";
+      if (error instanceof Error) {
+        errorMessage = error.message.substring(0, 200);
+      }
+      toast({
+        title: "AI Draft Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingAiToManual(false);
+    }
+  };
+
+
   const manualQuestionField = (name: keyof QuestionPaperFormValues, label: string, icon: React.ReactNode, placeholder: string) => (
     <FormField
       control={form.control}
@@ -122,7 +201,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
               placeholder={placeholder}
               className="min-h-[100px] resize-y"
               {...field}
-              value={field.value || ""} // Ensure value is not undefined
+              value={field.value || ""} 
             />
           </FormControl>
           <FormDescription>Enter one question per line. Include marks, e.g., "Question text? (2 marks)".</FormDescription>
@@ -165,7 +244,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             
-            {/* Institution Details */}
             <div className="space-y-6">
               <CardTitle className="text-xl font-semibold border-b pb-2 text-primary/90">Institution Details</CardTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -185,7 +263,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                 <FormField
                   control={form.control}
                   name="logo"
-                  render={({ field: { onChange, value, ...rest } }) => ( // `value` here is the File object, which is fine for display but not for setting
+                  render={({ field: { onChange, value, ...rest } }) => ( 
                     <FormItem>
                       <FormLabel className="flex items-center"><ImagePlus className="mr-2 h-4 w-4" />Institution Logo (Optional)</FormLabel>
                       <FormControl>
@@ -193,7 +271,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                           type="file" 
                           accept="image/*" 
                           onChange={(e) => onChange(e.target.files?.[0])}
-                          // Do not provide 'value' for file inputs as it's read-only and controlled by browser
                           {...rest} 
                           className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                         />
@@ -219,7 +296,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
               />
             </div>
 
-            {/* Paper Basics */}
             <div className="space-y-6">
               <CardTitle className="text-xl font-semibold border-b pb-2 text-primary/90">Paper Basics</CardTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -314,7 +390,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                 />
             </div>
 
-            {/* Marks & Time */}
             <div className="space-y-6">
               <CardTitle className="text-xl font-semibold border-b pb-2 text-primary/90">Marks & Time</CardTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -360,7 +435,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
               </div>
             </div>
             
-            {/* Instructions */}
             <FormField
               control={form.control}
               name="instructions"
@@ -380,7 +454,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
               )}
             />
 
-            {/* Question Generation Method */}
             <FormField
               control={form.control}
               name="generationMode"
@@ -413,7 +486,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
               )}
             />
             
-            {/* AI Specific Fields */}
             {generationMode === 'ai' && (
               <Card className="bg-secondary/30 p-4 border border-primary/20">
                 <CardHeader className="p-2">
@@ -449,16 +521,39 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                     {aiCountField("longQuestionCount", "Long Answer", <FileSignature className="mr-2 h-4 w-4" />)}
                     {aiCountField("numericalPracticalCount", "Numerical/Practical", <CalculatorIcon className="mr-2 h-4 w-4" />, "If applicable to subject.")}
                    </div>
+                   <div className="pt-4 border-t">
+                      <Button 
+                        type="button" 
+                        onClick={handleProcessAiToManual} 
+                        disabled={isProcessingAiToManual || isLoading}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {isProcessingAiToManual ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Processing AI Draft...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-5 w-5" />
+                            AI Draft to Manual Fields (for Editing)
+                          </>
+                        )}
+                      </Button>
+                      <FormDescription className="mt-2 text-center">
+                        Click this to let AI generate questions based on the counts above and populate them into the 'Manually Enter Questions' section below. You can then edit them before final generation.
+                      </FormDescription>
+                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* Manual Entry Fields */}
             {generationMode === 'manual' && (
               <Card className="bg-secondary/30 p-4 border border-primary/20">
                 <CardHeader className="p-2">
                    <CardTitle className="text-xl font-headline text-primary">Manual Question Entry</CardTitle>
-                   <CardDescription>Type your questions directly into the text areas below. One question per line.</CardDescription>
+                   <CardDescription>Type your questions directly into the text areas below. One question per line. If you used the "AI Draft" button, your questions will appear here for editing.</CardDescription>
                 </CardHeader>
                 <CardContent className="p-2 space-y-6">
                   {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, "E.g., What is the capital of Nepal? (1 mark)\nA. Kathmandu\nB. Pokhara\nC. Biratnagar\nD. Bhaktapur" )}
@@ -473,7 +568,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
             )}
 
 
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg py-3" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg py-3" disabled={isLoading || isProcessingAiToManual}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -489,4 +584,3 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     </Card>
   );
 }
-
