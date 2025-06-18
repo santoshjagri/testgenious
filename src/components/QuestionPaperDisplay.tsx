@@ -2,7 +2,8 @@
 "use client";
 
 import type * as React from 'react';
-import type { GenerateQuestionsOutput, GenerateQuestionsInput } from '@/ai/flows/generate-questions';
+import type { GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
+import type { QuestionPaperDisplayFormData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -10,7 +11,7 @@ import { ListOrdered, FileText, FileSignature, Printer, PencilLine, ClipboardChe
 import Image from 'next/image';
 
 interface QuestionPaperDisplayProps {
-  formData: Omit<GenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'>;
+  formData: QuestionPaperDisplayFormData;
   questions: GenerateQuestionsOutput;
 }
 
@@ -35,11 +36,11 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             <div className="flex flex-col items-center text-center mb-4">
                 <div className="mb-3">
                     <Image
-                        src="https://placehold.co/80x80.png" 
+                        src={formData.logoDataUri || "https://placehold.co/80x80.png"}
                         alt={formData.institutionName ? `${formData.institutionName} Logo` : "Institute Logo"}
                         width={80} 
                         height={80}
-                        className="rounded-md"
+                        className="rounded-md object-contain"
                         data-ai-hint="school emblem"
                     />
                 </div>
@@ -196,4 +197,3 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
-

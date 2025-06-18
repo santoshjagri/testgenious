@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
-import type { QuestionPaperFormValues, StoredQuestionPaper } from '@/lib/types';
+import type { QuestionPaperFormValues, StoredQuestionPaper, AppGenerateQuestionsInput, QuestionPaperDisplayFormData } from '@/lib/types';
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -12,15 +12,42 @@ import { Terminal } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 
+// Helper function to convert File to Data URI
+const fileToDataUri = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function Home() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [generatedPaper, setGeneratedPaper] = React.useState<GenerateQuestionsOutput | null>(null);
-  const [formSnapshot, setFormSnapshot] = React.useState<Omit<GenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'> | null>(null);
+  const [formSnapshotForDisplay, setFormSnapshotForDisplay] = React.useState<QuestionPaperDisplayFormData | null>(null);
   const { toast } = useToast();
 
   const handleFormSubmit = async (values: QuestionPaperFormValues) => {
     setIsLoading(true);
-    setGeneratedPaper(null); // Clear previous paper
+    setGeneratedPaper(null); 
+    setFormSnapshotForDisplay(null);
+
+    let logoDataUri: string | undefined = undefined;
+    if (values.logo) {
+      try {
+        logoDataUri = await fileToDataUri(values.logo);
+      } catch (error) {
+        console.error("Error converting logo to data URI:", error);
+        toast({
+          title: "Logo Error",
+          description: "Could not process the uploaded logo. Please try a different image.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
 
     const aiInput: GenerateQuestionsInput = {
       classLevel: values.classLevel,
@@ -33,6 +60,7 @@ export default function Home() {
       institutionName: values.institutionName || 'TestPaperGenius Institute',
       institutionAddress: values.institutionAddress || '',
       subjectCode: values.subjectCode || '',
+      logoDataUri: logoDataUri, // Pass to AI flow
       mcqCount: values.mcqCount,
       shortQuestionCount: values.shortQuestionCount,
       longQuestionCount: values.longQuestionCount,
@@ -40,26 +68,31 @@ export default function Home() {
       trueFalseCount: values.trueFalseCount,
       numericalPracticalCount: values.numericalPracticalCount,
     };
+    
+    const snapshotForStorageAndDisplay: QuestionPaperDisplayFormData = {
+      classLevel: values.classLevel,
+      subject: values.subject,
+      totalMarks: values.totalMarks,
+      passMarks: values.passMarks,
+      timeLimit: values.timeLimit,
+      instructions: values.instructions || 'All questions are compulsory.',
+      examType: values.examType || 'Final Examination',
+      institutionName: values.institutionName || 'TestPaperGenius Institute',
+      institutionAddress: values.institutionAddress || '',
+      subjectCode: values.subjectCode || '',
+      logoDataUri: logoDataUri, // Store for display and history
+    };
+
 
     try {
       const result = await generateQuestions(aiInput);
       setGeneratedPaper(result);
-      
-      const { 
-        mcqCount, 
-        shortQuestionCount, 
-        longQuestionCount, 
-        fillInTheBlanksCount,
-        trueFalseCount,
-        numericalPracticalCount,
-        ...restOfInput 
-      } = aiInput;
-      setFormSnapshot(restOfInput);
+      setFormSnapshotForDisplay(snapshotForStorageAndDisplay);
       
       const newPaperEntry: StoredQuestionPaper = {
         id: Date.now().toString(), 
         dateGenerated: new Date().toISOString(),
-        formSnapshot: restOfInput,
+        formSnapshot: snapshotForStorageAndDisplay, // Save snapshot with logoDataUri
         generatedPaper: result,
       };
 
@@ -89,7 +122,7 @@ export default function Home() {
       console.error("Error generating question paper:", error);
       let errorMessage = "Failed to generate question paper. Please try again.";
       if (error instanceof Error) {
-        errorMessage = error.message.substring(0, 200); // Cap length for toast
+        errorMessage = error.message.substring(0, 200); 
       }
       toast({
         title: "Error Generating Paper",
@@ -119,9 +152,9 @@ export default function Home() {
           </div>
         )}
 
-        {!isLoading && generatedPaper && formSnapshot && (
+        {!isLoading && generatedPaper && formSnapshotForDisplay && (
           <div className="animate-fadeInUp">
-            <QuestionPaperDisplay formData={formSnapshot} questions={generatedPaper} />
+            <QuestionPaperDisplay formData={formSnapshotForDisplay} questions={generatedPaper} />
           </div>
         )}
 
@@ -153,4 +186,3 @@ export default function Home() {
     </main>
   );
 }
-

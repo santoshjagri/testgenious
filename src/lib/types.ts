@@ -1,10 +1,11 @@
 
-import type { GenerateQuestionsInput, GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
+import type { GenerateQuestionsInput as AIInputType, GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import { z } from 'zod';
 
 export const questionPaperFormSchema = z.object({
   institutionName: z.string().optional(),
   institutionAddress: z.string().optional(),
+  logo: z.instanceof(File).optional(),
   classLevel: z.string().min(1, "Class/Level is required."),
   subject: z.string().min(1, "Subject is required."),
   subjectCode: z.string().optional(),
@@ -26,11 +27,21 @@ export const questionPaperFormSchema = z.object({
 
 export type QuestionPaperFormValues = z.infer<typeof questionPaperFormSchema>;
 
+// Extending AIInputType to include logoDataUri for internal app use (display, storage)
+// The actual AI flow input type is defined in generate-questions.ts
+export type AppGenerateQuestionsInput = AIInputType & {
+  logoDataUri?: string;
+};
+
+
 // Storing the full input for fidelity, but excluding counts as they are part of the form for regeneration
 // The generated paper itself contains the actual number of questions of each type.
 export interface StoredQuestionPaper {
   id: string; // Unique ID for the paper
   dateGenerated: string; // ISO string format
-  formSnapshot: Omit<GenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'>;
+  formSnapshot: Omit<AppGenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'>;
   generatedPaper: GenerateQuestionsOutput;
 }
+
+// This type is what QuestionPaperDisplay expects for its formData prop
+export type QuestionPaperDisplayFormData = Omit<AppGenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'>;

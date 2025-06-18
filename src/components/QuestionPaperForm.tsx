@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus } from 'lucide-react';
 
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
@@ -32,6 +32,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
     defaultValues: {
       institutionName: 'TestPaperGenius Institute',
       institutionAddress: '',
+      // logo: undefined, // Handled by file input
       classLevel: '',
       subject: '',
       subjectCode: '',
@@ -63,19 +64,42 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="institutionName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4" />Institution Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Springfield High School" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="institutionName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4" />Institution Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Springfield High School" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="logo"
+                render={({ field: { onChange, value, ...rest } }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center"><ImagePlus className="mr-2 h-4 w-4" />Institution Logo (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={(e) => onChange(e.target.files?.[0])}
+                        {...rest} 
+                        className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                      />
+                    </FormControl>
+                    <FormDescription>Upload your institution's logo (PNG, JPG, GIF).</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
 
             <FormField
               control={form.control}
