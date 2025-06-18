@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { History as HistoryIcon, Trash2, Eye, ArrowLeft, LanguagesIcon, Edit3 } from "lucide-react";
+import { History as HistoryIcon, Trash2, Eye, ArrowLeft, LanguagesIcon, Edit3, PlusSquare } from "lucide-react";
 import type { StoredQuestionPaper, ExamTypes } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -135,27 +135,32 @@ export default function HistoryPage() {
           <HistoryIcon className="mr-3 h-8 w-8 text-primary" />
           Paper History
         </h1>
-        {historyItems.length > 0 && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="no-print">
-                <Trash2 className="mr-2 h-4 w-4" /> Clear All History
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete all your saved question papers from history.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={clearHistory}>Yes, clear history</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
+        <div className="flex items-center gap-2">
+            <Button onClick={() => router.push('/')} className="no-print">
+              <PlusSquare className="mr-2 h-4 w-4" /> Create New Paper
+            </Button>
+            {historyItems.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="no-print">
+                    <Trash2 className="mr-2 h-4 w-4" /> Clear All History
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete all your saved question papers from history.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={clearHistory}>Yes, clear history</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+        </div>
       </div>
       {historyItems.length === 0 ? (
         <Card className="mt-4 shadow-md">
@@ -164,7 +169,7 @@ export default function HistoryPage() {
               <HistoryIcon className="h-5 w-5 text-primary" />
               <AlertTitle className="text-primary">No History Yet</AlertTitle>
               <AlertDescription className="text-foreground/80">
-                You haven't generated or manually created any question papers yet. Go to "Create New Paper" to get started. Your papers will appear here.
+                You haven't generated or manually created any question papers yet. Click "Create New Paper" above or go to "Create New Paper" in the sidebar to get started. Your papers will appear here.
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -220,7 +225,7 @@ export default function HistoryPage() {
                   <Eye className="mr-1 h-3 w-3" /> View Paper
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => handleEditPaper(item.id)} className="text-blue-600 hover:bg-blue-600/10 flex-1 text-center">
-                  <Edit3 className="mr-1 h-3 w-3" /> Edit Paper
+                  <Edit3 className="mr-1 h-3 w-3" /> Edit
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
