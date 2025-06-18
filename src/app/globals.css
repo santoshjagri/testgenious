@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -102,11 +103,13 @@ body {
     top: 0;
     width: 100%;
     margin: 0;
-    padding: 20px;
+    padding: 20px; /* Ensure consistent padding for print */
     border: none;
     box-shadow: none;
     background-color: white !important; /* Ensure background is white for printing */
     color: black !important; /* Ensure text is black for printing */
+    font-family: 'Inter', Arial, sans-serif; /* Use a clear sans-serif font */
+    line-height: 1.4; /* Improve readability */
   }
   .printable-area .prose :where(code):not(:where([class~="not-prose"] *))::before,
   .printable-area .prose :where(code):not(:where([class~="not-prose"] *))::after {
@@ -119,10 +122,21 @@ body {
   .printable-area .border {
     border-color: #ccc !important; /* Light grey border for print */
   }
-  .printable-area h1, .printable-area h2, .printable-area h3, .printable-area h4, .printable-area p, .printable-area li {
+   .printable-area h1, .printable-area h2, .printable-area h3, .printable-area h4, .printable-area p, .printable-area li, .printable-area div, .printable-area span {
     color: black !important;
+    /* Explicitly inherit font-family for children if needed, though .printable-area should cover it */
+    font-family: inherit !important; 
   }
   .printable-area hr {
     border-top-color: #ccc !important;
   }
+  /* Ensure section headers and other colored elements become black */
+  .printable-area .text-gray-700, .printable-area .text-gray-800, .printable-area .text-gray-600, .printable-area .text-gray-500 {
+    color: black !important;
+  }
+  .printable-area .bg-gray-50, .printable-area .bg-gray-100 {
+    background-color: white !important; /* Or a very light gray if preferred for sections, e.g., #f9f9f9 */
+  }
 }
+
+    
