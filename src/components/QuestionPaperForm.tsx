@@ -41,7 +41,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   const form = useForm<QuestionPaperFormValues>({
     resolver: zodResolver(questionPaperFormSchema),
     defaultValues: initialValues || { 
-      institutionName: 'TestPaperGenius Institute',
+      institutionName: 'ExamGenius AI Institute',
       institutionAddress: '',
       classLevel: '',
       subject: '',
@@ -76,7 +76,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       form.reset(initialValues);
     } else {
       form.reset({
-        institutionName: 'TestPaperGenius Institute',
+        institutionName: 'ExamGenius AI Institute',
         institutionAddress: '',
         logo: undefined, 
         classLevel: '',
@@ -140,7 +140,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       timeLimit: values.timeLimit,
       instructions: values.instructions || 'All questions are compulsory.',
       examType: values.examType,
-      institutionName: values.institutionName || 'TestPaperGenius Institute',
+      institutionName: values.institutionName || 'ExamGenius AI Institute',
       institutionAddress: values.institutionAddress || '',
       subjectCode: values.subjectCode || '',
       logoDataUri: logoDataUriFromForm, // Use processed logo or undefined
@@ -234,7 +234,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       <CardHeader>
         <CardTitle className="text-3xl font-headline text-primary flex items-center">
           <FileText className="mr-3 h-8 w-8" />
-          TestPaperGenius
+          ExamGenius AI
         </CardTitle>
         <CardDescription className="font-body">
           {initialValues ? "Edit the details below to update your question paper." : "Fill in the details below to generate your comprehensive question paper."}

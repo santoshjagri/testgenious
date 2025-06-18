@@ -22,7 +22,7 @@ const GenerateQuestionsInputSchema = z.object({
   timeLimit: z.string().describe('The time limit for the question paper (e.g., 2 hours, 90 minutes).'),
   instructions: z.string().describe('Any specific instructions for the question paper.'),
   examType: z.string().describe('The type of exam (e.g., First Term, Mid Term, Final Examination).'), // Kept as string for broader AI understanding but UI will use enum
-  institutionName: z.string().optional().describe('The name of the institution. Defaults to "TestPaperGenius Institute" if not provided by user.'),
+  institutionName: z.string().optional().describe('The name of the institution. Defaults to "ExamGenius AI Institute" if not provided by user.'),
   institutionAddress: z.string().optional().describe('The address of the institution. e.g., "123 Main Street, Anytown, ST 12345".'),
   logoDataUri: z.string().optional().describe("A data URI of the institution's logo, if provided by the user."),
   subjectCode: z.string().optional().describe('The subject code for the paper.'),
@@ -61,7 +61,7 @@ const generateQuestionsPrompt = ai.definePrompt({
   output: {schema: GenerateQuestionsOutputSchema},
   prompt: `You are an expert educator tasked with creating a comprehensive and well-structured question paper.
 The paper is for:
-- Institution: {{#if institutionName}}{{institutionName}}{{else}}TestPaperGenius Institute{{/if}}
+- Institution: {{#if institutionName}}{{institutionName}}{{else}}ExamGenius AI Institute{{/if}}
 {{#if institutionAddress}}- Address: {{institutionAddress}}{{/if}}
 - Class/Level: {{classLevel}}
 - Subject: {{subject}}{{#if subjectCode}} (Code: {{subjectCode}}){{/if}}
@@ -132,4 +132,3 @@ const generateQuestionsFlow = ai.defineFlow(
     return result;
   }
 );
-

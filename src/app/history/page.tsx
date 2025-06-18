@@ -174,7 +174,7 @@ export default function HistoryPage() {
                 <CardTitle className="text-lg text-primary">{item.formSnapshot.subject} - {item.formSnapshot.classLevel}</CardTitle>
                 <div className="text-xs text-muted-foreground space-y-0.5">
                     <p>{item.formSnapshot.examType || 'General Paper'}</p>
-                    {item.formSnapshot.institutionName && item.formSnapshot.institutionName !== "TestPaperGenius Institute" && <p>{item.formSnapshot.institutionName}</p>}
+                    {item.formSnapshot.institutionName && item.formSnapshot.institutionName !== "ExamGenius AI Institute" && <p>{item.formSnapshot.institutionName}</p>}
                     {item.formSnapshot.language && <p className="flex items-center"><LanguagesIcon className="h-3 w-3 mr-1"/>{item.formSnapshot.language}</p>}
                 </div>
               </CardHeader>

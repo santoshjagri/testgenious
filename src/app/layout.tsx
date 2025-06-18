@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'TestPaperGenius',
-  description: 'Generate question papers effortlessly with TestPaperGenius.',
+  title: 'ExamGenius AI',
+  description: 'Generate question papers effortlessly with ExamGenius AI.',
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
             <SidebarHeader className="p-4 border-b border-sidebar-border">
               <Link href="/" className="flex items-center gap-3 text-lg font-semibold text-sidebar-primary hover:text-sidebar-primary/90 transition-colors">
                 <LayoutDashboard className="h-7 w-7" />
-                <span className="group-data-[collapsible=icon]:hidden">TestPaperGenius</span>
+                <span className="group-data-[collapsible=icon]:hidden">ExamGenius AI</span>
               </Link>
             </SidebarHeader>
             <SidebarContent className="p-2">

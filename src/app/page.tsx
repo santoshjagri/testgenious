@@ -9,7 +9,7 @@ import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplay
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, Edit3, RotateCcw } from "lucide-react"; 
+import { Terminal, Edit3 } from "lucide-react"; 
 import { Button } from '@/components/ui/button';
 import { fileToDataUri } from '@/lib/utils'; 
 
@@ -155,7 +155,7 @@ export default function Home() {
           timeLimit: values.timeLimit,
           instructions: values.instructions || 'All questions are compulsory.',
           examType: values.examType,
-          institutionName: values.institutionName || 'TestPaperGenius Institute',
+          institutionName: values.institutionName || 'ExamGenius AI Institute',
           institutionAddress: values.institutionAddress || '',
           subjectCode: values.subjectCode || '',
           logoDataUri: logoDataUri,
@@ -285,7 +285,7 @@ export default function Home() {
         {!isLoading && !generatedPaper && !editingPaperId && ( 
            <Alert className="mt-8 border-primary/30 bg-primary/5 text-primary no-print">
             <Terminal className="h-5 w-5" />
-            <AlertTitle className="font-headline">Welcome to TestPaperGenius!</AlertTitle>
+            <AlertTitle className="font-headline">Welcome to ExamGenius AI!</AlertTitle>
             <AlertDescription>
               Fill out the form above to generate or manually create your custom question paper. The AI can craft questions, or you can write your own!
             </AlertDescription>
