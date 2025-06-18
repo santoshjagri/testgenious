@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { History as HistoryIcon, Trash2, Eye, ArrowLeft, LanguagesIcon, Edit3, PlusSquare } from "lucide-react";
+import { History as HistoryIcon, Trash2, Eye, ArrowLeft, LanguagesIcon, PlusSquare } from "lucide-react";
 import type { StoredQuestionPaper, ExamTypes } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,7 +23,6 @@ import { useToast } from '@/hooks/use-toast';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
-const EDIT_PAPER_ID_KEY = "editPaperId";
 
 export default function HistoryPage() {
   const [historyItems, setHistoryItems] = useState<StoredQuestionPaper[]>([]);
@@ -96,13 +95,6 @@ export default function HistoryPage() {
   
   const handleViewPaper = (item: StoredQuestionPaper) => {
     setSelectedPaperForView(item);
-  };
-
-  const handleEditPaper = (paperId: string) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(EDIT_PAPER_ID_KEY, paperId);
-      router.push('/'); // Navigate to the main form page
-    }
   };
 
   if (selectedPaperForView) {
@@ -224,9 +216,6 @@ export default function HistoryPage() {
                 <Button variant="ghost" size="sm" onClick={() => handleViewPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-center">
                   <Eye className="mr-1 h-3 w-3" /> View Paper
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => handleEditPaper(item.id)} className="text-blue-600 hover:bg-blue-600/10 flex-1 text-center">
-                  <Edit3 className="mr-1 h-3 w-3" /> Edit
-                </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-center">
@@ -256,4 +245,3 @@ export default function HistoryPage() {
     </div>
   );
 }
-
