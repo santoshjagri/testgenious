@@ -2,15 +2,18 @@
 "use client";
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation'; // For navigation
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
-import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, AppGenerateQuestionsInput } from '@/lib/types'; // Updated import
+import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, StorableQuestionPaperFormValues, AppGenerateQuestionsInput } from '@/lib/types';
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import { Terminal, Edit3 } from "lucide-react"; // Added Edit3 for potential use
+import { Button } from '@/components/ui/button';
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
+const EDIT_PAPER_ID_KEY = "editPaperId";
 
 const fileToDataUri = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -30,12 +33,74 @@ export default function Home() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [generatedPaper, setGeneratedPaper] = React.useState<GenerateQuestionsOutput | null>(null);
   const [formSnapshotForDisplay, setFormSnapshotForDisplay] = React.useState<QuestionPaperDisplayFormData | null>(null);
+  const [editingPaperId, setEditingPaperId] = React.useState<string | null>(null);
   const { toast } = useToast();
+  const router = useRouter(); // For navigation if needed, not directly used here but good for context
+
+  // React.useRef to get access to form instance if needed for form.reset()
+  // However, form.reset is available via the form instance returned by useForm inside QuestionPaperForm
+  // This page will trigger form reset via a key prop or by passing initial values to the form itself.
+  // For simplicity, we'll pass initial values fetched here.
+
+  const [initialFormValues, setInitialFormValues] = React.useState<QuestionPaperFormValues | undefined>(undefined);
+
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const paperIdToEdit = localStorage.getItem(EDIT_PAPER_ID_KEY);
+      if (paperIdToEdit) {
+        try {
+          const storedHistory = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (storedHistory) {
+            const historyItems: StoredQuestionPaper[] = JSON.parse(storedHistory);
+            const paperToEdit = historyItems.find(item => item.id === paperIdToEdit);
+
+            if (paperToEdit) {
+              // Map StorableQuestionPaperFormValues to QuestionPaperFormValues
+              const formValues: QuestionPaperFormValues = {
+                ...paperToEdit.formSnapshot,
+                logo: undefined, // File input cannot be programmatically set; user must re-select if changing
+              };
+              setInitialFormValues(formValues); // Set initial values for the form
+              setGeneratedPaper(paperToEdit.generatedPaper);
+              setFormSnapshotForDisplay(paperToEdit.formSnapshot);
+              setEditingPaperId(paperToEdit.id);
+              toast({
+                title: "Editing Paper",
+                description: `Loaded paper "${paperToEdit.formSnapshot.subject} - ${paperToEdit.formSnapshot.classLevel}" for editing.`,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load paper for editing:", error);
+          toast({
+            title: "Error Loading Paper",
+            description: "Could not load the selected paper for editing.",
+            variant: "destructive",
+          });
+        } finally {
+          localStorage.removeItem(EDIT_PAPER_ID_KEY); // Clean up after loading
+        }
+      } else {
+        // Reset initial values if not editing, so form loads fresh
+        setInitialFormValues(undefined);
+        setGeneratedPaper(null);
+        setFormSnapshotForDisplay(null);
+        setEditingPaperId(null);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount. Add router to deps if navigation depends on it changing.
 
   const handleFormSubmit = async (values: QuestionPaperFormValues) => {
     setIsLoading(true);
-    setGeneratedPaper(null); 
-    setFormSnapshotForDisplay(null);
+    // Don't clear generatedPaper or formSnapshotForDisplay if editing, 
+    // allow new generation to overwrite. If not editing, clear them.
+    if (!editingPaperId) {
+        setGeneratedPaper(null);
+        setFormSnapshotForDisplay(null);
+    }
+
 
     let logoDataUri: string | undefined = undefined;
     if (values.logo) {
@@ -51,32 +116,18 @@ export default function Home() {
         setIsLoading(false);
         return;
       }
+    } else if (editingPaperId && formSnapshotForDisplay?.logoDataUri) {
+      // Retain existing logo if not changed during edit
+      logoDataUri = formSnapshotForDisplay.logoDataUri;
     }
 
-    // Use AppGenerateQuestionsInput for the snapshot to include new fields
-    const snapshotForStorageAndDisplay: AppGenerateQuestionsInput = {
-      classLevel: values.classLevel,
-      subject: values.subject,
-      totalMarks: values.totalMarks,
-      passMarks: values.passMarks,
-      timeLimit: values.timeLimit,
-      instructions: values.instructions || 'All questions are compulsory.',
-      examType: values.examType, // examType is now from enum
-      institutionName: values.institutionName || 'TestPaperGenius Institute',
-      institutionAddress: values.institutionAddress || '',
-      subjectCode: values.subjectCode || '',
-      logoDataUri: logoDataUri,
-      language: values.language,
-      customPrompt: values.customPrompt, // New field
-      // AI counts are not part of AppGenerateQuestionsInput directly for snapshot if it's generic
-      // but will be used for AIInput if mode is 'ai'
+    const storableFormValues: StorableQuestionPaperFormValues = {
+      ...values, // All form values
+      logo: undefined, // Remove File object
+      logoDataUri: logoDataUri, // Add/replace data URI
     };
     
-    // Explicitly cast to QuestionPaperDisplayFormData for the display component if types differ
-    const displayData: QuestionPaperDisplayFormData = {
-        ...snapshotForStorageAndDisplay,
-        // ensure all required fields for QuestionPaperDisplayFormData are present
-    };
+    const displayData: QuestionPaperDisplayFormData = { ...storableFormValues };
 
 
     try {
@@ -92,16 +143,14 @@ export default function Home() {
           longQuestions: parseManualQuestions(values.manualLongQuestions),
           numericalPracticalQuestions: parseManualQuestions(values.manualNumericalPracticalQuestions),
         };
-        // Ensure optional arrays are omitted if empty, consistent with AI output
         if (result.veryShortQuestions?.length === 0) delete result.veryShortQuestions;
         if (result.fillInTheBlanks?.length === 0) delete result.fillInTheBlanks;
         if (result.trueFalseQuestions?.length === 0) delete result.trueFalseQuestions;
         if (result.numericalPracticalQuestions?.length === 0) delete result.numericalPracticalQuestions;
         
         toast({
-          title: "Manual Paper Prepared",
-          description: "Your manually entered questions are ready for display.",
-          variant: "default",
+          title: editingPaperId ? "Manual Paper Updated" : "Manual Paper Prepared",
+          description: "Your manually entered questions are ready.",
         });
 
       } else { // AI Generation mode
@@ -112,13 +161,13 @@ export default function Home() {
           passMarks: values.passMarks,
           timeLimit: values.timeLimit,
           instructions: values.instructions || 'All questions are compulsory.',
-          examType: values.examType, // Use enum value
+          examType: values.examType,
           institutionName: values.institutionName || 'TestPaperGenius Institute',
           institutionAddress: values.institutionAddress || '',
           subjectCode: values.subjectCode || '',
           logoDataUri: logoDataUri,
-          language: values.language, // Use enum value
-          customPrompt: values.customPrompt, // New field
+          language: values.language,
+          customPrompt: values.customPrompt,
           mcqCount: values.mcqCount,
           veryShortQuestionCount: values.veryShortQuestionCount,
           shortQuestionCount: values.shortQuestionCount,
@@ -129,48 +178,49 @@ export default function Home() {
         };
         result = await generateQuestions(aiInput);
         toast({
-          title: "Success!",
-          description: "AI Question paper generated and saved to history.",
-          variant: "default", 
+          title: editingPaperId ? "AI Paper Updated!" : "Success!",
+          description: editingPaperId ? "AI Question paper re-generated and updated in history." : "AI Question paper generated and saved to history.",
         });
       }
       
       setGeneratedPaper(result);
-      setFormSnapshotForDisplay(displayData); // Use displayData for the display component
+      setFormSnapshotForDisplay(displayData);
       
-      const newPaperEntry: StoredQuestionPaper = {
-        id: Date.now().toString(), 
-        dateGenerated: new Date().toISOString(),
-        formSnapshot: { // Ensure this matches the StoredQuestionPaper.formSnapshot structure
-          classLevel: snapshotForStorageAndDisplay.classLevel,
-          subject: snapshotForStorageAndDisplay.subject,
-          totalMarks: snapshotForStorageAndDisplay.totalMarks,
-          passMarks: snapshotForStorageAndDisplay.passMarks,
-          timeLimit: snapshotForStorageAndDisplay.timeLimit,
-          instructions: snapshotForStorageAndDisplay.instructions,
-          examType: snapshotForStorageAndDisplay.examType,
-          institutionName: snapshotForStorageAndDisplay.institutionName,
-          institutionAddress: snapshotForStorageAndDisplay.institutionAddress,
-          subjectCode: snapshotForStorageAndDisplay.subjectCode,
-          logoDataUri: snapshotForStorageAndDisplay.logoDataUri,
-          language: snapshotForStorageAndDisplay.language,
-          customPrompt: snapshotForStorageAndDisplay.customPrompt,
-          generationMode: values.generationMode,
-        },
-        generatedPaper: result,
-      };
-
       if (typeof window !== 'undefined') {
         try {
           const existingHistoryString = localStorage.getItem(LOCAL_STORAGE_KEY);
-          const existingHistory: StoredQuestionPaper[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
-          const updatedHistory = [newPaperEntry, ...existingHistory];
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory.slice(0, 20))); 
+          let existingHistory: StoredQuestionPaper[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
+          
+          if (editingPaperId) {
+            // Update existing entry
+            existingHistory = existingHistory.map(item => 
+              item.id === editingPaperId 
+              ? { ...item, formSnapshot: storableFormValues, generatedPaper: result, dateGenerated: new Date().toISOString() } 
+              : item
+            );
+          } else {
+            // Add new entry
+            const newPaperEntry: StoredQuestionPaper = {
+              id: Date.now().toString(), 
+              dateGenerated: new Date().toISOString(),
+              formSnapshot: storableFormValues,
+              generatedPaper: result,
+            };
+            existingHistory = [newPaperEntry, ...existingHistory];
+          }
+          
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20))); 
+          if (editingPaperId) {
+            setEditingPaperId(null); // Reset editing mode after successful save
+            // Optionally navigate back to history or clear form
+            // router.push('/history'); // Example navigation
+          }
+
         } catch (storageError) {
           console.error("Error saving to local storage:", storageError);
           toast({
             title: "Warning",
-            description: "Question paper prepared, but failed to save to history.",
+            description: `Question paper ${editingPaperId ? 'updated' : 'prepared'}, but failed to save to history.`,
             variant: "destructive", 
           });
         }
@@ -191,11 +241,41 @@ export default function Home() {
       setIsLoading(false);
     }
   };
+  
+  const clearFormAndEditState = () => {
+    setInitialFormValues(undefined); // This will trigger a re-render of QuestionPaperForm with default values
+    setGeneratedPaper(null);
+    setFormSnapshotForDisplay(null);
+    setEditingPaperId(null);
+    // Force re-render of QuestionPaperForm or use its own reset method if available
+    // A common way is to change the `key` prop of the form component.
+    // For now, setting initialFormValues to undefined should reset it if the form takes it as a prop for defaults.
+    // If QuestionPaperForm uses useForm's defaultValues directly, we might need to pass a key to it.
+    toast({ title: "Form Cleared", description: "Ready for a new paper."});
+  };
+
 
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
       <div className="w-full max-w-4xl space-y-12">
-        <QuestionPaperForm onSubmit={handleFormSubmit} isLoading={isLoading} />
+        {editingPaperId && (
+            <Alert variant="default" className="border-accent bg-accent/10 text-accent-foreground mb-6 no-print">
+                <Edit3 className="h-5 w-5" />
+                <AlertTitle>Editing Mode</AlertTitle>
+                <AlertDescription>
+                You are currently editing a previously saved paper. Make your changes and click "Generate Question Paper" to update it.
+                <Button variant="outline" size="sm" onClick={clearFormAndEditState} className="ml-4">
+                    Create New Instead
+                </Button>
+                </AlertDescription>
+            </Alert>
+        )}
+        <QuestionPaperForm 
+            key={initialFormValues ? editingPaperId : 'new'} // Change key to force re-initialization
+            onSubmit={handleFormSubmit} 
+            isLoading={isLoading}
+            initialValues={initialFormValues} // Pass initial values to the form
+        />
 
         {isLoading && (
           <div className="flex justify-center items-center p-10 bg-card rounded-lg shadow-md">
@@ -216,7 +296,7 @@ export default function Home() {
           </div>
         )}
 
-        {!isLoading && !generatedPaper && (
+        {!isLoading && !generatedPaper && !editingPaperId && ( // Show welcome only if not loading, no paper, and not in edit mode initially
            <Alert className="mt-8 border-primary/30 bg-primary/5 text-primary no-print">
             <Terminal className="h-5 w-5" />
             <AlertTitle className="font-headline">Welcome to TestPaperGenius!</AlertTitle>

@@ -2,9 +2,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { History as HistoryIcon, Trash2, Eye, ArrowLeft, LanguagesIcon } from "lucide-react";
+import { History as HistoryIcon, Trash2, Eye, ArrowLeft, LanguagesIcon, Edit3 } from "lucide-react";
 import type { StoredQuestionPaper, ExamTypes } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,11 +23,13 @@ import { useToast } from '@/hooks/use-toast';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
+const EDIT_PAPER_ID_KEY = "editPaperId";
 
 export default function HistoryPage() {
   const [historyItems, setHistoryItems] = useState<StoredQuestionPaper[]>([]);
   const [selectedPaperForView, setSelectedPaperForView] = useState<StoredQuestionPaper | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -95,13 +98,17 @@ export default function HistoryPage() {
     setSelectedPaperForView(item);
   };
 
+  const handleEditPaper = (paperId: string) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(EDIT_PAPER_ID_KEY, paperId);
+      router.push('/'); // Navigate to the main form page
+    }
+  };
+
   if (selectedPaperForView) {
-    // Ensure formSnapshot is compatible with QuestionPaperDisplayFormData
-    // This might require mapping or ensuring StoredQuestionPaper.formSnapshot is directly usable
     const displayFormData = {
         ...selectedPaperForView.formSnapshot,
-        // Explicitly handle any fields that might be missing or need transformation
-        examType: selectedPaperForView.formSnapshot.examType as (typeof ExamTypes)[number], // Cast if necessary
+        examType: selectedPaperForView.formSnapshot.examType as (typeof ExamTypes)[number], 
     };
 
     return (
@@ -179,24 +186,41 @@ export default function HistoryPage() {
                 <p><span className="font-medium">Pass Marks:</span> {item.formSnapshot.passMarks}</p>
                 <p><span className="font-medium">Time:</span> {item.formSnapshot.timeLimit}</p>
                 <hr className="my-2"/>
-                <p className="text-xs text-muted-foreground">Question Counts:</p>
+                <p className="text-xs text-muted-foreground">Question Counts/Mode:</p>
                 <div className="grid grid-cols-2 gap-x-2 text-xs">
-                  <p><span className="font-medium">MCQs:</span> {item.generatedPaper.mcqs.length}</p>
-                  {item.generatedPaper.veryShortQuestions && <p><span className="font-medium">Very Short:</span> {item.generatedPaper.veryShortQuestions.length}</p>}
-                  {item.generatedPaper.fillInTheBlanks && <p><span className="font-medium">Fill Blanks:</span> {item.generatedPaper.fillInTheBlanks.length}</p>}
-                  {item.generatedPaper.trueFalseQuestions && <p><span className="font-medium">True/False:</span> {item.generatedPaper.trueFalseQuestions.length}</p>}
-                  <p><span className="font-medium">Short Qs:</span> {item.generatedPaper.shortQuestions.length}</p>
-                  <p><span className="font-medium">Long Qs:</span> {item.generatedPaper.longQuestions.length}</p>
-                  {item.generatedPaper.numericalPracticalQuestions && <p><span className="font-medium">Numerical:</span> {item.generatedPaper.numericalPracticalQuestions.length}</p>}
+                  {item.formSnapshot.generationMode === 'ai' ? (
+                    <>
+                      <p><span className="font-medium">MCQs:</span> {item.formSnapshot.mcqCount}</p>
+                      {item.formSnapshot.veryShortQuestionCount > 0 && <p><span className="font-medium">Very Short:</span> {item.formSnapshot.veryShortQuestionCount}</p>}
+                      {item.formSnapshot.fillInTheBlanksCount > 0 && <p><span className="font-medium">Fill Blanks:</span> {item.formSnapshot.fillInTheBlanksCount}</p>}
+                      {item.formSnapshot.trueFalseCount > 0 && <p><span className="font-medium">True/False:</span> {item.formSnapshot.trueFalseCount}</p>}
+                      <p><span className="font-medium">Short Qs:</span> {item.formSnapshot.shortQuestionCount}</p>
+                      <p><span className="font-medium">Long Qs:</span> {item.formSnapshot.longQuestionCount}</p>
+                      {item.formSnapshot.numericalPracticalCount > 0 && <p><span className="font-medium">Numerical:</span> {item.formSnapshot.numericalPracticalCount}</p>}
+                    </>
+                  ) : (
+                    <>
+                      <p><span className="font-medium">MCQs:</span> {item.generatedPaper.mcqs.length}</p>
+                      {item.generatedPaper.veryShortQuestions && <p><span className="font-medium">Very Short:</span> {item.generatedPaper.veryShortQuestions.length}</p>}
+                      {item.generatedPaper.fillInTheBlanks && <p><span className="font-medium">Fill Blanks:</span> {item.generatedPaper.fillInTheBlanks.length}</p>}
+                      {item.generatedPaper.trueFalseQuestions && <p><span className="font-medium">True/False:</span> {item.generatedPaper.trueFalseQuestions.length}</p>}
+                      <p><span className="font-medium">Short Qs:</span> {item.generatedPaper.shortQuestions.length}</p>
+                      <p><span className="font-medium">Long Qs:</span> {item.generatedPaper.longQuestions.length}</p>
+                      {item.generatedPaper.numericalPracticalQuestions && <p><span className="font-medium">Numerical:</span> {item.generatedPaper.numericalPracticalQuestions.length}</p>}
+                    </>
+                  )}
                 </div>
                  <p className="mt-3 text-xs text-muted-foreground pt-2 border-t">
-                    <span className="font-medium">Generated:</span> {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString()}
+                    <span className="font-medium">Date:</span> {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString()}
                     {item.formSnapshot.generationMode && <span className="block capitalize"><span className="font-medium">Mode:</span> {item.formSnapshot.generationMode}</span>}
                  </p>
               </CardContent>
               <CardFooter className="border-t pt-3 pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-2 items-stretch">
                 <Button variant="ghost" size="sm" onClick={() => handleViewPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-center">
                   <Eye className="mr-1 h-3 w-3" /> View Paper
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => handleEditPaper(item.id)} className="text-blue-600 hover:bg-blue-600/10 flex-1 text-center">
+                  <Edit3 className="mr-1 h-3 w-3" /> Edit Paper
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>

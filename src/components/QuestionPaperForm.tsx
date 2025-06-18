@@ -2,6 +2,7 @@
 "use client";
 
 import type * as React from 'react';
+import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguages, ExamTypes } from '@/lib/types';
@@ -26,15 +27,16 @@ import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, Clipb
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
   isLoading: boolean;
+  initialValues?: QuestionPaperFormValues; // For editing
 }
 
-export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProps) {
+export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: QuestionPaperFormProps) {
   const form = useForm<QuestionPaperFormValues>({
     resolver: zodResolver(questionPaperFormSchema),
-    defaultValues: {
+    defaultValues: initialValues || { // Use initialValues if provided, otherwise fallback to defaults
       institutionName: 'TestPaperGenius Institute',
       institutionAddress: '',
-      // logo: undefined,
+      // logo: undefined, // File input cannot be set programmatically
       classLevel: '',
       subject: '',
       subjectCode: '',
@@ -63,6 +65,46 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
     },
   });
 
+  // Effect to reset form when initialValues change (e.g., when loading a paper for editing)
+  useEffect(() => {
+    if (initialValues) {
+      form.reset(initialValues);
+    } else {
+      // Reset to default when not editing (e.g., "Create New Instead" is clicked)
+      form.reset({
+        institutionName: 'TestPaperGenius Institute',
+        institutionAddress: '',
+        logo: undefined, 
+        classLevel: '',
+        subject: '',
+        subjectCode: '',
+        examType: 'Final Examination',
+        totalMarks: 70,
+        passMarks: 23,
+        timeLimit: '2 hours',
+        instructions: '1. All questions are compulsory.\n2. Marks are indicated against each question.\n3. Write neatly and legibly.',
+        language: "English",
+        customPrompt: '',
+        generationMode: 'ai',
+        mcqCount: 5,
+        veryShortQuestionCount: 0,
+        fillInTheBlanksCount: 0,
+        trueFalseCount: 0,
+        shortQuestionCount: 3,
+        longQuestionCount: 2,
+        numericalPracticalCount: 0,
+        manualMcqs: "",
+        manualVeryShortQuestions: "",
+        manualFillInTheBlanks: "",
+        manualTrueFalseQuestions: "",
+        manualShortQuestions: "",
+        manualLongQuestions: "",
+        manualNumericalPracticalQuestions: "",
+      });
+    }
+  }, [initialValues, form]);
+
+
   const generationMode = useWatch({
     control: form.control,
     name: 'generationMode',
@@ -80,6 +122,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
               placeholder={placeholder}
               className="min-h-[100px] resize-y"
               {...field}
+              value={field.value || ""} // Ensure value is not undefined
             />
           </FormControl>
           <FormDescription>Enter one question per line. Include marks, e.g., "Question text? (2 marks)".</FormDescription>
@@ -97,7 +140,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
           <FormItem>
             <FormLabel className="flex items-center">{icon}{label}</FormLabel>
             <FormControl>
-              <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+              <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} value={field.value || 0} />
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}
             <FormMessage />
@@ -115,7 +158,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
           TestPaperGenius
         </CardTitle>
         <CardDescription className="font-body">
-          Fill in the details below to generate your comprehensive question paper.
+          {initialValues ? "Edit the details below to update your question paper." : "Fill in the details below to generate your comprehensive question paper."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -133,7 +176,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                     <FormItem>
                       <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4" />Institution Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Springfield High School" {...field} />
+                        <Input placeholder="e.g., Springfield High School" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -142,7 +185,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                 <FormField
                   control={form.control}
                   name="logo"
-                  render={({ field: { onChange, value, ...rest } }) => (
+                  render={({ field: { onChange, value, ...rest } }) => ( // `value` here is the File object, which is fine for display but not for setting
                     <FormItem>
                       <FormLabel className="flex items-center"><ImagePlus className="mr-2 h-4 w-4" />Institution Logo (Optional)</FormLabel>
                       <FormControl>
@@ -150,11 +193,12 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                           type="file" 
                           accept="image/*" 
                           onChange={(e) => onChange(e.target.files?.[0])}
+                          // Do not provide 'value' for file inputs as it's read-only and controlled by browser
                           {...rest} 
                           className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                         />
                       </FormControl>
-                      <FormDescription>Upload your institution's logo (PNG, JPG, GIF).</FormDescription>
+                      <FormDescription>Upload your institution's logo (PNG, JPG, GIF). If editing, re-upload to change.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -167,7 +211,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                   <FormItem>
                     <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4" />Institution Address (Optional)</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="e.g., 123 Main Street, Anytown, USA" className="resize-y min-h-[60px]" {...field} />
+                      <Textarea placeholder="e.g., 123 Main Street, Anytown, USA" className="resize-y min-h-[60px]" {...field} value={field.value || ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -186,7 +230,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                     <FormItem>
                       <FormLabel>Class / Level</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Class 10, Grade 5" {...field} />
+                        <Input placeholder="e.g., Class 10, Grade 5" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -199,7 +243,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                     <FormItem>
                       <FormLabel>Subject</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Mathematics, Science" {...field} />
+                        <Input placeholder="e.g., Mathematics, Science" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -215,7 +259,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                     <FormItem>
                       <FormLabel className="flex items-center"><Code className="mr-2 h-4 w-4" />Subject Code (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., MATH101, SCI-05" {...field} />
+                        <Input placeholder="e.g., MATH101, SCI-05" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -227,7 +271,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center"><Type className="mr-2 h-4 w-4" />Exam Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select exam type" />
@@ -251,7 +295,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center"><LanguagesIcon className="mr-2 h-4 w-4" />Language for Questions</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select language for questions" />
@@ -281,7 +325,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                     <FormItem>
                       <FormLabel>Total Marks</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 100" {...field} onChange={e => field.onChange(parseInt(e.target.value,10) || 0)} />
+                        <Input type="number" placeholder="e.g., 100" {...field} onChange={e => field.onChange(parseInt(e.target.value,10) || 0)} value={field.value || 0} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -294,7 +338,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                     <FormItem>
                       <FormLabel>Pass Marks</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 33" {...field} onChange={e => field.onChange(parseInt(e.target.value,10) || 0)} />
+                        <Input type="number" placeholder="e.g., 33" {...field} onChange={e => field.onChange(parseInt(e.target.value,10) || 0)} value={field.value || 0}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -307,7 +351,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                     <FormItem>
                       <FormLabel>Time Limit</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., 2 hours, 90 minutes" {...field} />
+                        <Input placeholder="e.g., 2 hours, 90 minutes" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -328,6 +372,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                       placeholder="e.g., All questions are compulsory. Marks are indicated..."
                       className="resize-y min-h-[100px]"
                       {...field}
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -345,6 +390,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
+                      value={field.value}
                       defaultValue={field.value}
                       className="flex flex-col space-y-1 md:flex-row md:space-y-0 md:space-x-4"
                     >
@@ -385,6 +431,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                               placeholder="e.g., Focus on Chapter 5, or include questions about renewable energy."
                               className="min-h-[80px] resize-y"
                               {...field}
+                              value={field.value || ""}
                             />
                           </FormControl>
                            <FormDescription>Provide keywords, topics, or specific instructions to guide the AI.</FormDescription>
@@ -430,10 +477,10 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Generating Paper...
+                  {initialValues ? "Updating Paper..." : "Generating Paper..."}
                 </>
               ) : (
-                'Generate Question Paper'
+                initialValues ? "Update Question Paper" : "Generate Question Paper"
               )}
             </Button>
           </form>

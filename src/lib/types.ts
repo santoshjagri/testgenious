@@ -46,43 +46,29 @@ export const questionPaperFormSchema = z.object({
 
 export type QuestionPaperFormValues = z.infer<typeof questionPaperFormSchema>;
 
-// This type is used for AI input and also for form snapshot in local storage
-export type AppGenerateQuestionsInput = Omit<AIInputType, 'examType' | 'language' | 'totalQuestionNumber'> & {
+// Storable version of form values (logo as data URI)
+export type StorableQuestionPaperFormValues = Omit<QuestionPaperFormValues, 'logo'> & {
+  logoDataUri?: string;
+};
+
+// This type is used for AI input (without logo file, uses logoDataUri)
+export type AppGenerateQuestionsInput = Omit<AIInputType, 'examType' | 'language'> & {
   logoDataUri?: string;
   language: (typeof SupportedLanguages)[number];
-  examType: (typeof ExamTypes)[number]; // Use the enum for consistency
+  examType: (typeof ExamTypes)[number];
   customPrompt?: string;
+  // Includes AI counts from AIInputType: mcqCount, veryShortQuestionCount, etc.
 };
 
 
 export interface StoredQuestionPaper {
-  id: string; 
-  dateGenerated: string; 
-  // Ensure formSnapshot aligns with AppGenerateQuestionsInput fields for storage
-  formSnapshot: Omit<AppGenerateQuestionsInput, 'mcqCount' | 'veryShortQuestionCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount' | 'totalQuestionNumber'> & {
-    generationMode?: 'ai' | 'manual';
-    // Explicitly list all fields from AppGenerateQuestionsInput that should be stored
-    classLevel: string;
-    subject: string;
-    totalMarks: number;
-    passMarks: number;
-    timeLimit: string;
-    instructions?: string;
-    examType: (typeof ExamTypes)[number];
-    institutionName?: string;
-    institutionAddress?: string;
-    subjectCode?: string;
-    logoDataUri?: string;
-    language: (typeof SupportedLanguages)[number];
-    customPrompt?: string;
-  };
+  id: string;
+  dateGenerated: string;
+  formSnapshot: StorableQuestionPaperFormValues; // Updated to store full form details
   generatedPaper: GenerateQuestionsOutput;
 }
 
 // This type is for displaying the paper; ensure it has all necessary fields from formSnapshot
-export type QuestionPaperDisplayFormData = Omit<AppGenerateQuestionsInput, 'mcqCount' | 'veryShortQuestionCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount' | 'totalQuestionNumber'> & {
-    language: (typeof SupportedLanguages)[number];
-    examType: (typeof ExamTypes)[number]; // Ensure examType uses the enum here too
-    // customPrompt is not typically displayed on the paper itself
-  };
+// It can be derived from StorableQuestionPaperFormValues as it contains all display-relevant fields.
+export type QuestionPaperDisplayFormData = StorableQuestionPaperFormValues;
 
