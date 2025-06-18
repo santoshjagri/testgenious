@@ -1,9 +1,10 @@
+
 "use client";
 
 import type * as React from 'react';
 import type { GenerateQuestionsOutput, GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ListOrdered, FileText, FileSignature, Printer, Download } from 'lucide-react';
 
