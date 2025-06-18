@@ -177,7 +177,6 @@ export default function HistoryPage() {
               <CardContent className="space-y-1 text-sm flex-grow">
                 <p><span className="font-medium">Total Marks:</span> {item.formSnapshot.totalMarks}</p>
                 <p><span className="font-medium">Pass Marks:</span> {item.formSnapshot.passMarks}</p>
-                {item.formSnapshot.totalQuestionNumber && <p><span className="font-medium">Total Qs:</span> {item.formSnapshot.totalQuestionNumber}</p>}
                 <p><span className="font-medium">Time:</span> {item.formSnapshot.timeLimit}</p>
                 <hr className="my-2"/>
                 <p className="text-xs text-muted-foreground">Question Counts:</p>

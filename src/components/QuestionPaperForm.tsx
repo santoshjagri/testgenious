@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Sigma, Lightbulb, MessageSquareText } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText } from 'lucide-react';
 
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
@@ -34,14 +34,13 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
     defaultValues: {
       institutionName: 'TestPaperGenius Institute',
       institutionAddress: '',
-      // logo: undefined, 
+      // logo: undefined,
       classLevel: '',
       subject: '',
       subjectCode: '',
       examType: 'Final Examination',
       totalMarks: 70,
       passMarks: 23,
-      totalQuestionNumber: undefined, // Default to undefined or a number like 20
       timeLimit: '2 hours',
       instructions: '1. All questions are compulsory.\n2. Marks are indicated against each question.\n3. Write neatly and legibly.',
       language: "English",
@@ -271,9 +270,9 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                 />
             </div>
 
-            {/* Marks, Questions & Time */}
+            {/* Marks & Time */}
             <div className="space-y-6">
-              <CardTitle className="text-xl font-semibold border-b pb-2 text-primary/90">Marks, Questions & Time</CardTitle>
+              <CardTitle className="text-xl font-semibold border-b pb-2 text-primary/90">Marks & Time</CardTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <FormField
                   control={form.control}
@@ -315,20 +314,6 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                   )}
                 />
               </div>
-               <FormField
-                  control={form.control}
-                  name="totalQuestionNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center"><Sigma className="mr-2 h-4 w-4" />Total Number of Questions (Optional)</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="e.g., 20 (Informational for AI)" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10) || 0)} />
-                      </FormControl>
-                      <FormDescription>Desired total question count. AI will use this as a guideline.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
             </div>
             
             {/* Instructions */}

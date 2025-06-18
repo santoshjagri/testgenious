@@ -27,7 +27,6 @@ const GenerateQuestionsInputSchema = z.object({
   logoDataUri: z.string().optional().describe("A data URI of the institution's logo, if provided by the user."),
   subjectCode: z.string().optional().describe('The subject code for the paper.'),
   language: z.string().describe('The language in which the questions should be generated (e.g., English, Nepali, Hindi).'),
-  totalQuestionNumber: z.number().optional().describe('The desired total number of questions for the paper. This is informational for the AI to help guide question distribution if provided.'),
   customPrompt: z.string().optional().describe('Specific instructions, topics, or keywords provided by the user to guide question generation.'),
   mcqCount: z.number().default(5).describe('Number of Multiple Choice Questions to generate.'),
   veryShortQuestionCount: z.number().default(0).describe('Number of Very Short Answer Questions to generate.'),
@@ -69,7 +68,6 @@ The paper is for:
 - Exam Type: {{examType}}
 - Total Marks: {{totalMarks}}
 - Pass Marks: {{passMarks}}
-{{#if totalQuestionNumber}}- Desired Total Number of Questions: {{totalQuestionNumber}} (Use this as a guideline for distributing question counts if possible, but prioritize the specific counts provided below for each question type.){{/if}}
 - Time Limit: {{timeLimit}}
 - Language for Questions: {{language}}
 

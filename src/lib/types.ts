@@ -15,7 +15,6 @@ export const questionPaperFormSchema = z.object({
   examType: z.enum(ExamTypes).default("Final Examination"),
   totalMarks: z.coerce.number().min(1, "Total marks must be at least 1.").max(1000, "Total marks cannot exceed 1000."),
   passMarks: z.coerce.number().min(1, "Pass marks must be at least 1.").max(1000, "Pass marks cannot exceed 1000."),
-  totalQuestionNumber: z.coerce.number().min(0, "Total questions must be 0 or more.").max(200, "Total questions cannot exceed 200.").optional(),
   timeLimit: z.string().min(1, "Time limit is required. (e.g., 2 hours, 90 minutes)"),
   instructions: z.string().optional(),
   language: z.enum(SupportedLanguages).default("English"),
@@ -48,11 +47,10 @@ export const questionPaperFormSchema = z.object({
 export type QuestionPaperFormValues = z.infer<typeof questionPaperFormSchema>;
 
 // This type is used for AI input and also for form snapshot in local storage
-export type AppGenerateQuestionsInput = Omit<AIInputType, 'examType' | 'language'> & {
+export type AppGenerateQuestionsInput = Omit<AIInputType, 'examType' | 'language' | 'totalQuestionNumber'> & {
   logoDataUri?: string;
   language: (typeof SupportedLanguages)[number];
   examType: (typeof ExamTypes)[number]; // Use the enum for consistency
-  totalQuestionNumber?: number;
   customPrompt?: string;
 };
 
@@ -61,7 +59,7 @@ export interface StoredQuestionPaper {
   id: string; 
   dateGenerated: string; 
   // Ensure formSnapshot aligns with AppGenerateQuestionsInput fields for storage
-  formSnapshot: Omit<AppGenerateQuestionsInput, 'mcqCount' | 'veryShortQuestionCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'> & {
+  formSnapshot: Omit<AppGenerateQuestionsInput, 'mcqCount' | 'veryShortQuestionCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount' | 'totalQuestionNumber'> & {
     generationMode?: 'ai' | 'manual';
     // Explicitly list all fields from AppGenerateQuestionsInput that should be stored
     classLevel: string;
@@ -76,17 +74,15 @@ export interface StoredQuestionPaper {
     subjectCode?: string;
     logoDataUri?: string;
     language: (typeof SupportedLanguages)[number];
-    totalQuestionNumber?: number;
     customPrompt?: string;
   };
   generatedPaper: GenerateQuestionsOutput;
 }
 
 // This type is for displaying the paper; ensure it has all necessary fields from formSnapshot
-export type QuestionPaperDisplayFormData = Omit<AppGenerateQuestionsInput, 'mcqCount' | 'veryShortQuestionCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'> & {
+export type QuestionPaperDisplayFormData = Omit<AppGenerateQuestionsInput, 'mcqCount' | 'veryShortQuestionCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount' | 'totalQuestionNumber'> & {
     language: (typeof SupportedLanguages)[number];
     examType: (typeof ExamTypes)[number]; // Ensure examType uses the enum here too
-    totalQuestionNumber?: number; // Add if it should be displayed or used by display component
     // customPrompt is not typically displayed on the paper itself
   };
 

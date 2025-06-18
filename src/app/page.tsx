@@ -67,7 +67,6 @@ export default function Home() {
       subjectCode: values.subjectCode || '',
       logoDataUri: logoDataUri,
       language: values.language,
-      totalQuestionNumber: values.totalQuestionNumber, // New field
       customPrompt: values.customPrompt, // New field
       // AI counts are not part of AppGenerateQuestionsInput directly for snapshot if it's generic
       // but will be used for AIInput if mode is 'ai'
@@ -119,7 +118,6 @@ export default function Home() {
           subjectCode: values.subjectCode || '',
           logoDataUri: logoDataUri,
           language: values.language, // Use enum value
-          totalQuestionNumber: values.totalQuestionNumber, // New field
           customPrompt: values.customPrompt, // New field
           mcqCount: values.mcqCount,
           veryShortQuestionCount: values.veryShortQuestionCount,
@@ -156,7 +154,6 @@ export default function Home() {
           subjectCode: snapshotForStorageAndDisplay.subjectCode,
           logoDataUri: snapshotForStorageAndDisplay.logoDataUri,
           language: snapshotForStorageAndDisplay.language,
-          totalQuestionNumber: snapshotForStorageAndDisplay.totalQuestionNumber,
           customPrompt: snapshotForStorageAndDisplay.customPrompt,
           generationMode: values.generationMode,
         },
