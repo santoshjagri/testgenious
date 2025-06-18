@@ -29,7 +29,7 @@ export default function Home() {
       passMarks: values.passMarks,
       timeLimit: values.timeLimit,
       instructions: values.instructions || 'All questions are compulsory.',
-      examType: values.examType,
+      examType: values.examType || 'Final Examination', // Added fallback
       institutionName: values.institutionName || 'TestPaperGenius Institute',
       subjectCode: values.subjectCode || '',
       mcqCount: values.mcqCount,
@@ -152,3 +152,4 @@ export default function Home() {
     </main>
   );
 }
+
