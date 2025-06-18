@@ -255,14 +255,7 @@ export default function Home() {
                 </AlertDescription>
             </Alert>
         )}
-        {!editingPaperId && (
-          <div className="flex justify-end mb-4 no-print">
-            <Button variant="outline" onClick={clearFormAndEditState}>
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Clear Form
-            </Button>
-          </div>
-        )}
+        
         <QuestionPaperForm 
             key={initialFormValues ? editingPaperId : 'new'} 
             onSubmit={handleFormSubmit} 
@@ -317,4 +310,3 @@ export default function Home() {
     </main>
   );
 }
-
