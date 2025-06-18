@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { History as HistoryIcon, Trash2, Download, ArrowLeft } from "lucide-react";
+import { History as HistoryIcon, Trash2, Eye, ArrowLeft } from "lucide-react"; // Changed Download to Eye
 import type { StoredQuestionPaper } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -91,7 +91,7 @@ export default function HistoryPage() {
     }
   };
   
-  const handleViewPrintPaper = (item: StoredQuestionPaper) => {
+  const handleViewPaper = (item: StoredQuestionPaper) => {
     setSelectedPaperForView(item);
   };
 
@@ -181,8 +181,8 @@ export default function HistoryPage() {
                  <p className="mt-3 text-xs text-muted-foreground pt-2 border-t"><span className="font-medium">Generated:</span> {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString()}</p>
               </CardContent>
               <CardFooter className="border-t pt-3 pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-2 items-stretch">
-                <Button variant="ghost" size="sm" onClick={() => handleViewPrintPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-center">
-                  <Download className="mr-1 h-3 w-3" /> View/Print Paper
+                <Button variant="ghost" size="sm" onClick={() => handleViewPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-center">
+                  <Eye className="mr-1 h-3 w-3" /> View Paper
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
