@@ -8,7 +8,7 @@ import type { QuestionPaperDisplayFormData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ListOrdered, FileText, FileSignature, Download, PencilLine, ClipboardCheck, CalculatorIcon, Info, FileQuestion, Loader2, Printer as PrinterIcon, LanguagesIcon } from 'lucide-react';
+import { ListOrdered, FileText, FileSignature, Download, PencilLine, ClipboardCheck, CalculatorIcon, Info, FileQuestion, Loader2, Printer as PrinterIcon } from 'lucide-react';
 import Image from 'next/image';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -144,7 +144,6 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <div><strong>Time Allowed:</strong> {formData.timeLimit}</div>
                 <div><strong>Pass Marks:</strong> {formData.passMarks}</div>
                 <div className="col-span-2 mt-1"><strong>Date:</strong> {currentDate}</div>
-                {formData.language && <div className="col-span-2 mt-1 flex items-center"><LanguagesIcon className="h-4 w-4 mr-1 text-gray-600"/><strong>Language:</strong> {formData.language}</div>}
             </div>
         </CardHeader>
 
