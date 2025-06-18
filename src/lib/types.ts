@@ -15,6 +15,7 @@ export const questionPaperFormSchema = z.object({
   timeLimit: z.string().min(1, "Time limit is required. (e.g., 2 hours, 90 minutes)"),
   instructions: z.string().optional(),
   mcqCount: z.coerce.number().min(0).max(50).default(5),
+  veryShortQuestionCount: z.coerce.number().min(0).max(30).default(0),
   fillInTheBlanksCount: z.coerce.number().min(0).max(30).default(0),
   trueFalseCount: z.coerce.number().min(0).max(30).default(0),
   shortQuestionCount: z.coerce.number().min(0).max(20).default(3),
@@ -39,9 +40,10 @@ export type AppGenerateQuestionsInput = AIInputType & {
 export interface StoredQuestionPaper {
   id: string; // Unique ID for the paper
   dateGenerated: string; // ISO string format
-  formSnapshot: Omit<AppGenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'>;
+  formSnapshot: Omit<AppGenerateQuestionsInput, 'mcqCount' | 'veryShortQuestionCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'>;
   generatedPaper: GenerateQuestionsOutput;
 }
 
 // This type is what QuestionPaperDisplay expects for its formData prop
-export type QuestionPaperDisplayFormData = Omit<AppGenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'>;
+export type QuestionPaperDisplayFormData = Omit<AppGenerateQuestionsInput, 'mcqCount' | 'veryShortQuestionCount' | 'shortQuestionCount' | 'longQuestionCount' | 'fillInTheBlanksCount' | 'trueFalseCount' | 'numericalPracticalCount'>;
+

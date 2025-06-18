@@ -166,6 +166,7 @@ export default function HistoryPage() {
                 <p className="text-xs text-muted-foreground">Question Counts:</p>
                 <div className="grid grid-cols-2 gap-x-2 text-xs">
                   <p><span className="font-medium">MCQs:</span> {item.generatedPaper.mcqs.length}</p>
+                  {item.generatedPaper.veryShortQuestions && <p><span className="font-medium">Very Short:</span> {item.generatedPaper.veryShortQuestions.length}</p>}
                   {item.generatedPaper.fillInTheBlanks && <p><span className="font-medium">Fill Blanks:</span> {item.generatedPaper.fillInTheBlanks.length}</p>}
                   {item.generatedPaper.trueFalseQuestions && <p><span className="font-medium">True/False:</span> {item.generatedPaper.trueFalseQuestions.length}</p>}
                   <p><span className="font-medium">Short Qs:</span> {item.generatedPaper.shortQuestions.length}</p>
@@ -210,3 +211,4 @@ export default function HistoryPage() {
     </div>
   );
 }
+

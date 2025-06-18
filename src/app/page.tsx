@@ -62,6 +62,7 @@ export default function Home() {
       subjectCode: values.subjectCode || '',
       logoDataUri: logoDataUri, // Pass to AI flow
       mcqCount: values.mcqCount,
+      veryShortQuestionCount: values.veryShortQuestionCount,
       shortQuestionCount: values.shortQuestionCount,
       longQuestionCount: values.longQuestionCount,
       fillInTheBlanksCount: values.fillInTheBlanksCount,
@@ -101,7 +102,7 @@ export default function Home() {
           const existingHistoryString = localStorage.getItem(LOCAL_STORAGE_KEY);
           const existingHistory: StoredQuestionPaper[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
           const updatedHistory = [newPaperEntry, ...existingHistory];
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory.slice(0, 20)));
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory.slice(0, 20))); // Limit history to 20 items
         } catch (storageError) {
           console.error("Error saving to local storage:", storageError);
           toast({
@@ -186,3 +187,4 @@ export default function Home() {
     </main>
   );
 }
+

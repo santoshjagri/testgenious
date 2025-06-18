@@ -7,7 +7,7 @@ import type { QuestionPaperDisplayFormData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ListOrdered, FileText, FileSignature, Printer, PencilLine, ClipboardCheck, CalculatorIcon, Info } from 'lucide-react';
+import { ListOrdered, FileText, FileSignature, Printer, PencilLine, ClipboardCheck, CalculatorIcon, Info, FileQuestion } from 'lucide-react';
 import Image from 'next/image';
 
 interface QuestionPaperDisplayProps {
@@ -94,6 +94,25 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 ))}
               </ol>
             </section>
+          )}
+
+          {questions.veryShortQuestions && questions.veryShortQuestions.length > 0 && (
+            <>
+            <Separator className="my-6 border-gray-300" />
+            <section aria-labelledby="very-short-questions-title">
+              <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
+                <FileQuestion className="h-6 w-6 mr-3 text-gray-700" />
+                <h2 id="very-short-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Very Short Answer Questions</h2>
+              </div>
+              <ol className="space-y-3 list-decimal list-inside pl-4 text-sm">
+                {questions.veryShortQuestions.map((question, index) => (
+                  <li key={`vshort-${index}`} className="pb-1">
+                    {question}
+                  </li>
+                ))}
+              </ol>
+            </section>
+            </>
           )}
 
           {questions.fillInTheBlanks && questions.fillInTheBlanks.length > 0 && (

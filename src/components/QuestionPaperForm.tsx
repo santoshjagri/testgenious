@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion } from 'lucide-react';
 
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
@@ -42,6 +42,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
       timeLimit: '2 hours',
       instructions: '1. All questions are compulsory.\n2. Marks are indicated against each question.\n3. Write neatly and legibly.',
       mcqCount: 5,
+      veryShortQuestionCount: 0,
       fillInTheBlanksCount: 0,
       trueFalseCount: 0,
       shortQuestionCount: 3,
@@ -254,6 +255,19 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
                   />
                   <FormField
                     control={form.control}
+                    name="veryShortQuestionCount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center"><FileQuestion className="mr-2 h-4 w-4" />Very Short Answer</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="fillInTheBlanksCount"
                     render={({ field }) => (
                       <FormItem>
@@ -337,3 +351,4 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
     </Card>
   );
 }
+
