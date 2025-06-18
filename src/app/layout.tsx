@@ -1,6 +1,6 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
-import { LayoutDashboard, PlusSquare, History as HistoryIcon } from 'lucide-react';
+import { LayoutDashboard, PlusSquare, History as HistoryIcon, GraduationCap } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
@@ -46,6 +46,14 @@ export default function RootLayout({
                     <Link href="/history">
                       <HistoryIcon />
                       <span className="group-data-[collapsible=icon]:hidden">Paper History</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Gradesheet">
+                    <Link href="/gradesheet">
+                      <GraduationCap />
+                      <span className="group-data-[collapsible=icon]:hidden">Gradesheet</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
