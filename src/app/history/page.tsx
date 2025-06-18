@@ -1,13 +1,14 @@
 "use client";
 
-import type * as React from 'react';
+import type * as React from 'react'; // Keep type import if only types are used elsewhere from React
+import { useState, useEffect } from 'react'; // Import useState and useEffect directly
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { History as HistoryIcon } from "lucide-react"; // Renamed to avoid conflict
 
 export default function HistoryPage() {
   // In a real app, you'd fetch history from localStorage, a database, or state management.
-  const [historyItems, setHistoryItems] = React.useState<any[]>([]); // Replace 'any' with your actual paper data type
+  const [historyItems, setHistoryItems] = useState<any[]>([]); // Replace 'any' with your actual paper data type
 
   return (
     <div className="flex-1 flex flex-col gap-4 p-4 md:gap-8 md:p-8">
