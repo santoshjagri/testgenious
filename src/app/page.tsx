@@ -8,8 +8,7 @@ import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplay
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from '@/components/ui/button';
-import { Terminal, FileJson } from "lucide-react";
+import { Terminal } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 
@@ -136,51 +135,6 @@ export default function Home() {
     }
   };
 
-  const downloadCurrentPaperData = () => {
-    if (!formSnapshotForDisplay || !generatedPaper) {
-      toast({
-        title: "Error",
-        description: "No paper data available to download.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const paperDataToDownload: StoredQuestionPaper = {
-      id: `current_${Date.now().toString()}`,
-      dateGenerated: new Date().toISOString(),
-      formSnapshot: formSnapshotForDisplay,
-      generatedPaper: generatedPaper,
-    };
-
-    try {
-      const jsonData = JSON.stringify(paperDataToDownload, null, 2); // Pretty print JSON
-      const blob = new Blob([jsonData], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const safeSubject = formSnapshotForDisplay.subject?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'untitled';
-      const safeClassLevel = formSnapshotForDisplay.classLevel?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'level';
-      const filename = `paperdata-${safeSubject}-${safeClassLevel}-current.json`;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast({
-        title: "Data Downloaded",
-        description: `${filename} has been downloaded.`,
-      });
-    } catch (error) {
-      console.error("Failed to download current paper data:", error);
-      toast({
-        title: "Error Downloading Data",
-        description: "Could not prepare the paper data for download.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
       <div className="w-full max-w-4xl space-y-12">
@@ -201,11 +155,7 @@ export default function Home() {
 
         {!isLoading && generatedPaper && formSnapshotForDisplay && (
           <div className="animate-fadeInUp">
-            <div className="flex justify-end mb-4 no-print">
-              <Button variant="outline" onClick={downloadCurrentPaperData} className="text-green-600 hover:bg-green-600/10 hover:text-green-700 border-green-600/50">
-                <FileJson className="mr-2 h-4 w-4" /> Download Paper Data (JSON)
-              </Button>
-            </div>
+            {/* Removed "Download Paper Data (JSON)" button from here */}
             <QuestionPaperDisplay formData={formSnapshotForDisplay} questions={generatedPaper} />
           </div>
         )}
@@ -238,4 +188,3 @@ export default function Home() {
     </main>
   );
 }
-
