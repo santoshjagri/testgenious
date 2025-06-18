@@ -36,33 +36,37 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
 
       <Card className="printable-area shadow-2xl rounded-lg border-2 border-primary/20 bg-white text-black" id="question-paper">
         <CardHeader className="p-6 border-b-2 border-black">
-            <div className="flex flex-col items-center text-center mb-4">
-                <div className="mb-3">
-                    <Image
-                        src={formData.logoDataUri || "https://placehold.co/80x80.png"}
-                        alt={formData.institutionName ? `${formData.institutionName} Logo` : "Institute Logo"}
-                        width={80} 
-                        height={80}
-                        className="rounded-md object-contain"
-                        data-ai-hint="school emblem"
-                    />
+            {/* Top Row: Logo and Main Institution Info */}
+            <div className="flex flex-row items-center w-full">
+                {/* Left: Logo */}
+                <div className="flex-shrink-0 mr-6">
+                  <Image
+                    src={formData.logoDataUri || "https://placehold.co/80x80.png"}
+                    alt={formData.institutionName ? `${formData.institutionName} Logo` : "Institute Logo"}
+                    width={80}
+                    height={80}
+                    className="rounded-md object-contain"
+                    data-ai-hint="school emblem"
+                  />
                 </div>
-                <h1 className="text-3xl font-bold mb-1">{formData.institutionName || "TestPaperGenius Institute"}</h1>
-                {formData.institutionAddress && <p className="text-sm text-gray-700 mb-2">{formData.institutionAddress}</p>}
-                <h2 className="text-xl font-semibold mb-3">{formData.examType} - {new Date().getFullYear()}</h2>
+                {/* Right: Institution Name, Address, Exam Type - centered in remaining space */}
+                <div className="flex-grow flex flex-col items-center text-center">
+                  <h1 className="text-3xl font-bold mb-1">{formData.institutionName || "TestPaperGenius Institute"}</h1>
+                  {formData.institutionAddress && <p className="text-sm text-gray-700 mb-2">{formData.institutionAddress}</p>}
+                  <h2 className="text-xl font-semibold">{formData.examType} - {new Date().getFullYear()}</h2>
+                </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm mb-2">
+            {/* Bottom Row: Specific Paper Details (Subject, Marks, Date) */}
+            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm mt-4 pt-4 border-t border-gray-300">
                 <div><strong>Subject:</strong> {formData.subject}</div>
                 {formData.subjectCode && <div><strong>Subject Code:</strong> {formData.subjectCode}</div>}
                 <div><strong>Class/Level:</strong> {formData.classLevel}</div>
                 <div><strong>Full Marks:</strong> {formData.totalMarks}</div>
                 <div><strong>Time Allowed:</strong> {formData.timeLimit}</div>
                 <div><strong>Pass Marks:</strong> {formData.passMarks}</div>
+                <div className="col-span-2 mt-1"><strong>Date:</strong> {currentDate}</div>
             </div>
-             <div className="mt-2 text-sm">
-                <div><strong>Date:</strong> {currentDate}</div>
-             </div>
         </CardHeader>
 
         <CardContent className="p-6 md:p-8 space-y-6">
@@ -197,3 +201,4 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
+
