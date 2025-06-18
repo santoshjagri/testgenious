@@ -35,12 +35,7 @@ export default function Home() {
   const [formSnapshotForDisplay, setFormSnapshotForDisplay] = React.useState<QuestionPaperDisplayFormData | null>(null);
   const [editingPaperId, setEditingPaperId] = React.useState<string | null>(null);
   const { toast } = useToast();
-  const router = useRouter(); // For navigation if needed, not directly used here but good for context
-
-  // React.useRef to get access to form instance if needed for form.reset()
-  // However, form.reset is available via the form instance returned by useForm inside QuestionPaperForm
-  // This page will trigger form reset via a key prop or by passing initial values to the form itself.
-  // For simplicity, we'll pass initial values fetched here.
+  const router = useRouter(); 
 
   const [initialFormValues, setInitialFormValues] = React.useState<QuestionPaperFormValues | undefined>(undefined);
 
@@ -56,12 +51,23 @@ export default function Home() {
             const paperToEdit = historyItems.find(item => item.id === paperIdToEdit);
 
             if (paperToEdit) {
-              // Map StorableQuestionPaperFormValues to QuestionPaperFormValues
               const formValues: QuestionPaperFormValues = {
                 ...paperToEdit.formSnapshot,
-                logo: undefined, // File input cannot be programmatically set; user must re-select if changing
+                logo: undefined, 
               };
-              setInitialFormValues(formValues); // Set initial values for the form
+
+              if (paperToEdit.formSnapshot.generationMode === 'manual' && paperToEdit.generatedPaper) {
+                const { generatedPaper: gp } = paperToEdit;
+                formValues.manualMcqs = gp.mcqs?.join('\n') || "";
+                formValues.manualVeryShortQuestions = gp.veryShortQuestions?.join('\n') || "";
+                formValues.manualFillInTheBlanks = gp.fillInTheBlanks?.join('\n') || "";
+                formValues.manualTrueFalseQuestions = gp.trueFalseQuestions?.join('\n') || "";
+                formValues.manualShortQuestions = gp.shortQuestions?.join('\n') || "";
+                formValues.manualLongQuestions = gp.longQuestions?.join('\n') || "";
+                formValues.manualNumericalPracticalQuestions = gp.numericalPracticalQuestions?.join('\n') || "";
+              }
+              
+              setInitialFormValues(formValues); 
               setGeneratedPaper(paperToEdit.generatedPaper);
               setFormSnapshotForDisplay(paperToEdit.formSnapshot);
               setEditingPaperId(paperToEdit.id);
@@ -79,10 +85,9 @@ export default function Home() {
             variant: "destructive",
           });
         } finally {
-          localStorage.removeItem(EDIT_PAPER_ID_KEY); // Clean up after loading
+          localStorage.removeItem(EDIT_PAPER_ID_KEY); 
         }
       } else {
-        // Reset initial values if not editing, so form loads fresh
         setInitialFormValues(undefined);
         setGeneratedPaper(null);
         setFormSnapshotForDisplay(null);
@@ -90,17 +95,14 @@ export default function Home() {
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run once on mount. Add router to deps if navigation depends on it changing.
+  }, []); 
 
   const handleFormSubmit = async (values: QuestionPaperFormValues) => {
     setIsLoading(true);
-    // Don't clear generatedPaper or formSnapshotForDisplay if editing, 
-    // allow new generation to overwrite. If not editing, clear them.
     if (!editingPaperId) {
         setGeneratedPaper(null);
         setFormSnapshotForDisplay(null);
     }
-
 
     let logoDataUri: string | undefined = undefined;
     if (values.logo) {
@@ -117,18 +119,16 @@ export default function Home() {
         return;
       }
     } else if (editingPaperId && formSnapshotForDisplay?.logoDataUri) {
-      // Retain existing logo if not changed during edit
       logoDataUri = formSnapshotForDisplay.logoDataUri;
     }
 
     const storableFormValues: StorableQuestionPaperFormValues = {
-      ...values, // All form values
-      logo: undefined, // Remove File object
-      logoDataUri: logoDataUri, // Add/replace data URI
+      ...values, 
+      logo: undefined, 
+      logoDataUri: logoDataUri, 
     };
     
     const displayData: QuestionPaperDisplayFormData = { ...storableFormValues };
-
 
     try {
       let result: GenerateQuestionsOutput;
@@ -153,7 +153,7 @@ export default function Home() {
           description: "Your manually entered questions are ready.",
         });
 
-      } else { // AI Generation mode
+      } else { 
         const aiInput: GenerateQuestionsInput = {
           classLevel: values.classLevel,
           subject: values.subject,
@@ -192,14 +192,12 @@ export default function Home() {
           let existingHistory: StoredQuestionPaper[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
           
           if (editingPaperId) {
-            // Update existing entry
             existingHistory = existingHistory.map(item => 
               item.id === editingPaperId 
               ? { ...item, formSnapshot: storableFormValues, generatedPaper: result, dateGenerated: new Date().toISOString() } 
               : item
             );
           } else {
-            // Add new entry
             const newPaperEntry: StoredQuestionPaper = {
               id: Date.now().toString(), 
               dateGenerated: new Date().toISOString(),
@@ -211,9 +209,7 @@ export default function Home() {
           
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20))); 
           if (editingPaperId) {
-            setEditingPaperId(null); // Reset editing mode after successful save
-            // Optionally navigate back to history or clear form
-            // router.push('/history'); // Example navigation
+            setEditingPaperId(null); 
           }
 
         } catch (storageError) {
@@ -243,14 +239,10 @@ export default function Home() {
   };
   
   const clearFormAndEditState = () => {
-    setInitialFormValues(undefined); // This will trigger a re-render of QuestionPaperForm with default values
+    setInitialFormValues(undefined); 
     setGeneratedPaper(null);
     setFormSnapshotForDisplay(null);
     setEditingPaperId(null);
-    // Force re-render of QuestionPaperForm or use its own reset method if available
-    // A common way is to change the `key` prop of the form component.
-    // For now, setting initialFormValues to undefined should reset it if the form takes it as a prop for defaults.
-    // If QuestionPaperForm uses useForm's defaultValues directly, we might need to pass a key to it.
     toast({ title: "Form Cleared", description: "Ready for a new paper."});
   };
 
@@ -271,10 +263,10 @@ export default function Home() {
             </Alert>
         )}
         <QuestionPaperForm 
-            key={initialFormValues ? editingPaperId : 'new'} // Change key to force re-initialization
+            key={initialFormValues ? editingPaperId : 'new'} 
             onSubmit={handleFormSubmit} 
             isLoading={isLoading}
-            initialValues={initialFormValues} // Pass initial values to the form
+            initialValues={initialFormValues} 
         />
 
         {isLoading && (
@@ -296,7 +288,7 @@ export default function Home() {
           </div>
         )}
 
-        {!isLoading && !generatedPaper && !editingPaperId && ( // Show welcome only if not loading, no paper, and not in edit mode initially
+        {!isLoading && !generatedPaper && !editingPaperId && ( 
            <Alert className="mt-8 border-primary/30 bg-primary/5 text-primary no-print">
             <Terminal className="h-5 w-5" />
             <AlertTitle className="font-headline">Welcome to TestPaperGenius!</AlertTitle>
