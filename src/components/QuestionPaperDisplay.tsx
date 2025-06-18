@@ -76,15 +76,12 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  let masterQuestionNumber = 1;
-
   const renderQuestionList = (questionArray: string[] | undefined) => {
     if (!questionArray || questionArray.length === 0) return null;
     return (
       <ol className="space-y-3 list-none pl-0 text-sm">
         {questionArray.map((questionText, index) => (
-          <li key={`q-${masterQuestionNumber}`} className="pb-1 flex">
-            <span className="mr-2 font-semibold">{masterQuestionNumber++}.</span>
+          <li key={`q-${index}`} className="pb-1 flex">
             <span>{questionText}</span>
           </li>
         ))}
