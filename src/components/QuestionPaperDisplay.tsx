@@ -7,7 +7,7 @@ import type { QuestionPaperDisplayFormData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ListOrdered, FileText, FileSignature, Printer, PencilLine, ClipboardCheck, CalculatorIcon, Info, FileQuestion } from 'lucide-react';
+import { ListOrdered, FileText, FileSignature, Download, PencilLine, ClipboardCheck, CalculatorIcon, Info, FileQuestion } from 'lucide-react';
 import Image from 'next/image';
 
 interface QuestionPaperDisplayProps {
@@ -30,8 +30,8 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
   return (
     <div className="mt-12">
       <Button onClick={handlePrint} variant="default" className="mb-6 w-full md:w-auto no-print shadow-md">
-        <Printer className="mr-2 h-5 w-5" />
-        Download / Print Question Paper
+        <Download className="mr-2 h-5 w-5" />
+        Download Paper
       </Button>
 
       <Card className="printable-area shadow-2xl rounded-lg border-2 border-primary/20 bg-white text-black" id="question-paper">
