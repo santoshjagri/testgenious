@@ -29,7 +29,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
 
   return (
     <div className="mt-12">
-      <Button onClick={handlePrint} variant="outline" className="mb-6 w-full md:w-auto no-print bg-accent hover:bg-accent/90 text-accent-foreground shadow-md">
+      <Button onClick={handlePrint} variant="default" className="mb-6 w-full md:w-auto no-print shadow-md">
         <Printer className="mr-2 h-5 w-5" />
         Download / Print Question Paper
       </Button>
