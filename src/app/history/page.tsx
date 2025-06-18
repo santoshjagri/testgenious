@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { History as HistoryIcon, Eye, Trash2, Download } from "lucide-react";
+import { History as HistoryIcon, Trash2, Download, ArrowLeft } from "lucide-react";
 import type { StoredQuestionPaper } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -19,7 +19,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
-
+import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 
@@ -51,6 +51,7 @@ export default function HistoryPage() {
         try {
           localStorage.removeItem(LOCAL_STORAGE_KEY);
           setHistoryItems([]);
+          setSelectedPaperForView(null); // Clear view if history is cleared
           toast({
             title: "History Cleared",
             description: "All question paper history has been cleared.",
@@ -72,6 +73,9 @@ export default function HistoryPage() {
         const updatedHistory = historyItems.filter(item => item.id !== paperId);
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory));
         setHistoryItems(updatedHistory);
+        if (selectedPaperForView?.id === paperId) {
+          setSelectedPaperForView(null); // Clear view if the viewed item is deleted
+        }
         toast({
           title: "Paper Deleted",
           description: "The selected question paper has been removed from history.",
@@ -87,27 +91,27 @@ export default function HistoryPage() {
     }
   };
   
-  // Placeholder - In a real app, this would likely navigate to the main page
-  // and pre-fill the form with data from `item.formSnapshot`
-  const handleReEdit = (item: StoredQuestionPaper) => {
-    toast({
-        title: "Re-edit Clicked (Demo)",
-        description: `Paper: ${item.formSnapshot.subject} - ${item.formSnapshot.classLevel}. This would pre-fill the form.`,
-    });
-    // Example: router.push(`/?edit=${item.id}`); // You'd need to implement query param handling
+  const handleViewPrintPaper = (item: StoredQuestionPaper) => {
+    setSelectedPaperForView(item);
   };
 
-  // Placeholder - This would trigger a download/print of the selected paper
-  // You might reuse/adapt the QuestionPaperDisplay component or its logic
-  const handleDownloadPrint = (item: StoredQuestionPaper) => {
-     toast({
-        title: "Download/Print Clicked (Demo)",
-        description: `Paper: ${item.formSnapshot.subject} - ${item.formSnapshot.classLevel}. This would prepare the paper for printing.`,
-    });
-    // Potentially set this paper as active and use a global print function
-    // or render it in a modal for printing.
-  };
-
+  if (selectedPaperForView) {
+    return (
+      <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8">
+        <Button 
+          variant="outline" 
+          onClick={() => setSelectedPaperForView(null)} 
+          className="mb-6 self-start no-print"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to History
+        </Button>
+        <QuestionPaperDisplay 
+          formData={selectedPaperForView.formSnapshot} 
+          questions={selectedPaperForView.generatedPaper} 
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col gap-4 p-4 md:gap-8 md:p-8">
@@ -157,6 +161,7 @@ export default function HistoryPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg text-primary">{item.formSnapshot.subject} - {item.formSnapshot.classLevel}</CardTitle>
                 <p className="text-xs text-muted-foreground">{item.formSnapshot.examType || 'General Paper'}</p>
+                 {item.formSnapshot.institutionName && item.formSnapshot.institutionName !== "TestPaperGenius Institute" && <p className="text-xs text-muted-foreground">{item.formSnapshot.institutionName}</p>}
               </CardHeader>
               <CardContent className="space-y-1 text-sm flex-grow">
                 <p><span className="font-medium">Total Marks:</span> {item.formSnapshot.totalMarks}</p>
@@ -176,11 +181,8 @@ export default function HistoryPage() {
                  <p className="mt-3 text-xs text-muted-foreground pt-2 border-t"><span className="font-medium">Generated:</span> {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString()}</p>
               </CardContent>
               <CardFooter className="border-t pt-3 pb-3 grid grid-cols-2 gap-2">
-                {/* <Button variant="outline" size="sm" onClick={() => handleReEdit(item)}>
-                  <Eye className="mr-1 h-3 w-3" /> View/Re-edit
-                </Button> */}
-                <Button variant="ghost" size="sm" onClick={() => handleDownloadPrint(item)} className="text-primary hover:bg-primary/10">
-                  <Download className="mr-1 h-3 w-3" /> Download/Print
+                <Button variant="ghost" size="sm" onClick={() => handleViewPrintPaper(item)} className="text-primary hover:bg-primary/10">
+                  <Download className="mr-1 h-3 w-3" /> View/Print Paper
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -211,4 +213,3 @@ export default function HistoryPage() {
     </div>
   );
 }
-
