@@ -2,13 +2,16 @@
 "use client";
 
 import type * as React from 'react';
+import { useState } from 'react';
 import type { GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import type { QuestionPaperDisplayFormData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ListOrdered, FileText, FileSignature, Download, PencilLine, ClipboardCheck, CalculatorIcon, Info, FileQuestion } from 'lucide-react';
+import { ListOrdered, FileText, FileSignature, Download, PencilLine, ClipboardCheck, CalculatorIcon, Info, FileQuestion, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface QuestionPaperDisplayProps {
   formData: QuestionPaperDisplayFormData;
@@ -16,6 +19,58 @@ interface QuestionPaperDisplayProps {
 }
 
 export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDisplayProps) {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    setIsDownloading(true);
+    const paperElement = document.getElementById('question-paper');
+    if (paperElement) {
+      try {
+        const canvas = await html2canvas(paperElement, {
+          scale: 2, // Increase scale for better resolution
+          useCORS: true, // For external images like placeholders
+          logging: false,
+        });
+        const imgData = canvas.toDataURL('image/png');
+        
+        const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, millimeters, A4
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        
+        // Calculate the aspect ratio
+        const aspectRatio = canvasWidth / canvasHeight;
+        
+        let imgWidth = pdfWidth;
+        let imgHeight = pdfWidth / aspectRatio;
+        
+        // If the calculated height is greater than PDF height, scale by height
+        if (imgHeight > pdfHeight) {
+          imgHeight = pdfHeight;
+          imgWidth = pdfHeight * aspectRatio;
+        }
+        
+        // Center the image if it's smaller than the page
+        const xOffset = (pdfWidth - imgWidth) / 2;
+        const yOffset = (pdfHeight - imgHeight) / 2;
+
+        pdf.addImage(imgData, 'PNG', xOffset > 0 ? xOffset : 0, yOffset > 0 ? yOffset : 0, imgWidth, imgHeight);
+        
+        const safeSubject = formData.subject?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'paper';
+        const safeClassLevel = formData.classLevel?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'level';
+        const filename = `question_paper_${safeSubject}_${safeClassLevel}.pdf`;
+        
+        pdf.save(filename);
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+        // Consider adding a user-facing error message here, e.g., using a toast
+      }
+    }
+    setIsDownloading(false);
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -29,10 +84,24 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
 
   return (
     <div className="mt-12">
-      <Button onClick={handlePrint} variant="default" className="mb-6 w-full md:w-auto no-print shadow-md">
-        <Download className="mr-2 h-5 w-5" />
-        Download Paper
-      </Button>
+      <div className="flex flex-wrap gap-2 mb-6 no-print">
+        <Button onClick={handleDownloadPdf} variant="default" className="w-full md:w-auto shadow-md" disabled={isDownloading}>
+          {isDownloading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Downloading...
+            </>
+          ) : (
+            <>
+              <Download className="mr-2 h-5 w-5" />
+              Download Paper (PDF)
+            </>
+          )}
+        </Button>
+        <Button onClick={handlePrint} variant="outline" className="w-full md:w-auto shadow-md">
+          Print Paper
+        </Button>
+      </div>
 
       <Card className="printable-area shadow-2xl rounded-lg border-2 border-primary/20 bg-white text-black" id="question-paper">
         <CardHeader className="p-6 border-b-2 border-black">
@@ -47,6 +116,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                     height={80}
                     className="rounded-md object-contain"
                     data-ai-hint="school emblem"
+                    unoptimized // May help with html2canvas if issues arise with Next/Image optimization
                   />
                 </div>
                 {/* Right: Institution Name, Address, Exam Type - centered in remaining space */}
@@ -220,4 +290,3 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
-
