@@ -242,7 +242,7 @@ export default function Home() {
 
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
-      <div className="w-full max-w-4xl space-y-12">
+      <div className="w-full max-w-4xl space-y-8 sm:space-y-12">
         {editingPaperId && (
             <Alert variant="default" className="border-accent bg-accent/10 text-accent-foreground mb-6 no-print">
                 <Edit3 className="h-5 w-5" />

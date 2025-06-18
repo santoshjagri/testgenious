@@ -133,13 +133,13 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                   />
                 </div>
                 <div className="flex-grow flex flex-col items-center text-center">
-                  <h1 className="text-3xl font-bold mb-1">{formData.institutionName || "TestPaperGenius Institute"}</h1>
-                  {formData.institutionAddress && <p className="text-sm text-gray-700 mb-2">{formData.institutionAddress}</p>}
-                  <h2 className="text-xl font-semibold">{formData.examType} - {new Date().getFullYear()}</h2>
+                  <h1 className="text-2xl sm:text-3xl font-bold mb-1">{formData.institutionName || "TestPaperGenius Institute"}</h1>
+                  {formData.institutionAddress && <p className="text-xs sm:text-sm text-gray-700 mb-2">{formData.institutionAddress}</p>}
+                  <h2 className="text-lg sm:text-xl font-semibold">{formData.examType} - {new Date().getFullYear()}</h2>
                 </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm mt-4 pt-4 border-t border-gray-300">
+            <div className="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-1 text-xs sm:text-sm mt-4 pt-4 border-t border-gray-300">
                 <div><strong>Subject:</strong> {formData.subject}</div>
                 {formData.subjectCode && <div><strong>Subject Code:</strong> {formData.subjectCode}</div>}
                 <div><strong>Class/Level:</strong> {formData.classLevel}</div>
@@ -165,7 +165,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             <section aria-labelledby="mcq-section-title">
               <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
                 <ListOrdered className="h-6 w-6 mr-3 text-gray-700" />
-                <h2 id="mcq-section-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Multiple Choice Questions</h2>
+                <h2 id="mcq-section-title" className="text-base sm:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Multiple Choice Questions</h2>
               </div>
               <div className="space-y-4 text-sm">
                 {questions.mcqs.map((questionText, index) => (
@@ -183,7 +183,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             <section aria-labelledby="very-short-questions-title">
               <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
                 <FileQuestion className="h-6 w-6 mr-3 text-gray-700" />
-                <h2 id="very-short-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Very Short Answer Questions</h2>
+                <h2 id="very-short-questions-title" className="text-base sm:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Very Short Answer Questions</h2>
               </div>
               {renderQuestionList(questions.veryShortQuestions)}
             </section>
@@ -196,7 +196,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             <section aria-labelledby="fitb-section-title">
               <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
                 <PencilLine className="h-6 w-6 mr-3 text-gray-700" />
-                <h2 id="fitb-section-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Fill in the Blanks</h2>
+                <h2 id="fitb-section-title" className="text-base sm:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Fill in the Blanks</h2>
               </div>
               {renderQuestionList(questions.fillInTheBlanks)}
             </section>
@@ -209,7 +209,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             <section aria-labelledby="tf-section-title">
               <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
                 <ClipboardCheck className="h-6 w-6 mr-3 text-gray-700" />
-                <h2 id="tf-section-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: True or False</h2>
+                <h2 id="tf-section-title" className="text-base sm:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: True or False</h2>
               </div>
               {renderQuestionList(questions.trueFalseQuestions)}
             </section>
@@ -222,7 +222,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             <section aria-labelledby="short-questions-title">
               <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
                 <FileText className="h-6 w-6 mr-3 text-gray-700" />
-                <h2 id="short-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Short Answer Questions</h2>
+                <h2 id="short-questions-title" className="text-base sm:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Short Answer Questions</h2>
               </div>
               {renderQuestionList(questions.shortQuestions)}
             </section>
@@ -235,7 +235,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             <section aria-labelledby="long-questions-title">
               <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
                 <FileSignature className="h-6 w-6 mr-3 text-gray-700" />
-                <h2 id="long-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Long Answer Questions</h2>
+                <h2 id="long-questions-title" className="text-base sm:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Long Answer Questions</h2>
               </div>
               {renderQuestionList(questions.longQuestions)}
             </section>
@@ -248,7 +248,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             <section aria-labelledby="num-prac-questions-title">
               <div className="flex items-center mb-3 p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400">
                 <CalculatorIcon className="h-6 w-6 mr-3 text-gray-700" />
-                <h2 id="num-prac-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Numerical / Practical Questions</h2>
+                <h2 id="num-prac-questions-title" className="text-base sm:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Numerical / Practical Questions</h2>
               </div>
                {renderQuestionList(questions.numericalPracticalQuestions)}
             </section>
