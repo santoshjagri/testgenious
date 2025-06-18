@@ -56,7 +56,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start p-4 md:p-12 lg:p-24 bg-gradient-to-br from-background to-blue-50/50">
+    <main className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
       <div className="w-full max-w-4xl space-y-12">
         <QuestionPaperForm onSubmit={handleFormSubmit} isLoading={isLoading} />
 
