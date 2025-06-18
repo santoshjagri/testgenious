@@ -3,11 +3,13 @@
 import * as React from 'react';
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
-import type { QuestionPaperFormValues } from '@/lib/types';
+import type { QuestionPaperFormValues, StoredQuestionPaper } from '@/lib/types';
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
+
+const LOCAL_STORAGE_KEY = "questionPaperHistory";
 
 export default function Home() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -37,9 +39,34 @@ export default function Home() {
       const { mcqCount, shortQuestionCount, longQuestionCount, ...restOfInput } = aiInput;
       setFormSnapshot(restOfInput);
       
+      // Save to history
+      const newPaperEntry: StoredQuestionPaper = {
+        id: Date.now().toString(), // Simple unique ID
+        dateGenerated: new Date().toISOString(),
+        formSnapshot: restOfInput,
+        generatedPaper: result,
+      };
+
+      if (typeof window !== 'undefined') {
+        try {
+          const existingHistoryString = localStorage.getItem(LOCAL_STORAGE_KEY);
+          const existingHistory: StoredQuestionPaper[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
+          const updatedHistory = [newPaperEntry, ...existingHistory];
+          // Limit history to a reasonable number, e.g., 20 items
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory.slice(0, 20)));
+        } catch (storageError) {
+          console.error("Error saving to local storage:", storageError);
+          toast({
+            title: "Warning",
+            description: "Question paper generated, but failed to save to history.",
+            variant: "destructive", // Or a less severe variant
+          });
+        }
+      }
+      
       toast({
         title: "Success!",
-        description: "Question paper generated successfully.",
+        description: "Question paper generated and saved to history.",
         variant: "default", 
       });
 

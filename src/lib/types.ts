@@ -1,3 +1,4 @@
+import type { GenerateQuestionsInput, GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import { z } from 'zod';
 
 export const questionPaperFormSchema = z.object({
@@ -16,3 +17,10 @@ export const questionPaperFormSchema = z.object({
 });
 
 export type QuestionPaperFormValues = z.infer<typeof questionPaperFormSchema>;
+
+export interface StoredQuestionPaper {
+  id: string; // Unique ID for the paper
+  dateGenerated: string; // ISO string format
+  formSnapshot: Omit<GenerateQuestionsInput, 'mcqCount' | 'shortQuestionCount' | 'longQuestionCount'>;
+  generatedPaper: GenerateQuestionsOutput;
+}
