@@ -2,13 +2,15 @@
 "use client";
 
 import type * as React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { questionPaperFormSchema, type QuestionPaperFormValues } from '@/lib/types';
+import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguages } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Form,
   FormControl,
@@ -19,7 +21,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3 } from 'lucide-react';
 
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
@@ -32,7 +34,7 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
     defaultValues: {
       institutionName: 'TestPaperGenius Institute',
       institutionAddress: '',
-      // logo: undefined, // Handled by file input
+      // logo: undefined, 
       classLevel: '',
       subject: '',
       subjectCode: '',
@@ -41,6 +43,8 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
       passMarks: 23,
       timeLimit: '2 hours',
       instructions: '1. All questions are compulsory.\n2. Marks are indicated against each question.\n3. Write neatly and legibly.',
+      language: "English",
+      generationMode: 'ai',
       mcqCount: 5,
       veryShortQuestionCount: 0,
       fillInTheBlanksCount: 0,
@@ -48,8 +52,59 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
       shortQuestionCount: 3,
       longQuestionCount: 2,
       numericalPracticalCount: 0,
+      manualMcqs: "",
+      manualVeryShortQuestions: "",
+      manualFillInTheBlanks: "",
+      manualTrueFalseQuestions: "",
+      manualShortQuestions: "",
+      manualLongQuestions: "",
+      manualNumericalPracticalQuestions: "",
     },
   });
+
+  const generationMode = useWatch({
+    control: form.control,
+    name: 'generationMode',
+  });
+
+  const manualQuestionField = (name: keyof QuestionPaperFormValues, label: string, icon: React.ReactNode, placeholder: string) => (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="flex items-center">{icon}{label}</FormLabel>
+          <FormControl>
+            <Textarea
+              placeholder={placeholder}
+              className="min-h-[100px] resize-y"
+              {...field}
+            />
+          </FormControl>
+          <FormDescription>Enter one question per line. Include marks, e.g., "Question text? (2 marks)".</FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+  
+  const aiCountField = (name: keyof QuestionPaperFormValues, label: string, icon: React.ReactNode, description?: string) => (
+     <FormField
+        control={form.control}
+        name={name}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="flex items-center">{icon}{label}</FormLabel>
+            <FormControl>
+              <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+            </FormControl>
+            {description && <FormDescription>{description}</FormDescription>}
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+  );
+
 
   return (
     <Card className="w-full max-w-3xl mx-auto shadow-xl no-print">
@@ -101,7 +156,6 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
               />
             </div>
             
-
             <FormField
               control={form.control}
               name="institutionAddress"
@@ -174,6 +228,30 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
               />
             </div>
 
+             <FormField
+                control={form.control}
+                name="language"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center"><LanguagesIcon className="mr-2 h-4 w-4" />Language for Questions</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select language for questions" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {SupportedLanguages.map(lang => (
+                          <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>AI will generate questions in this language. For manual entry, type in your chosen language.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FormField
                 control={form.control}
@@ -234,106 +312,73 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
               )}
             />
 
-            <Card className="bg-secondary/30 p-4 border border-primary/20">
-              <CardHeader className="p-2">
-                 <CardTitle className="text-xl font-headline text-primary">Question Distribution</CardTitle>
-                 <CardDescription>Specify the number of questions for each type.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="mcqCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center"><ListOrdered className="mr-2 h-4 w-4" />MCQs</FormLabel>
+            <FormField
+              control={form.control}
+              name="generationMode"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel className="text-base font-semibold">Question Generation Method</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex flex-col space-y-1 md:flex-row md:space-y-0 md:space-x-4"
+                    >
+                      <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+                          <RadioGroupItem value="ai" />
                         </FormControl>
-                        <FormMessage />
+                        <FormLabel className="font-normal flex items-center"><Brain className="mr-2 h-4 w-4 text-primary"/>AI Generate Questions</FormLabel>
                       </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="veryShortQuestionCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center"><FileQuestion className="mr-2 h-4 w-4" />Very Short Answer</FormLabel>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
+                          <RadioGroupItem value="manual" />
                         </FormControl>
-                        <FormMessage />
+                        <FormLabel className="font-normal flex items-center"><Edit3 className="mr-2 h-4 w-4 text-primary"/>Manually Enter Questions</FormLabel>
                       </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="fillInTheBlanksCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center"><PencilLine className="mr-2 h-4 w-4" />Fill in the Blanks</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="trueFalseCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center"><ClipboardCheck className="mr-2 h-4 w-4" />True/False</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="shortQuestionCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center"><FileText className="mr-2 h-4 w-4" />Short Answer</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="longQuestionCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center"><FileSignature className="mr-2 h-4 w-4" />Long Answer</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="numericalPracticalCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center"><CalculatorIcon className="mr-2 h-4 w-4" />Numerical/Practical</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
-                        </FormControl>
-                        <FormDescription>If applicable to subject.</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-              </CardContent>
-            </Card>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {generationMode === 'ai' && (
+              <Card className="bg-secondary/30 p-4 border border-primary/20">
+                <CardHeader className="p-2">
+                   <CardTitle className="text-xl font-headline text-primary">AI Question Distribution</CardTitle>
+                   <CardDescription>Specify the number of questions for each type for AI generation.</CardDescription>
+                </CardHeader>
+                <CardContent className="p-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {aiCountField("mcqCount", "MCQs", <ListOrdered className="mr-2 h-4 w-4" />)}
+                    {aiCountField("veryShortQuestionCount", "Very Short Answer", <FileQuestion className="mr-2 h-4 w-4" />)}
+                    {aiCountField("fillInTheBlanksCount", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />)}
+                    {aiCountField("trueFalseCount", "True/False", <ClipboardCheck className="mr-2 h-4 w-4" />)}
+                    {aiCountField("shortQuestionCount", "Short Answer", <FileText className="mr-2 h-4 w-4" />)}
+                    {aiCountField("longQuestionCount", "Long Answer", <FileSignature className="mr-2 h-4 w-4" />)}
+                    {aiCountField("numericalPracticalCount", "Numerical/Practical", <CalculatorIcon className="mr-2 h-4 w-4" />, "If applicable to subject.")}
+                </CardContent>
+              </Card>
+            )}
+
+            {generationMode === 'manual' && (
+              <Card className="bg-secondary/30 p-4 border border-primary/20">
+                <CardHeader className="p-2">
+                   <CardTitle className="text-xl font-headline text-primary">Manual Question Entry</CardTitle>
+                   <CardDescription>Type your questions directly into the text areas below. One question per line.</CardDescription>
+                </CardHeader>
+                <CardContent className="p-2 space-y-6">
+                  {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, "E.g., What is the capital of Nepal? (1 mark)\nA. Kathmandu\nB. Pokhara\nC. Biratnagar\nD. Bhaktapur" )}
+                  {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />, "E.g., What is your name? (1 mark)")}
+                  {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />, "E.g., The sun rises in the ____. (1 mark)")}
+                  {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />, "E.g., The Earth is flat. (True/False) (1 mark)")}
+                  {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />, "E.g., Define a noun with an example. (3 marks)")}
+                  {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />, "E.g., Describe the process of photosynthesis in detail. (5 marks)")}
+                  {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />, "E.g., Calculate the area of a rectangle with length 5cm and width 3cm. (2 marks)")}
+                </CardContent>
+              </Card>
+            )}
+
 
             <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg py-3" disabled={isLoading}>
               {isLoading ? (
@@ -351,4 +396,3 @@ export function QuestionPaperForm({ onSubmit, isLoading }: QuestionPaperFormProp
     </Card>
   );
 }
-

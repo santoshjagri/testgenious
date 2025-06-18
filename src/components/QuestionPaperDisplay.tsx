@@ -8,7 +8,7 @@ import type { QuestionPaperDisplayFormData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ListOrdered, FileText, FileSignature, Download, PencilLine, ClipboardCheck, CalculatorIcon, Info, FileQuestion, Loader2 } from 'lucide-react';
+import { ListOrdered, FileText, FileSignature, Download, PencilLine, ClipboardCheck, CalculatorIcon, Info, FileQuestion, Loader2, Printer as PrinterIcon, LanguagesIcon } from 'lucide-react';
 import Image from 'next/image';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -27,32 +27,28 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     if (paperElement) {
       try {
         const canvas = await html2canvas(paperElement, {
-          scale: 2, // Increase scale for better resolution
-          useCORS: true, // For external images like placeholders
+          scale: 2, 
+          useCORS: true, 
           logging: false,
         });
         const imgData = canvas.toDataURL('image/png');
         
-        const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, millimeters, A4
+        const pdf = new jsPDF('p', 'mm', 'a4'); 
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
-        
-        // Calculate the aspect ratio
         const aspectRatio = canvasWidth / canvasHeight;
         
         let imgWidth = pdfWidth;
         let imgHeight = pdfWidth / aspectRatio;
         
-        // If the calculated height is greater than PDF height, scale by height
         if (imgHeight > pdfHeight) {
           imgHeight = pdfHeight;
           imgWidth = pdfHeight * aspectRatio;
         }
         
-        // Center the image if it's smaller than the page
         const xOffset = (pdfWidth - imgWidth) / 2;
         const yOffset = (pdfHeight - imgHeight) / 2;
 
@@ -65,7 +61,6 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
         pdf.save(filename);
       } catch (error) {
         console.error("Error generating PDF:", error);
-        // Consider adding a user-facing error message here, e.g., using a toast
       }
     }
     setIsDownloading(false);
@@ -80,6 +75,22 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
   const currentDate = new Date().toLocaleDateString(undefined, {
     year: 'numeric', month: 'long', day: 'numeric'
   });
+
+  let masterQuestionNumber = 1;
+
+  const renderQuestionList = (questionArray: string[] | undefined) => {
+    if (!questionArray || questionArray.length === 0) return null;
+    return (
+      <ol className="space-y-3 list-none pl-0 text-sm">
+        {questionArray.map((questionText, index) => (
+          <li key={`q-${masterQuestionNumber}`} className="pb-1 flex">
+            <span className="mr-2 font-semibold">{masterQuestionNumber++}.</span>
+            <span>{questionText}</span>
+          </li>
+        ))}
+      </ol>
+    );
+  };
 
 
   return (
@@ -99,15 +110,14 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
           )}
         </Button>
         <Button onClick={handlePrint} variant="outline" className="w-full md:w-auto shadow-md">
+           <PrinterIcon className="mr-2 h-5 w-5" />
           Print Paper
         </Button>
       </div>
 
       <Card className="printable-area shadow-2xl rounded-lg border-2 border-primary/20 bg-white text-black" id="question-paper">
         <CardHeader className="p-6 border-b-2 border-black">
-            {/* Top Row: Logo and Main Institution Info */}
-            <div className="flex flex-row items-center w-full">
-                {/* Left: Logo */}
+            <div className="flex flex-row items-start w-full">
                 <div className="flex-shrink-0 mr-6">
                   <Image
                     src={formData.logoDataUri || "https://placehold.co/80x80.png"}
@@ -116,10 +126,9 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                     height={80}
                     className="rounded-md object-contain"
                     data-ai-hint="school emblem"
-                    unoptimized // May help with html2canvas if issues arise with Next/Image optimization
+                    unoptimized 
                   />
                 </div>
-                {/* Right: Institution Name, Address, Exam Type - centered in remaining space */}
                 <div className="flex-grow flex flex-col items-center text-center">
                   <h1 className="text-3xl font-bold mb-1">{formData.institutionName || "TestPaperGenius Institute"}</h1>
                   {formData.institutionAddress && <p className="text-sm text-gray-700 mb-2">{formData.institutionAddress}</p>}
@@ -127,7 +136,6 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 </div>
             </div>
             
-            {/* Bottom Row: Specific Paper Details (Subject, Marks, Date) */}
             <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm mt-4 pt-4 border-t border-gray-300">
                 <div><strong>Subject:</strong> {formData.subject}</div>
                 {formData.subjectCode && <div><strong>Subject Code:</strong> {formData.subjectCode}</div>}
@@ -136,6 +144,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <div><strong>Time Allowed:</strong> {formData.timeLimit}</div>
                 <div><strong>Pass Marks:</strong> {formData.passMarks}</div>
                 <div className="col-span-2 mt-1"><strong>Date:</strong> {currentDate}</div>
+                {formData.language && <div className="col-span-2 mt-1 flex items-center"><LanguagesIcon className="h-4 w-4 mr-1 text-gray-600"/><strong>Language:</strong> {formData.language}</div>}
             </div>
         </CardHeader>
 
@@ -156,13 +165,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <ListOrdered className="h-6 w-6 mr-3 text-gray-700" />
                 <h2 id="mcq-section-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Multiple Choice Questions</h2>
               </div>
-              <ol className="space-y-3 list-decimal list-inside pl-4 text-sm">
-                {questions.mcqs.map((mcq, index) => (
-                  <li key={`mcq-${index}`} className="pb-1">
-                    {mcq}
-                  </li>
-                ))}
-              </ol>
+              {renderQuestionList(questions.mcqs)}
             </section>
           )}
 
@@ -174,13 +177,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <FileQuestion className="h-6 w-6 mr-3 text-gray-700" />
                 <h2 id="very-short-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Very Short Answer Questions</h2>
               </div>
-              <ol className="space-y-3 list-decimal list-inside pl-4 text-sm">
-                {questions.veryShortQuestions.map((question, index) => (
-                  <li key={`vshort-${index}`} className="pb-1">
-                    {question}
-                  </li>
-                ))}
-              </ol>
+              {renderQuestionList(questions.veryShortQuestions)}
             </section>
             </>
           )}
@@ -193,13 +190,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <PencilLine className="h-6 w-6 mr-3 text-gray-700" />
                 <h2 id="fitb-section-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Fill in the Blanks</h2>
               </div>
-              <ol className="space-y-3 list-decimal list-inside pl-4 text-sm">
-                {questions.fillInTheBlanks.map((fitb, index) => (
-                  <li key={`fitb-${index}`} className="pb-1">
-                    {fitb}
-                  </li>
-                ))}
-              </ol>
+              {renderQuestionList(questions.fillInTheBlanks)}
             </section>
             </>
           )}
@@ -212,13 +203,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <ClipboardCheck className="h-6 w-6 mr-3 text-gray-700" />
                 <h2 id="tf-section-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: True or False</h2>
               </div>
-              <ol className="space-y-3 list-decimal list-inside pl-4 text-sm">
-                {questions.trueFalseQuestions.map((tf, index) => (
-                  <li key={`tf-${index}`} className="pb-1">
-                    {tf}
-                  </li>
-                ))}
-              </ol>
+              {renderQuestionList(questions.trueFalseQuestions)}
             </section>
             </>
           )}
@@ -231,13 +216,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <FileText className="h-6 w-6 mr-3 text-gray-700" />
                 <h2 id="short-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Short Answer Questions</h2>
               </div>
-              <ol className="space-y-4 list-decimal list-inside pl-4 text-sm">
-                {questions.shortQuestions.map((question, index) => (
-                  <li key={`short-${index}`} className="pb-1">
-                    {question}
-                  </li>
-                ))}
-              </ol>
+              {renderQuestionList(questions.shortQuestions)}
             </section>
             </>
           )}
@@ -250,13 +229,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <FileSignature className="h-6 w-6 mr-3 text-gray-700" />
                 <h2 id="long-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Long Answer Questions</h2>
               </div>
-              <ol className="space-y-5 list-decimal list-inside pl-4 text-sm">
-                {questions.longQuestions.map((question, index) => (
-                  <li key={`long-${index}`} className="pb-1">
-                     {question}
-                  </li>
-                ))}
-              </ol>
+              {renderQuestionList(questions.longQuestions)}
             </section>
             </>
           )}
@@ -269,13 +242,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <CalculatorIcon className="h-6 w-6 mr-3 text-gray-700" />
                 <h2 id="num-prac-questions-title" className="text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Numerical / Practical Questions</h2>
               </div>
-              <ol className="space-y-4 list-decimal list-inside pl-4 text-sm">
-                {questions.numericalPracticalQuestions.map((question, index) => (
-                  <li key={`num-prac-${index}`} className="pb-1">
-                    {question}
-                  </li>
-                ))}
-              </ol>
+               {renderQuestionList(questions.numericalPracticalQuestions)}
             </section>
             </>
           )}

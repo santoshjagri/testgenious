@@ -12,6 +12,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import type { SupportedLanguages } from '@/lib/types'; // Import the type
 
 const GenerateQuestionsInputSchema = z.object({
   classLevel: z.string().describe('The class level for which to generate questions (e.g., Class 10, Level 3).'),
@@ -25,6 +26,7 @@ const GenerateQuestionsInputSchema = z.object({
   institutionAddress: z.string().optional().describe('The address of the institution. e.g., "123 Main Street, Anytown, ST 12345".'),
   logoDataUri: z.string().optional().describe("A data URI of the institution's logo, if provided by the user."),
   subjectCode: z.string().optional().describe('The subject code for the paper.'),
+  language: z.string().describe('The language in which the questions should be generated (e.g., English, Nepali, Hindi).'),
   mcqCount: z.number().default(5).describe('Number of Multiple Choice Questions to generate.'),
   veryShortQuestionCount: z.number().default(0).describe('Number of Very Short Answer Questions to generate.'),
   fillInTheBlanksCount: z.number().default(0).describe('Number of Fill in the Blanks questions to generate.'),
@@ -66,15 +68,20 @@ The paper is for:
 - Total Marks: {{totalMarks}}
 - Pass Marks: {{passMarks}}
 - Time Limit: {{timeLimit}}
+- Language for Questions: {{language}}
 
 General Instructions for Students (to be included in the paper):
 {{{instructions}}}
 
+Generate all output text, including all questions, strictly in the {{language}} language.
+
 You need to generate questions for the following sections based on the counts provided.
 The sum of marks for all generated questions should ideally align with the 'Total Marks'.
 Ensure questions cover the syllabus for the given subject and class level proportionally and include a balance of easy, medium, and hard difficulty levels.
+
 For each question you generate, YOU MUST clearly indicate the marks allocated within the question string itself, for example: "What is photosynthesis? (2 marks)" or "Define force. (3 marks)".
-For True/False questions, include "(True/False)" in the question string, like "The sun is a planet. (True/False) (1 mark)".
+For True/False questions, also include "(True/False)" in the question string, like "The sun is a planet. (True/False) (1 mark)".
+Do NOT pre-pend any list-style numbering (e.g., "1.", "a.", "i)") or section identifiers to the questions themselves; the numbering and sectioning will be handled by the application's display logic.
 
 Generate the following number of questions:
 - Multiple Choice Questions: {{mcqCount}}
@@ -90,7 +97,6 @@ The user might provide a logoDataUri for the institution's logo. You do not need
 The output must be a JSON object strictly adhering to the 'GenerateQuestionsOutputSchema'.
 Each array in the JSON should contain the question strings as described.
 Only include arrays for 'veryShortQuestions', 'fillInTheBlanks', 'trueFalseQuestions', and 'numericalPracticalQuestions' in the output JSON if their respective counts (veryShortQuestionCount, fillInTheBlanksCount, trueFalseCount, numericalPracticalCount) are greater than 0. The 'mcqs', 'shortQuestions', and 'longQuestions' arrays should always be present, even if empty (if their count is 0).
-Present questions with standard academic formatting. Start questions with a number if appropriate within their section (e.g., "1. Question text...").
   `,
 });
 
@@ -103,6 +109,7 @@ const generateQuestionsFlow = ai.defineFlow(
   async input => {
     const {output} = await generateQuestionsPrompt(input);
     const result = output!;
+    // Ensure arrays are present if count > 0, even if AI ommitted them (shouldn't happen with schema but good fallback)
     if (input.veryShortQuestionCount > 0 && !result.veryShortQuestions) {
       result.veryShortQuestions = [];
     }
@@ -118,4 +125,3 @@ const generateQuestionsFlow = ai.defineFlow(
     return result;
   }
 );
-

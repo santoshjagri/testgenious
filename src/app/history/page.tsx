@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { History as HistoryIcon, Trash2, Eye, ArrowLeft } from "lucide-react"; // Changed Download to Eye
+import { History as HistoryIcon, Trash2, Eye, ArrowLeft, LanguagesIcon } from "lucide-react";
 import type { StoredQuestionPaper } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -51,7 +51,7 @@ export default function HistoryPage() {
         try {
           localStorage.removeItem(LOCAL_STORAGE_KEY);
           setHistoryItems([]);
-          setSelectedPaperForView(null); // Clear view if history is cleared
+          setSelectedPaperForView(null); 
           toast({
             title: "History Cleared",
             description: "All question paper history has been cleared.",
@@ -74,7 +74,7 @@ export default function HistoryPage() {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory));
         setHistoryItems(updatedHistory);
         if (selectedPaperForView?.id === paperId) {
-          setSelectedPaperForView(null); // Clear view if the viewed item is deleted
+          setSelectedPaperForView(null); 
         }
         toast({
           title: "Paper Deleted",
@@ -149,7 +149,7 @@ export default function HistoryPage() {
               <HistoryIcon className="h-5 w-5 text-primary" />
               <AlertTitle className="text-primary">No History Yet</AlertTitle>
               <AlertDescription className="text-foreground/80">
-                You haven't generated any question papers yet. Go to "Create New Paper" to get started. Your generated papers will appear here.
+                You haven't generated or manually created any question papers yet. Go to "Create New Paper" to get started. Your papers will appear here.
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -160,8 +160,11 @@ export default function HistoryPage() {
             <Card key={item.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-200 rounded-lg">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg text-primary">{item.formSnapshot.subject} - {item.formSnapshot.classLevel}</CardTitle>
-                <p className="text-xs text-muted-foreground">{item.formSnapshot.examType || 'General Paper'}</p>
-                 {item.formSnapshot.institutionName && item.formSnapshot.institutionName !== "TestPaperGenius Institute" && <p className="text-xs text-muted-foreground">{item.formSnapshot.institutionName}</p>}
+                <div className="text-xs text-muted-foreground space-y-0.5">
+                    <p>{item.formSnapshot.examType || 'General Paper'}</p>
+                    {item.formSnapshot.institutionName && item.formSnapshot.institutionName !== "TestPaperGenius Institute" && <p>{item.formSnapshot.institutionName}</p>}
+                    {item.formSnapshot.language && <p className="flex items-center"><LanguagesIcon className="h-3 w-3 mr-1"/>{item.formSnapshot.language}</p>}
+                </div>
               </CardHeader>
               <CardContent className="space-y-1 text-sm flex-grow">
                 <p><span className="font-medium">Total Marks:</span> {item.formSnapshot.totalMarks}</p>
@@ -178,7 +181,10 @@ export default function HistoryPage() {
                   <p><span className="font-medium">Long Qs:</span> {item.generatedPaper.longQuestions.length}</p>
                   {item.generatedPaper.numericalPracticalQuestions && <p><span className="font-medium">Numerical:</span> {item.generatedPaper.numericalPracticalQuestions.length}</p>}
                 </div>
-                 <p className="mt-3 text-xs text-muted-foreground pt-2 border-t"><span className="font-medium">Generated:</span> {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString()}</p>
+                 <p className="mt-3 text-xs text-muted-foreground pt-2 border-t">
+                    <span className="font-medium">Generated:</span> {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString()}
+                    {item.formSnapshot.generationMode && <span className="block capitalize"><span className="font-medium">Mode:</span> {item.formSnapshot.generationMode}</span>}
+                 </p>
               </CardContent>
               <CardFooter className="border-t pt-3 pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-2 items-stretch">
                 <Button variant="ghost" size="sm" onClick={() => handleViewPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-center">

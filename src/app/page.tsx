@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
-import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData } from '@/lib/types';
+import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, SupportedLanguages } from '@/lib/types';
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -12,7 +12,6 @@ import { Terminal } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 
-// Helper function to convert File to Data URI
 const fileToDataUri = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -20,6 +19,11 @@ const fileToDataUri = (file: File): Promise<string> => {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+};
+
+const parseManualQuestions = (text?: string): string[] => {
+  if (!text || text.trim() === "") return [];
+  return text.split('\n').map(q => q.trim()).filter(q => q.length > 0);
 };
 
 export default function Home() {
@@ -49,27 +53,6 @@ export default function Home() {
       }
     }
 
-    const aiInput: GenerateQuestionsInput = {
-      classLevel: values.classLevel,
-      subject: values.subject,
-      totalMarks: values.totalMarks,
-      passMarks: values.passMarks,
-      timeLimit: values.timeLimit,
-      instructions: values.instructions || 'All questions are compulsory.',
-      examType: values.examType || 'Final Examination',
-      institutionName: values.institutionName || 'TestPaperGenius Institute',
-      institutionAddress: values.institutionAddress || '',
-      subjectCode: values.subjectCode || '',
-      logoDataUri: logoDataUri,
-      mcqCount: values.mcqCount,
-      veryShortQuestionCount: values.veryShortQuestionCount,
-      shortQuestionCount: values.shortQuestionCount,
-      longQuestionCount: values.longQuestionCount,
-      fillInTheBlanksCount: values.fillInTheBlanksCount,
-      trueFalseCount: values.trueFalseCount,
-      numericalPracticalCount: values.numericalPracticalCount,
-    };
-    
     const snapshotForStorageAndDisplay: QuestionPaperDisplayFormData = {
       classLevel: values.classLevel,
       subject: values.subject,
@@ -82,18 +65,74 @@ export default function Home() {
       institutionAddress: values.institutionAddress || '',
       subjectCode: values.subjectCode || '',
       logoDataUri: logoDataUri,
+      language: values.language,
     };
 
-
     try {
-      const result = await generateQuestions(aiInput);
+      let result: GenerateQuestionsOutput;
+
+      if (values.generationMode === 'manual') {
+        result = {
+          mcqs: parseManualQuestions(values.manualMcqs),
+          veryShortQuestions: parseManualQuestions(values.manualVeryShortQuestions),
+          fillInTheBlanks: parseManualQuestions(values.manualFillInTheBlanks),
+          trueFalseQuestions: parseManualQuestions(values.manualTrueFalseQuestions),
+          shortQuestions: parseManualQuestions(values.manualShortQuestions),
+          longQuestions: parseManualQuestions(values.manualLongQuestions),
+          numericalPracticalQuestions: parseManualQuestions(values.manualNumericalPracticalQuestions),
+        };
+        // Ensure optional arrays are omitted if empty, consistent with AI output
+        if (result.veryShortQuestions?.length === 0) delete result.veryShortQuestions;
+        if (result.fillInTheBlanks?.length === 0) delete result.fillInTheBlanks;
+        if (result.trueFalseQuestions?.length === 0) delete result.trueFalseQuestions;
+        if (result.numericalPracticalQuestions?.length === 0) delete result.numericalPracticalQuestions;
+        
+        toast({
+          title: "Manual Paper Prepared",
+          description: "Your manually entered questions are ready for display.",
+          variant: "default",
+        });
+
+      } else { // AI Generation mode
+        const aiInput: GenerateQuestionsInput = {
+          classLevel: values.classLevel,
+          subject: values.subject,
+          totalMarks: values.totalMarks,
+          passMarks: values.passMarks,
+          timeLimit: values.timeLimit,
+          instructions: values.instructions || 'All questions are compulsory.',
+          examType: values.examType || 'Final Examination',
+          institutionName: values.institutionName || 'TestPaperGenius Institute',
+          institutionAddress: values.institutionAddress || '',
+          subjectCode: values.subjectCode || '',
+          logoDataUri: logoDataUri,
+          language: values.language,
+          mcqCount: values.mcqCount,
+          veryShortQuestionCount: values.veryShortQuestionCount,
+          shortQuestionCount: values.shortQuestionCount,
+          longQuestionCount: values.longQuestionCount,
+          fillInTheBlanksCount: values.fillInTheBlanksCount,
+          trueFalseCount: values.trueFalseCount,
+          numericalPracticalCount: values.numericalPracticalCount,
+        };
+        result = await generateQuestions(aiInput);
+        toast({
+          title: "Success!",
+          description: "AI Question paper generated and saved to history.",
+          variant: "default", 
+        });
+      }
+      
       setGeneratedPaper(result);
       setFormSnapshotForDisplay(snapshotForStorageAndDisplay);
       
       const newPaperEntry: StoredQuestionPaper = {
         id: Date.now().toString(), 
         dateGenerated: new Date().toISOString(),
-        formSnapshot: snapshotForStorageAndDisplay,
+        formSnapshot: {
+          ...snapshotForStorageAndDisplay, // Contains language
+          generationMode: values.generationMode,
+        },
         generatedPaper: result,
       };
 
@@ -107,26 +146,20 @@ export default function Home() {
           console.error("Error saving to local storage:", storageError);
           toast({
             title: "Warning",
-            description: "Question paper generated, but failed to save to history.",
+            description: "Question paper prepared, but failed to save to history.",
             variant: "destructive", 
           });
         }
       }
-      
-      toast({
-        title: "Success!",
-        description: "Question paper generated and saved to history.",
-        variant: "default", 
-      });
 
     } catch (error) {
-      console.error("Error generating question paper:", error);
-      let errorMessage = "Failed to generate question paper. Please try again.";
+      console.error("Error during paper processing:", error);
+      let errorMessage = "Failed to process question paper. Please try again.";
       if (error instanceof Error) {
         errorMessage = error.message.substring(0, 200); 
       }
       toast({
-        title: "Error Generating Paper",
+        title: "Error Processing Paper",
         description: errorMessage,
         variant: "destructive",
       });
@@ -147,15 +180,14 @@ export default function Home() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <p className="text-lg text-primary font-medium">Generating your masterpiece...</p>
-              <p className="text-sm text-muted-foreground">This might take a moment. The AI is thinking hard!</p>
+              <p className="text-lg text-primary font-medium">Preparing your masterpiece...</p>
+              <p className="text-sm text-muted-foreground">This might take a moment.</p>
             </div>
           </div>
         )}
 
         {!isLoading && generatedPaper && formSnapshotForDisplay && (
           <div className="animate-fadeInUp">
-            {/* Removed "Download Paper Data (JSON)" button from here */}
             <QuestionPaperDisplay formData={formSnapshotForDisplay} questions={generatedPaper} />
           </div>
         )}
@@ -165,7 +197,7 @@ export default function Home() {
             <Terminal className="h-5 w-5" />
             <AlertTitle className="font-headline">Welcome to TestPaperGenius!</AlertTitle>
             <AlertDescription>
-              Fill out the form above to generate your custom question paper. The AI will craft questions based on your specifications, complete with sections and mark allocations.
+              Fill out the form above to generate or manually create your custom question paper. The AI can craft questions, or you can write your own!
             </AlertDescription>
           </Alert>
         )}
