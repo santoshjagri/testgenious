@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { History as HistoryIcon, Trash2, Download, ArrowLeft } from "lucide-react";
+import { History as HistoryIcon, Trash2, Download, ArrowLeft, FileJson } from "lucide-react";
 import type { StoredQuestionPaper } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -95,6 +95,35 @@ export default function HistoryPage() {
     setSelectedPaperForView(item);
   };
 
+  const downloadPaperData = (item: StoredQuestionPaper) => {
+    try {
+      const jsonData = JSON.stringify(item, null, 2); // Pretty print JSON
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeSubject = item.formSnapshot.subject?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'untitled';
+      const safeClassLevel = item.formSnapshot.classLevel?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'level';
+      const filename = `paperdata-${safeSubject}-${safeClassLevel}-${item.id}.json`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({
+        title: "Data Downloaded",
+        description: `${filename} has been downloaded.`,
+      });
+    } catch (error) {
+      console.error("Failed to download paper data:", error);
+      toast({
+        title: "Error Downloading Data",
+        description: "Could not prepare the paper data for download.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (selectedPaperForView) {
     return (
       <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8">
@@ -180,13 +209,16 @@ export default function HistoryPage() {
                 </div>
                  <p className="mt-3 text-xs text-muted-foreground pt-2 border-t"><span className="font-medium">Generated:</span> {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString()}</p>
               </CardContent>
-              <CardFooter className="border-t pt-3 pb-3 grid grid-cols-2 gap-2">
-                <Button variant="ghost" size="sm" onClick={() => handleViewPrintPaper(item)} className="text-primary hover:bg-primary/10">
+              <CardFooter className="border-t pt-3 pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-2 items-stretch">
+                <Button variant="ghost" size="sm" onClick={() => handleViewPrintPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-center">
                   <Download className="mr-1 h-3 w-3" /> View/Print Paper
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => downloadPaperData(item)} className="text-green-600 hover:bg-green-600/10 flex-1 text-center">
+                  <FileJson className="mr-1 h-3 w-3" /> Download Data
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
+                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-center">
                         <Trash2 className="mr-1 h-3 w-3" /> Delete
                       </Button>
                     </AlertDialogTrigger>
