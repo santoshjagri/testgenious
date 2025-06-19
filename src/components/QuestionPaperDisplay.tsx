@@ -107,9 +107,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
 
   let sectionCounter = 0;
   const getSectionLetter = () => String.fromCharCode(65 + sectionCounter++);
-  const currentDate = new Date().toLocaleDateString(undefined, {
-    year: 'numeric', month: 'long', day: 'numeric'
-  });
+  
 
   const renderQuestionList = (questionArray: string[] | undefined) => {
     if (!questionArray || questionArray.length === 0) return null;
@@ -175,7 +173,6 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <div><strong>Full Marks:</strong> {formData.totalMarks}</div>
                 <div><strong>Time Allowed:</strong> {formData.timeLimit}</div>
                 <div><strong>Pass Marks:</strong> {formData.passMarks}</div>
-                <div className="col-span-2 mt-1"><strong>Date:</strong> {currentDate}</div>
             </div>
         </CardHeader>
 
@@ -294,3 +291,4 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
+
