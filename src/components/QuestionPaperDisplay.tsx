@@ -180,15 +180,18 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             <div className="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-1 text-sm mt-4 pt-4 border-t border-gray-300">
                 {/* Row 1 */}
                 <div><strong>Subject:</strong> {formData.subject}</div>
-                <div>{formData.subjectCode ? <><strong>Subject Code:</strong> {formData.subjectCode}</> : ''}</div>
+                <div>{formData.subjectCode ? <><strong>Subject Code:</strong> {formData.subjectCode}</> : <span>&nbsp;</span>}</div>
 
                 {/* Row 2 */}
                 <div><strong>Class/Level:</strong> {formData.classLevel}</div>
-                <div><strong>Full Marks:</strong> {formData.totalMarks}</div>
+                <div> 
+                    <div><strong>Full Marks:</strong> {formData.totalMarks}</div>
+                    <div className="mt-px"><strong>Pass Marks:</strong> {formData.passMarks}</div>
+                </div>
                 
                 {/* Row 3 */}
                 <div><strong>Time Allowed:</strong> {formData.timeLimit}</div>
-                <div><strong>Pass Marks:</strong> {formData.passMarks}</div>
+                <div><span>&nbsp;</span></div> 
             </div>
         </CardHeader>
 
@@ -307,3 +310,4 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
+
