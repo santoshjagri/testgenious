@@ -38,28 +38,20 @@ export function calculateGradeSheet(formData: GradeSheetFormValues): CalculatedG
 
   const percentage = totalFullMarks > 0 ? (totalObtainedMarks / totalFullMarks) * 100 : 0;
 
-  let grade = 'N/A';
-  let gpa = 0.0;
+  let calculatedGrade = 'N/A';
+  let calculatedGpa = 0.0;
 
   for (const rule of GRADING_SCALE) {
     if (percentage >= rule.minPercentage) {
-      grade = rule.grade;
-      gpa = rule.gpa;
+      calculatedGrade = rule.grade;
+      calculatedGpa = rule.gpa;
       break;
     }
   }
   
   // Determine overall result status
-  // Pass if all subjects are passed AND overall percentage meets threshold
-  const overallPass = allSubjectsPassed && percentage >= OVERALL_PASS_PERCENTAGE_THRESHOLD;
-  const resultStatus = overallPass ? "Pass" : "Fail";
-
-  // If any subject is failed, or overall percentage is below NG threshold, ensure grade reflects this.
-  // This is a stricter fail condition. If 'NG' is only for very low scores, adjust this.
-  if (!allSubjectsPassed || percentage < GRADING_SCALE[GRADING_SCALE.length -2].minPercentage) { // -2 to check against C threshold
-    grade = 'NG'; // Force NG if any subject failed or overall is too low
-    gpa = 0.0;
-  }
+  const overallPercentagePass = percentage >= OVERALL_PASS_PERCENTAGE_THRESHOLD;
+  const resultStatus = allSubjectsPassed && overallPercentagePass ? "Pass" : "Fail";
   
   // Remarks
   let remarks = "";
@@ -69,8 +61,20 @@ export function calculateGradeSheet(formData: GradeSheetFormValues): CalculatedG
     else if (percentage >= 70) remarks = "Good effort. Room for improvement.";
     else if (percentage >= 60) remarks = "Satisfactory. Focus on weaker areas.";
     else remarks = "Passed. Work harder for better results.";
-  } else {
-    remarks = "Needs significant improvement. Focus on all subjects.";
+  } else { // resultStatus === "Fail"
+    let failReasons = [];
+    if (!allSubjectsPassed) {
+        failReasons.push("one or more subjects not passed");
+    }
+    if (!overallPercentagePass) {
+        failReasons.push(`overall percentage (${percentage.toFixed(2)}%) is below the pass threshold of ${OVERALL_PASS_PERCENTAGE_THRESHOLD}%`);
+    }
+    remarks = `Needs significant improvement. Reason(s): ${failReasons.join('; ')}.`;
+    if (failReasons.length === 0 && !allSubjectsPassed) { // Fallback if somehow reasons are empty but failed
+      remarks = "Needs significant improvement. Failed in one or more subjects."
+    } else if (failReasons.length === 0 && !overallPercentagePass) {
+      remarks = "Needs significant improvement. Overall percentage is below pass threshold."
+    }
   }
 
 
@@ -79,10 +83,11 @@ export function calculateGradeSheet(formData: GradeSheetFormValues): CalculatedG
     totalObtainedMarks,
     totalFullMarks,
     percentage: parseFloat(percentage.toFixed(2)),
-    grade,
-    gpa: parseFloat(gpa.toFixed(1)),
+    grade: calculatedGrade, // Grade is now directly from the percentage scale
+    gpa: parseFloat(calculatedGpa.toFixed(1)), // GPA is now directly from the percentage scale
     resultStatus,
     individualSubjectStatus,
     remarks,
   };
 }
+
