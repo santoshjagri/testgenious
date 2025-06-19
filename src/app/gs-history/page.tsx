@@ -131,10 +131,11 @@ export default function GradesheetHistoryPage() {
         const pdfPageWidth = pdf.internal.pageSize.getWidth();
         const pdfPageHeight = pdf.internal.pageSize.getHeight();
 
-        const marginTopMM = 20; 
-        const marginBottomMM = 20;
-        const marginLeftMM = 15; 
-        const marginRightMM = 15;
+        const marginMM = 10; // 10mm margin on all sides
+        const marginTopMM = marginMM; 
+        const marginBottomMM = marginMM;
+        const marginLeftMM = marginMM; 
+        const marginRightMM = marginMM;
 
         const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
         const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
@@ -149,7 +150,7 @@ export default function GradesheetHistoryPage() {
         const fullCanvasHeightPx = fullCanvas.height;
 
         const pxPerMm = fullCanvasWidthPx / contentWidthMM; 
-        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97; // 3% buffer
+        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97; // 3% buffer to avoid cutting content
 
         let currentYpx = 0; 
 
@@ -340,3 +341,4 @@ export default function GradesheetHistoryPage() {
     </div>
   );
 }
+
