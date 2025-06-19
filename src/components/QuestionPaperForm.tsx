@@ -554,7 +554,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                         ) : (
                           <>
                             <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                            AI Draft to Manual Fields (for Editing)
+                            Generate Paper from Gemini
                           </>
                         )}
                       </Button>
@@ -601,3 +601,4 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     </Card>
   );
 }
+
