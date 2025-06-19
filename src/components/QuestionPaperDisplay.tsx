@@ -178,18 +178,15 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             </div>
             
             <div className="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-1 text-sm mt-4 pt-4 border-t border-gray-300">
-                {/* Row 1 */}
                 <div><strong>Subject:</strong> {formData.subject}</div>
                 <div>{formData.subjectCode ? <><strong>Subject Code:</strong> {formData.subjectCode}</> : <span>&nbsp;</span>}</div>
 
-                {/* Row 2 */}
                 <div><strong>Class/Level:</strong> {formData.classLevel}</div>
                 <div> 
                     <div><strong>Full Marks:</strong> {formData.totalMarks}</div>
                     <div className="mt-px"><strong>Pass Marks:</strong> {formData.passMarks}</div>
                 </div>
                 
-                {/* Row 3 */}
                 <div><strong>Time Allowed:</strong> {formData.timeLimit}</div>
                 <div><span>&nbsp;</span></div> 
             </div>
@@ -197,12 +194,12 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
 
         <CardContent className="p-6 md:p-8 space-y-6">
           {formData.instructions && (
-            <div className="mb-6 p-3 border border-gray-300 rounded-md bg-gray-50">
-              <div className="flex items-center mb-2">
-                <Info className="h-5 w-5 mr-2 text-blue-600" />
-                <h3 className="text-md font-semibold text-gray-700">Instructions for Students:</h3>
+            <div className="mb-4 p-2 border border-gray-300 rounded-md bg-gray-50">
+              <div className="flex items-center mb-1.5">
+                <Info className="h-4 w-4 mr-2 text-blue-600" />
+                <h3 className="text-sm font-semibold text-gray-700">Instructions for Students:</h3>
               </div>
-              <p className="whitespace-pre-line text-sm text-gray-700">{formData.instructions}</p>
+              <p className="whitespace-pre-line text-xs text-gray-700">{formData.instructions}</p>
             </div>
           )}
 
@@ -310,4 +307,3 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
-
