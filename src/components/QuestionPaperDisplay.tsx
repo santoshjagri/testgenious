@@ -24,46 +24,80 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
   const handleDownloadPdf = async () => {
     setIsDownloading(true);
     const paperElement = document.getElementById('question-paper');
+    
     if (paperElement) {
       try {
-        const canvas = await html2canvas(paperElement, {
-          scale: 2, 
-          useCORS: true, 
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfPageWidth = pdf.internal.pageSize.getWidth();
+        const pdfPageHeight = pdf.internal.pageSize.getHeight();
+        const marginValue = 10; // 10mm margin on all sides
+
+        const contentWidthMM = pdfPageWidth - 2 * marginValue;
+        const contentHeightMM = pdfPageHeight - 2 * marginValue;
+
+        const fullCanvas = await html2canvas(paperElement, {
+          scale: 2, // Use a higher scale for better resolution
+          useCORS: true,
           logging: false,
-          onclone: (document) => {
-            // Attempt to make SVGs render correctly by inlining styles or other fixes if needed
-            // For now, this is a placeholder for more complex SVG handling if issues arise
+           onclone: (document) => {
+            // You can add custom DOM manipulations here if needed before canvas capture
           }
         });
-        const imgData = canvas.toDataURL('image/png');
-        
-        const pdf = new jsPDF('p', 'mm', 'a4'); 
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const aspectRatio = canvasWidth / canvasHeight;
-        
-        let imgWidth = pdfWidth;
-        let imgHeight = pdfWidth / aspectRatio;
-        
-        // If image height is greater than PDF height, scale down
-        if (imgHeight > pdfHeight) {
-          imgHeight = pdfHeight;
-          imgWidth = pdfHeight * aspectRatio;
-        }
-        
-        const xOffset = (pdfWidth - imgWidth) / 2;
-        const yOffset = (pdfHeight - imgHeight) / 2;
 
-        pdf.addImage(imgData, 'PNG', xOffset > 0 ? xOffset : 0, yOffset > 0 ? yOffset : 0, imgWidth, imgHeight);
+        const fullCanvasWidthPx = fullCanvas.width;
+        const fullCanvasHeightPx = fullCanvas.height;
+
+        // Calculate how many pixels from the fullCanvas correspond to the content height of one PDF page
+        const pxPerMm = fullCanvasWidthPx / contentWidthMM; // Assumes width fits, derive pixel density
+        const pageSliceHeightPx = contentHeightMM * pxPerMm;
+
+        let currentYpx = 0; // Current Y position on the fullCanvas to start slicing from
+
+        while (currentYpx < fullCanvasHeightPx) {
+          const remainingHeightPx = fullCanvasHeightPx - currentYpx;
+          const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
+
+          // Create a temporary canvas for the current page's slice
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = fullCanvasWidthPx;
+          pageCanvas.height = sliceForThisPagePx;
+          const pageCtx = pageCanvas.getContext('2d');
+
+          if (pageCtx) {
+            // Draw the slice from fullCanvas to pageCanvas
+            pageCtx.drawImage(
+              fullCanvas,
+              0, // sx (source x)
+              currentYpx, // sy (source y - where to start slicing from fullCanvas)
+              fullCanvasWidthPx, // sWidth (source width - full width of original)
+              sliceForThisPagePx, // sHeight (source height - height of the slice for this page)
+              0, // dx (destination x on pageCanvas)
+              0, // dy (destination y on pageCanvas)
+              fullCanvasWidthPx, // dWidth (destination width on pageCanvas)
+              sliceForThisPagePx // dHeight (destination height on pageCanvas)
+            );
+
+            const pageImgData = pageCanvas.toDataURL('image/png', 0.9); // Use JPEG for potentially smaller size, or PNG for quality
+            
+            // Calculate the actual height this slice should take on the PDF page to maintain aspect ratio
+            const actualContentHeightMMForThisPage = (sliceForThisPagePx / pxPerMm);
+
+            pdf.addImage(pageImgData, 'PNG', marginValue, marginValue, contentWidthMM, actualContentHeightMMForThisPage);
+          }
+
+          currentYpx += sliceForThisPagePx;
+
+          if (currentYpx < fullCanvasHeightPx) {
+            pdf.addPage();
+          }
+        }
         
         const safeSubject = formData.subject?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'paper';
         const safeClassLevel = formData.classLevel?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'level';
         const filename = `question_paper_${safeSubject}_${safeClassLevel}.pdf`;
         
         pdf.save(filename);
+
       } catch (error) {
         console.error("Error generating PDF:", error);
         // Potentially show a toast to the user
@@ -265,3 +299,4 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
+
