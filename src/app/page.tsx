@@ -2,16 +2,16 @@
 "use client";
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation'; 
+import { useRouter } from 'next/navigation';
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
 import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, StorableQuestionPaperFormValues } from '@/lib/types';
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, Edit3, RotateCcw } from "lucide-react"; 
+import { Terminal, Edit3, RotateCcw } from "lucide-react";
 import { Button } from '@/components/ui/button';
-import { fileToDataUri } from '@/lib/utils'; 
+import { fileToDataUri } from '@/lib/utils';
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 const EDIT_PAPER_ID_KEY = "editPaperId";
@@ -28,7 +28,7 @@ export default function Home() {
   const [formSnapshotForDisplay, setFormSnapshotForDisplay] = React.useState<QuestionPaperDisplayFormData | null>(null);
   const [editingPaperId, setEditingPaperId] = React.useState<string | null>(null);
   const { toast } = useToast();
-  const router = useRouter(); 
+  const router = useRouter();
 
   const [initialFormValues, setInitialFormValues] = React.useState<QuestionPaperFormValues | undefined>(undefined);
 
@@ -46,7 +46,7 @@ export default function Home() {
             if (paperToEdit) {
               const formValues: QuestionPaperFormValues = {
                 ...paperToEdit.formSnapshot,
-                logo: undefined, 
+                logo: undefined,
               };
 
               if (paperToEdit.formSnapshot.generationMode === 'manual' && paperToEdit.generatedPaper) {
@@ -59,8 +59,8 @@ export default function Home() {
                 formValues.manualLongQuestions = gp.longQuestions?.join('\n') || "";
                 formValues.manualNumericalPracticalQuestions = gp.numericalPracticalQuestions?.join('\n') || "";
               }
-              
-              setInitialFormValues(formValues); 
+
+              setInitialFormValues(formValues);
               setGeneratedPaper(paperToEdit.generatedPaper);
               setFormSnapshotForDisplay(paperToEdit.formSnapshot);
               setEditingPaperId(paperToEdit.id);
@@ -78,7 +78,7 @@ export default function Home() {
             variant: "destructive",
           });
         } finally {
-          localStorage.removeItem(EDIT_PAPER_ID_KEY); 
+          localStorage.removeItem(EDIT_PAPER_ID_KEY);
         }
       } else {
         setInitialFormValues(undefined);
@@ -88,7 +88,7 @@ export default function Home() {
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+  }, []);
 
   const handleFormSubmit = async (values: QuestionPaperFormValues) => {
     setIsLoading(true);
@@ -116,11 +116,11 @@ export default function Home() {
     }
 
     const storableFormValues: StorableQuestionPaperFormValues = {
-      ...values, 
-      logo: undefined, 
-      logoDataUri: logoDataUri, 
+      ...values,
+      logo: undefined,
+      logoDataUri: logoDataUri,
     };
-    
+
     const displayData: QuestionPaperDisplayFormData = { ...storableFormValues };
 
     try {
@@ -140,13 +140,13 @@ export default function Home() {
         if (result.fillInTheBlanks?.length === 0) delete result.fillInTheBlanks;
         if (result.trueFalseQuestions?.length === 0) delete result.trueFalseQuestions;
         if (result.numericalPracticalQuestions?.length === 0) delete result.numericalPracticalQuestions;
-        
+
         toast({
           title: editingPaperId ? "Manual Paper Updated" : "Manual Paper Prepared",
           description: "Your manually entered questions are ready.",
         });
 
-      } else { 
+      } else {
         const aiInput: GenerateQuestionsInput = {
           classLevel: values.classLevel,
           subject: values.subject,
@@ -175,34 +175,34 @@ export default function Home() {
           description: editingPaperId ? "AI Question paper re-generated and updated in history." : "AI Question paper generated and saved to history.",
         });
       }
-      
+
       setGeneratedPaper(result);
       setFormSnapshotForDisplay(displayData);
-      
+
       if (typeof window !== 'undefined') {
         try {
           const existingHistoryString = localStorage.getItem(LOCAL_STORAGE_KEY);
           let existingHistory: StoredQuestionPaper[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
-          
+
           if (editingPaperId) {
-            existingHistory = existingHistory.map(item => 
-              item.id === editingPaperId 
-              ? { ...item, formSnapshot: storableFormValues, generatedPaper: result, dateGenerated: new Date().toISOString() } 
+            existingHistory = existingHistory.map(item =>
+              item.id === editingPaperId
+              ? { ...item, formSnapshot: storableFormValues, generatedPaper: result, dateGenerated: new Date().toISOString() }
               : item
             );
           } else {
             const newPaperEntry: StoredQuestionPaper = {
-              id: Date.now().toString(), 
+              id: Date.now().toString(),
               dateGenerated: new Date().toISOString(),
               formSnapshot: storableFormValues,
               generatedPaper: result,
             };
             existingHistory = [newPaperEntry, ...existingHistory];
           }
-          
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20))); 
+
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20)));
           if (editingPaperId) {
-            setEditingPaperId(null); 
+            setEditingPaperId(null);
           }
 
         } catch (storageError) {
@@ -210,7 +210,7 @@ export default function Home() {
           toast({
             title: "Warning",
             description: `Question paper ${editingPaperId ? 'updated' : 'prepared'}, but failed to save to history.`,
-            variant: "destructive", 
+            variant: "destructive",
           });
         }
       }
@@ -219,7 +219,7 @@ export default function Home() {
       console.error("Error during paper processing:", error);
       let errorMessage = "Failed to process question paper. Please try again.";
       if (error instanceof Error) {
-        errorMessage = error.message.substring(0, 200); 
+        errorMessage = error.message.substring(0, 200);
       }
       toast({
         title: "Error Processing Paper",
@@ -230,9 +230,9 @@ export default function Home() {
       setIsLoading(false);
     }
   };
-  
+
   const clearFormAndEditState = () => {
-    setInitialFormValues(undefined); 
+    setInitialFormValues(undefined);
     setGeneratedPaper(null);
     setFormSnapshotForDisplay(null);
     setEditingPaperId(null);
@@ -255,12 +255,12 @@ export default function Home() {
                 </AlertDescription>
             </Alert>
         )}
-        
-        <QuestionPaperForm 
-            key={initialFormValues ? editingPaperId : 'new'} 
-            onSubmit={handleFormSubmit} 
+
+        <QuestionPaperForm
+            key={editingPaperId || 'new'}
+            onSubmit={handleFormSubmit}
             isLoading={isLoading}
-            initialValues={initialFormValues} 
+            initialValues={initialFormValues}
         />
 
         {isLoading && (
@@ -282,7 +282,7 @@ export default function Home() {
           </div>
         )}
 
-        {!isLoading && !generatedPaper && !editingPaperId && ( 
+        {!isLoading && !generatedPaper && !editingPaperId && (
            <Alert className="mt-6 sm:mt-8 border-primary/30 bg-primary/5 text-primary no-print">
             <Terminal className="h-4 w-4 sm:h-5 sm:w-5" />
             <AlertTitle className="font-headline text-base sm:text-lg">Welcome to ExamGenius AI!</AlertTitle>
