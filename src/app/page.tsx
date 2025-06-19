@@ -192,7 +192,7 @@ export default function Home() {
             );
           } else {
             const newPaperEntry: StoredQuestionPaper = {
-              id: Date.now().toString(),
+              id: crypto.randomUUID(), // Changed from Date.now().toString()
               dateGenerated: new Date().toISOString(),
               formSnapshot: storableFormValues,
               generatedPaper: result,
@@ -310,3 +310,4 @@ export default function Home() {
     </main>
   );
 }
+
