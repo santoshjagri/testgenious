@@ -22,7 +22,6 @@ export const questionPaperFormSchema = z.object({
   customPrompt: z.string().optional().describe("Specific instructions or topics for the AI."),
   generationMode: z.enum(['ai', 'manual']).default('ai'),
 
-  // AI Generation Counts
   mcqCount: z.coerce.number().min(0).max(50).default(5),
   veryShortQuestionCount: z.coerce.number().min(0).max(30).default(0),
   fillInTheBlanksCount: z.coerce.number().min(0).max(30).default(0),
@@ -31,7 +30,6 @@ export const questionPaperFormSchema = z.object({
   longQuestionCount: z.coerce.number().min(0).max(10).default(2),
   numericalPracticalCount: z.coerce.number().min(0).max(10).default(0),
 
-  // Manual Question Entry
   manualMcqs: z.string().optional().describe("Enter one MCQ per line, including marks. E.g., What is 2+2? (1 mark)"),
   manualVeryShortQuestions: z.string().optional().describe("Enter one very short question per line, including marks."),
   manualFillInTheBlanks: z.string().optional().describe("Enter one fill-in-the-blank question per line, including marks."),
@@ -47,29 +45,68 @@ export const questionPaperFormSchema = z.object({
 
 export type QuestionPaperFormValues = z.infer<typeof questionPaperFormSchema>;
 
-// Storable version of form values (logo as data URI)
 export type StorableQuestionPaperFormValues = Omit<QuestionPaperFormValues, 'logo'> & {
   logoDataUri?: string;
 };
 
-// This type is used for AI input (without logo file, uses logoDataUri)
 export type AppGenerateQuestionsInput = Omit<AIInputType, 'examType' | 'language'> & {
   logoDataUri?: string;
   language: (typeof SupportedLanguages)[number];
   examType: (typeof ExamTypes)[number];
   customPrompt?: string;
-  // Includes AI counts from AIInputType: mcqCount, veryShortQuestionCount, etc.
 };
-
 
 export interface StoredQuestionPaper {
   id: string;
   dateGenerated: string;
-  formSnapshot: StorableQuestionPaperFormValues; // Updated to store full form details
+  formSnapshot: StorableQuestionPaperFormValues;
   generatedPaper: GenerateQuestionsOutput;
 }
 
-// This type is for displaying the paper; ensure it has all necessary fields from formSnapshot
-// It can be derived from StorableQuestionPaperFormValues as it contains all display-relevant fields.
 export type QuestionPaperDisplayFormData = StorableQuestionPaperFormValues;
 
+// --- GradeSheet Types ---
+
+export const GradeSheetExamTypes = ["First Term", "Mid Term", "Second Term", "Third Term", "Final Examination", "Unit Test", "Pre-Board"] as const;
+
+export const subjectMarkSchema = z.object({
+  id: z.string().default(() => `subject-${Date.now()}-${Math.random()}`), // For unique key in React rendering
+  subjectName: z.string().min(1, "Subject name is required."),
+  fullMarks: z.coerce.number().min(1, "Full marks > 0").max(200, "Max 200"),
+  passMarks: z.coerce.number().min(0, "Pass marks >= 0").max(200, "Max 200"),
+  obtainedMarks: z.coerce.number().min(0, "Obtained marks >= 0").max(200, "Max 200"),
+}).refine(data => data.obtainedMarks <= data.fullMarks, {
+  message: "Obtained marks cannot exceed full marks.",
+  path: ["obtainedMarks"],
+}).refine(data => data.passMarks <= data.fullMarks, {
+  message: "Pass marks cannot exceed full marks.",
+  path: ["passMarks"],
+});
+
+export type SubjectMarkInput = z.infer<typeof subjectMarkSchema>;
+
+export const gradeSheetFormSchema = z.object({
+  studentId: z.string().optional(),
+  studentName: z.string().min(1, "Student name is required."),
+  studentClass: z.string().min(1, "Class is required."),
+  rollNo: z.string().min(1, "Roll number is required."),
+  schoolName: z.string().min(1, "School name is required."),
+  examType: z.enum(GradeSheetExamTypes).default("Final Examination"),
+  academicYear: z.string().min(1, "Academic year is required (e.g., 2023-2024).")
+                   .regex(/^\d{4}-\d{4}$/, "Format must be YYYY-YYYY (e.g., 2023-2024)."),
+  examDate: z.string().min(1, "Exam date is required."), // Consider using a date type if more complex validation needed
+  subjects: z.array(subjectMarkSchema).min(1, "At least one subject is required."),
+});
+
+export type GradeSheetFormValues = z.infer<typeof gradeSheetFormSchema>;
+
+export interface CalculatedGradeSheetResult extends GradeSheetFormValues {
+  totalObtainedMarks: number;
+  totalFullMarks: number;
+  percentage: number;
+  grade: string;
+  gpa: number;
+  resultStatus: "Pass" | "Fail" | "N/A";
+  remarks?: string;
+  individualSubjectStatus: Array<{ subjectName: string; status: "Pass" | "Fail" }>;
+}
