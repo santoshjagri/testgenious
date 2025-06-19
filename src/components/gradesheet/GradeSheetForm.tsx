@@ -13,7 +13,9 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, User, BookOpen, CalendarDays, Hash, School, Award, PlusCircle, Trash2, Info } from 'lucide-react';
-import { DatePicker } from '@/components/ui/date-picker'; // Assuming you have a DatePicker component
+import { DatePicker } from '@/components/ui/date-picker';
+import { format } from 'date-fns';
+
 
 interface GradeSheetFormProps {
   onSubmit: (values: GradeSheetFormValues) => Promise<void>;
@@ -40,7 +42,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
       schoolName: 'ExamGenius Academy',
       examType: 'Final Examination',
       academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
-      examDate: new Date().toISOString().split('T')[0], // Defaults to today
+      examDate: format(new Date(), "yyyy-MM-dd"), // Defaults to today as string
       subjects: [defaultSubject],
     },
   });
@@ -54,15 +56,11 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     append({ ...defaultSubject, id: `subject-${Date.now()}-${Math.random()}` });
   };
   
-  const [examDate, setExamDate] = React.useState<Date | undefined>(
-    initialValues?.examDate ? new Date(initialValues.examDate) : new Date()
-  );
-
   React.useEffect(() => {
-    if (examDate) {
-      form.setValue('examDate', examDate.toISOString().split('T')[0]);
+    if (initialValues) {
+      form.reset(initialValues);
     }
-  }, [examDate, form]);
+  }, [initialValues, form]);
 
 
   return (
@@ -177,7 +175,14 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="mb-1.5">Exam Date</FormLabel>
-                     <DatePicker date={examDate} setDate={setExamDate} />
+                    <FormControl>
+                       <DatePicker
+                        date={field.value ? new Date(field.value) : undefined}
+                        setDate={(date) => {
+                          field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                        }}
+                      />
+                    </FormControl>
                     <FormMessage className="mt-2"/>
                   </FormItem>
                 )}
@@ -298,37 +303,3 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
   );
 }
 
-// Minimal DatePicker component (can be moved to ui/date-picker.tsx if needed)
-// For simplicity, placing it here. If you have a shared DatePicker, use that.
-// This one does not use ShadCN Calendar directly for simplicity in this snippet.
-// A proper implementation would use Popover and Calendar from ShadCN.
-
-interface DatePickerProps {
-  date: Date | undefined;
-  setDate: (date: Date | undefined) => void;
-}
-
-export const DatePicker: React.FC<DatePickerProps> = ({ date, setDate }) => {
-  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const dateValue = event.target.value;
-    if (dateValue) {
-      setDate(new Date(dateValue));
-    } else {
-      setDate(undefined);
-    }
-  };
-
-  return (
-    <div className="relative">
-       <FormControl>
-        <Input
-            type="date"
-            value={date ? date.toISOString().split('T')[0] : ''}
-            onChange={handleDateChange}
-            className="block w-full"
-        />
-       </FormControl>
-       <CalendarDays className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-    </div>
-  );
-};
