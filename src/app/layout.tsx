@@ -1,7 +1,7 @@
 
 import type {Metadata} from 'next';
 import Link from 'next/link';
-import { LayoutDashboard, PlusSquare, History as HistoryIcon, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, PlusSquare, History as HistoryIcon, GraduationCap, ClipboardList } from 'lucide-react';
 // Removed: import { AuthProvider } from '@/contexts/AuthContext';
 // Removed: import { UserNav } from '@/components/auth/UserNav';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -58,6 +58,14 @@ export default function RootLayout({
                     <Link href="/gradesheet">
                       <GraduationCap />
                       <span className="group-data-[collapsible=icon]:hidden">Gradesheet</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="GS History">
+                    <Link href="/gs-history">
+                      <ClipboardList />
+                      <span className="group-data-[collapsible=icon]:hidden">GS History</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

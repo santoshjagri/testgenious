@@ -4,30 +4,67 @@
 import * as React from 'react';
 import { GradeSheetForm } from "@/components/gradesheet/GradeSheetForm";
 import { GradeSheetDisplay } from "@/components/gradesheet/GradeSheetDisplay";
-import type { GradeSheetFormValues, CalculatedGradeSheetResult } from "@/lib/types";
+import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet } from "@/lib/types";
 import { calculateGradeSheet } from "@/lib/gradesheet-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, FileText, AlertCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+
+const GRADESHEET_LOCAL_STORAGE_KEY = "gradesheetHistory";
 
 export default function GradesheetPage() {
   const [calculatedResult, setCalculatedResult] = React.useState<CalculatedGradeSheetResult | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleFormSubmit = async (values: GradeSheetFormValues) => {
     setIsProcessing(true);
     setError(null);
     setCalculatedResult(null);
     try {
-      // Simulate API call or heavy computation if needed in future
-      // For now, direct calculation
       await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
       const result = calculateGradeSheet(values);
       setCalculatedResult(result);
+
+      // Save to local storage
+      if (typeof window !== 'undefined') {
+        try {
+          const existingHistoryString = localStorage.getItem(GRADESHEET_LOCAL_STORAGE_KEY);
+          let existingHistory: StoredGradeSheet[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
+          
+          const newGradeSheetEntry: StoredGradeSheet = {
+            id: Date.now().toString(), 
+            dateGenerated: new Date().toISOString(),
+            gradesheetData: result,
+          };
+          existingHistory = [newGradeSheetEntry, ...existingHistory];
+          localStorage.setItem(GRADESHEET_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20))); // Keep last 20 entries
+          
+          toast({
+            title: "GradeSheet Generated!",
+            description: "The gradesheet has been generated and saved to GS History.",
+          });
+
+        } catch (storageError) {
+          console.error("Error saving gradesheet to local storage:", storageError);
+          toast({
+            title: "Warning",
+            description: "GradeSheet prepared, but failed to save to GS History.",
+            variant: "destructive", 
+          });
+        }
+      }
+
     } catch (e) {
       console.error("Error processing gradesheet:", e);
       setError("An unexpected error occurred while processing the gradesheet.");
+      toast({
+        title: "Error Processing Gradesheet",
+        description: e instanceof Error ? e.message : "An unknown error occurred.",
+        variant: "destructive",
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -52,8 +89,8 @@ export default function GradesheetPage() {
                 <FileText className="h-5 w-5" />
                 <AlertTitle>Work in Progress</AlertTitle>
                 <AlertDescription>
-                  This GradeSheet tool is currently in client-side mode. Data is NOT saved to any database yet. 
-                  Firebase/Firestore integration for data persistence, PDF download, and printing features will be added in future updates.
+                  This GradeSheet tool is currently in client-side mode. Data is saved to your browser's local storage.
+                  Firebase/Firestore integration for cloud data persistence, enhanced PDF download, and printing features will be added in future updates.
                 </AlertDescription>
             </Alert>
             <GradeSheetForm onSubmit={handleFormSubmit} isLoading={isProcessing} />

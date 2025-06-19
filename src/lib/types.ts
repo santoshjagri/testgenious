@@ -110,3 +110,9 @@ export interface CalculatedGradeSheetResult extends GradeSheetFormValues {
   remarks?: string;
   individualSubjectStatus: Array<{ subjectName: string; status: "Pass" | "Fail" }>;
 }
+
+export interface StoredGradeSheet {
+  id: string;
+  dateGenerated: string; // ISO string
+  gradesheetData: CalculatedGradeSheetResult;
+}
