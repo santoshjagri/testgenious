@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star } from "lucide-react";
+import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle } from "lucide-react";
 import type { StoredGradeSheet } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -243,3 +243,4 @@ export default function GradesheetHistoryPage() {
     </div>
   );
 }
+
