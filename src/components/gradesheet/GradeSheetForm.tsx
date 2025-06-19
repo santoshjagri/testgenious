@@ -21,7 +21,6 @@ interface GradeSheetFormProps {
   initialValues?: GradeSheetFormValues;
 }
 
-// Template for a new subject, ID will be added dynamically
 const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
   subjectName: '',
   fullMarks: 100,
@@ -40,10 +39,10 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
       rollNo: '',
       schoolName: 'ExamGenius Academy',
       examType: 'Final Examination',
-      academicYear: "", // Placeholder, will be set in useEffect for new forms
-      examDate: "",     // Placeholder, will be set in useEffect for new forms
+      academicYear: "", 
+      examDate: "",     
       subjects: [
-        { ...newSubjectTemplate, subjectName: 'Sample Subject' } // ID will be added in useEffect for new forms
+        { ...newSubjectTemplate, subjectName: 'Sample Subject', id: crypto.randomUUID() } 
       ],
     },
   });
@@ -55,10 +54,9 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
   
   React.useEffect(() => {
     if (initialValues) {
-      form.reset(initialValues); // Populate form if editing existing gradesheet
+      form.reset(initialValues); 
     } else {
-      // For new forms, set dynamic defaults client-side to avoid hydration issues
-      if (typeof window !== 'undefined') { // Ensure this runs only on the client
+      if (typeof window !== 'undefined') { 
         if (form.getValues('examDate') === "") {
           form.setValue('examDate', format(new Date(), "yyyy-MM-dd"));
         }
@@ -78,26 +76,26 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
   const handleAddSubject = () => {
     append({
       ...newSubjectTemplate,
-      id: crypto.randomUUID(), // Assign unique ID on client
+      id: crypto.randomUUID(), 
     });
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
         <Card className="border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-primary/90 flex items-center"><User className="mr-2 h-5 w-5" />Student Information</CardTitle>
+          <CardHeader className="p-3 sm:p-4">
+            <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><User className="mr-2 h-5 w-5" />Student Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="studentName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Student Name</FormLabel>
-                    <FormControl><Input placeholder="e.g., John Doe" {...field} /></FormControl>
+                    <FormLabel className="text-sm sm:text-base">Student Name</FormLabel>
+                    <FormControl><Input placeholder="e.g., John Doe" {...field} className="text-sm sm:text-base"/></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -107,21 +105,21 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 name="studentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Student ID (Optional)</FormLabel>
-                    <FormControl><Input placeholder="e.g., S1001" {...field} /></FormControl>
+                    <FormLabel className="text-sm sm:text-base">Student ID (Optional)</FormLabel>
+                    <FormControl><Input placeholder="e.g., S1001" {...field} className="text-sm sm:text-base"/></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="studentClass"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Class</FormLabel>
-                    <FormControl><Input placeholder="e.g., Class 10" {...field} /></FormControl>
+                    <FormLabel className="text-sm sm:text-base">Class</FormLabel>
+                    <FormControl><Input placeholder="e.g., Class 10" {...field} className="text-sm sm:text-base"/></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -131,8 +129,8 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 name="rollNo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center"><Hash className="mr-2 h-4 w-4"/>Roll No.</FormLabel>
-                    <FormControl><Input placeholder="e.g., 25" {...field} /></FormControl>
+                    <FormLabel className="flex items-center text-sm sm:text-base"><Hash className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4"/>Roll No.</FormLabel>
+                    <FormControl><Input placeholder="e.g., 25" {...field} className="text-sm sm:text-base"/></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -142,8 +140,8 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 name="symbolNo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center"><Hash className="mr-2 h-4 w-4"/>Symbol No. (Optional)</FormLabel>
-                    <FormControl><Input placeholder="e.g., 0012345A" {...field} /></FormControl>
+                    <FormLabel className="flex items-center text-sm sm:text-base"><Hash className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4"/>Symbol No. (Opt)</FormLabel>
+                    <FormControl><Input placeholder="e.g., 0012345A" {...field} className="text-sm sm:text-base"/></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -154,8 +152,8 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
               name="schoolName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center"><School className="mr-2 h-4 w-4"/>School Name</FormLabel>
-                  <FormControl><Input placeholder="e.g., Springfield High" {...field} /></FormControl>
+                  <FormLabel className="flex items-center text-sm sm:text-base"><School className="mr-2 h-4 w-4"/>School Name</FormLabel>
+                  <FormControl><Input placeholder="e.g., Springfield High" {...field} className="text-sm sm:text-base"/></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -164,22 +162,22 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
         </Card>
 
         <Card className="border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-primary/90 flex items-center"><Award className="mr-2 h-5 w-5" />Exam Details</CardTitle>
+          <CardHeader className="p-3 sm:p-4">
+            <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><Award className="mr-2 h-5 w-5" />Exam Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="examType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Exam Type</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">Exam Type</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Select exam type" /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="text-sm sm:text-base"><SelectValue placeholder="Select exam type" /></SelectTrigger></FormControl>
                       <SelectContent>
                         {GradeSheetExamTypes.map(type => (
-                          <SelectItem key={type} value={type}>{type}</SelectItem>
+                          <SelectItem key={type} value={type} className="text-sm sm:text-base">{type}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -192,9 +190,9 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 name="academicYear"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Academic Year</FormLabel>
-                    <FormControl><Input placeholder="e.g., 2023-2024" {...field} /></FormControl>
-                     <FormDescription>Format: YYYY-YYYY</FormDescription>
+                    <FormLabel className="text-sm sm:text-base">Academic Year</FormLabel>
+                    <FormControl><Input placeholder="e.g., 2023-2024" {...field} className="text-sm sm:text-base"/></FormControl>
+                     <FormDescription className="text-xs">Format: YYYY-YYYY</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -204,16 +202,17 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 name="examDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="mb-1.5">Exam Date</FormLabel>
+                    <FormLabel className="mb-1 sm:mb-1.5 text-sm sm:text-base">Exam Date</FormLabel>
                     <FormControl>
                        <DatePicker
                         date={field.value ? new Date(field.value) : undefined}
                         setDate={(date) => {
                           field.onChange(date ? format(date, "yyyy-MM-dd") : "");
                         }}
+                        className="text-sm sm:text-base"
                       />
                     </FormControl>
-                    <FormMessage className="mt-2"/>
+                    <FormMessage className="mt-1 sm:mt-2"/>
                   </FormItem>
                 )}
               />
@@ -222,22 +221,22 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
         </Card>
 
         <Card className="border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-primary/90 flex items-center"><BookOpen className="mr-2 h-5 w-5" />Subject-wise Marks</CardTitle>
-             <CardDescription>Add each subject and its corresponding marks. Obtained marks cannot be greater than Full Marks.</CardDescription>
+          <CardHeader className="p-3 sm:p-4">
+            <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><BookOpen className="mr-2 h-5 w-5" />Subject-wise Marks</CardTitle>
+             <CardDescription className="text-sm sm:text-base">Add each subject and its corresponding marks. Obtained marks cannot be greater than Full Marks.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-4">
             {fields.map((field, index) => (
-              <div key={field.id} className="p-4 border rounded-md shadow-sm bg-background/50 space-y-3 relative">
+              <div key={field.id} className="p-3 sm:p-4 border rounded-md shadow-sm bg-background/50 space-y-2 sm:space-y-3 relative">
                 <FormLabel className="text-md font-medium text-primary/80">Subject {index + 1}</FormLabel>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 items-end">
                   <FormField
                     control={form.control}
                     name={`subjects.${index}.subjectName`}
                     render={({ field: subjectField }) => (
                       <FormItem>
-                        <FormLabel>Subject Name</FormLabel>
-                        <FormControl><Input placeholder="e.g., Mathematics" {...subjectField} /></FormControl>
+                        <FormLabel className="text-xs sm:text-sm">Subject Name</FormLabel>
+                        <FormControl><Input placeholder="e.g., Mathematics" {...subjectField} className="text-xs sm:text-sm"/></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -247,8 +246,8 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                     name={`subjects.${index}.fullMarks`}
                     render={({ field: subjectField }) => (
                       <FormItem>
-                        <FormLabel>Full Marks</FormLabel>
-                        <FormControl><Input type="number" placeholder="e.g., 100" {...subjectField} onChange={e => subjectField.onChange(parseFloat(e.target.value) || 0)} /></FormControl>
+                        <FormLabel className="text-xs sm:text-sm">Full Marks</FormLabel>
+                        <FormControl><Input type="number" placeholder="e.g., 100" {...subjectField} onChange={e => subjectField.onChange(parseFloat(e.target.value) || 0)} className="text-xs sm:text-sm"/></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -258,8 +257,8 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                     name={`subjects.${index}.passMarks`}
                     render={({ field: subjectField }) => (
                       <FormItem>
-                        <FormLabel>Pass Marks</FormLabel>
-                        <FormControl><Input type="number" placeholder="e.g., 40" {...subjectField} onChange={e => subjectField.onChange(parseFloat(e.target.value) || 0)}/></FormControl>
+                        <FormLabel className="text-xs sm:text-sm">Pass Marks</FormLabel>
+                        <FormControl><Input type="number" placeholder="e.g., 40" {...subjectField} onChange={e => subjectField.onChange(parseFloat(e.target.value) || 0)} className="text-xs sm:text-sm"/></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -269,14 +268,13 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                     name={`subjects.${index}.obtainedMarks`}
                     render={({ field: subjectField }) => (
                       <FormItem>
-                        <FormLabel>Obtained Marks</FormLabel>
-                        <FormControl><Input type="number" placeholder="e.g., 75" {...subjectField} onChange={e => subjectField.onChange(parseFloat(e.target.value) || 0)}/></FormControl>
+                        <FormLabel className="text-xs sm:text-sm">Obtained Marks</FormLabel>
+                        <FormControl><Input type="number" placeholder="e.g., 75" {...subjectField} onChange={e => subjectField.onChange(parseFloat(e.target.value) || 0)} className="text-xs sm:text-sm"/></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-                {/* Hidden field for subject id, managed by the form logic */}
                 <FormField
                     control={form.control}
                     name={`subjects.${index}.id`}
@@ -292,10 +290,10 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                     variant="ghost"
                     size="sm"
                     onClick={() => remove(index)}
-                    className="absolute top-2 right-2 text-destructive hover:bg-destructive/10 p-1 h-auto"
+                    className="absolute top-1 right-1 sm:top-2 sm:right-2 text-destructive hover:bg-destructive/10 p-1 h-auto"
                     aria-label="Remove subject"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 )}
               </div>
@@ -304,32 +302,32 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
               type="button"
               variant="outline"
               onClick={handleAddSubject}
-              className="mt-2 border-dashed border-primary/50 text-primary hover:bg-primary/10 hover:text-primary"
+              className="mt-2 border-dashed border-primary/50 text-primary hover:bg-primary/10 hover:text-primary w-full sm:w-auto text-sm sm:text-base"
             >
               <PlusCircle className="mr-2 h-4 w-4" /> Add Subject
             </Button>
             {form.formState.errors.subjects && !form.formState.errors.subjects.message && (
-                 <FormMessage className="text-sm font-medium text-destructive">
+                 <FormMessage className="text-xs sm:text-sm font-medium text-destructive">
                    Please check for errors in the subject fields.
                  </FormMessage>
             )}
              {form.formState.errors.subjects?.root?.message && (
-                 <FormMessage className="text-sm font-medium text-destructive">
+                 <FormMessage className="text-xs sm:text-sm font-medium text-destructive">
                     {form.formState.errors.subjects.root.message}
                  </FormMessage>
             )}
             {form.formState.errors.subjects?.message && (
-                 <FormMessage className="text-sm font-medium text-destructive">
+                 <FormMessage className="text-xs sm:text-sm font-medium text-destructive">
                     {form.formState.errors.subjects.message}
                  </FormMessage>
             )}
           </CardContent>
         </Card>
 
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg py-3" disabled={isLoading}>
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-md sm:text-lg py-2.5 sm:py-3" disabled={isLoading}>
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
               Processing GradeSheet...
             </>
           ) : (

@@ -35,7 +35,7 @@ export default function GradesheetPage() {
           let existingHistory: StoredGradeSheet[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
           
           const newGradeSheetEntry: StoredGradeSheet = {
-            id: Date.now().toString(), 
+            id: crypto.randomUUID(), 
             dateGenerated: new Date().toISOString(),
             gradesheetData: result,
           };
@@ -71,24 +71,24 @@ export default function GradesheetPage() {
   };
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
-      <div className="w-full max-w-5xl space-y-8">
+    <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
+      <div className="w-full max-w-5xl space-y-6 sm:space-y-8">
         <Card className="shadow-xl">
-          <CardHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <GraduationCap className="h-10 w-10 text-primary" />
-              <CardTitle className="text-3xl font-headline text-primary">Exam GradeSheet Tool</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mb-2">
+              <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+              <CardTitle className="text-2xl sm:text-3xl font-headline text-primary">Exam GradeSheet Tool</CardTitle>
             </div>
-            <CardDescription className="font-body">
+            <CardDescription className="font-body text-sm sm:text-base">
               Enter student, exam, and subject mark details to generate a comprehensive gradesheet.
               Calculations for total marks, percentage, grade, GPA, and result status will be performed automatically.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-             <Alert variant="default" className="mb-6 border-accent bg-accent/10 text-accent-foreground">
-                <FileText className="h-5 w-5" />
-                <AlertTitle>Work in Progress</AlertTitle>
-                <AlertDescription>
+          <CardContent className="p-4 sm:p-6">
+             <Alert variant="default" className="mb-4 sm:mb-6 border-accent bg-accent/10 text-accent-foreground">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
+                <AlertTitle className="text-base sm:text-lg">Work in Progress</AlertTitle>
+                <AlertDescription className="text-xs sm:text-sm">
                   This GradeSheet tool is currently in client-side mode. Data is saved to your browser's local storage.
                   Firebase/Firestore integration for cloud data persistence, enhanced PDF download, and printing features will be added in future updates.
                 </AlertDescription>
@@ -98,28 +98,28 @@ export default function GradesheetPage() {
         </Card>
 
         {error && (
-          <Alert variant="destructive" className="mt-6">
-            <AlertCircle className="h-5 w-5" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+          <Alert variant="destructive" className="mt-4 sm:mt-6">
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+            <AlertTitle className="text-base sm:text-lg">Error</AlertTitle>
+            <AlertDescription className="text-xs sm:text-sm">{error}</AlertDescription>
           </Alert>
         )}
 
         {isProcessing && (
-          <div className="flex justify-center items-center p-10 bg-card rounded-lg shadow-md mt-8">
+          <div className="flex justify-center items-center p-6 sm:p-10 bg-card rounded-lg shadow-md mt-6 sm:mt-8">
             <div className="animate-pulse flex flex-col items-center space-y-2">
-              <svg className="animate-spin h-12 w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-10 w-10 sm:h-12 sm:w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <p className="text-lg text-primary font-medium">Calculating Grades...</p>
-              <p className="text-sm text-muted-foreground">Please wait a moment.</p>
+              <p className="text-md sm:text-lg text-primary font-medium">Calculating Grades...</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Please wait a moment.</p>
             </div>
           </div>
         )}
 
         {calculatedResult && !isProcessing && (
-          <div className="animate-fadeInUp mt-8">
+          <div className="animate-fadeInUp mt-6 sm:mt-8">
             <GradeSheetDisplay result={calculatedResult} />
           </div>
         )}

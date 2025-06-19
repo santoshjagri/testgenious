@@ -123,7 +123,7 @@ export default function GradesheetHistoryPage() {
     }
 
     setIsDownloadingPdf(true);
-    const paperElement = document.getElementById('gradesheet-printable-area'); // This ID is on GradeSheetDisplay
+    const paperElement = document.getElementById('gradesheet-printable-area'); 
     
     if (paperElement) {
       try {
@@ -131,7 +131,7 @@ export default function GradesheetHistoryPage() {
         const pdfPageWidth = pdf.internal.pageSize.getWidth();
         const pdfPageHeight = pdf.internal.pageSize.getHeight();
 
-        const marginMM = 10; // 10mm margin on all sides
+        const marginMM = 10; 
         const marginTopMM = marginMM; 
         const marginBottomMM = marginMM;
         const marginLeftMM = marginMM; 
@@ -150,7 +150,7 @@ export default function GradesheetHistoryPage() {
         const fullCanvasHeightPx = fullCanvas.height;
 
         const pxPerMm = fullCanvasWidthPx / contentWidthMM; 
-        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97; // 3% buffer to avoid cutting content
+        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97; 
 
         let currentYpx = 0; 
 
@@ -210,19 +210,19 @@ export default function GradesheetHistoryPage() {
 
   if (selectedGradeSheetForView) {
     return (
-      <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8">
-        <div className="flex flex-wrap gap-2 mb-6 no-print">
+      <div className="flex-1 flex flex-col p-2 sm:p-4 md:p-6 lg:p-8">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 mb-4 sm:mb-6 no-print">
             <Button 
               variant="outline" 
               onClick={() => setSelectedGradeSheetForView(null)} 
-              className="mr-auto"
+              className="w-full sm:w-auto sm:mr-auto"
             >
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to GS History
             </Button>
-            <Button onClick={handlePrint} variant="outline">
+            <Button onClick={handlePrint} variant="outline" className="w-full sm:w-auto">
               <PrinterIcon className="mr-2 h-4 w-4" /> Print Gradesheet
             </Button>
-            <Button onClick={handleDownloadPdf} variant="default" disabled={isDownloadingPdf}>
+            <Button onClick={handleDownloadPdf} variant="default" disabled={isDownloadingPdf} className="w-full sm:w-auto">
                {isDownloadingPdf ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -235,27 +235,26 @@ export default function GradesheetHistoryPage() {
               )}
             </Button>
         </div>
-        {/* The GradeSheetDisplay component has id="gradesheet-printable-area" on its root Card */}
         <GradeSheetDisplay result={selectedGradeSheetForView.gradesheetData} /> 
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="font-semibold text-2xl md:text-3xl flex items-center">
-          <ClipboardList className="mr-3 h-8 w-8 text-primary" />
+    <div className="flex-1 flex flex-col gap-4 p-2 sm:p-4 md:gap-6 md:p-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <h1 className="font-semibold text-xl sm:text-2xl md:text-3xl flex items-center">
+          <ClipboardList className="mr-2 sm:mr-3 h-6 w-6 sm:h-8 sm:w-8 text-primary" />
           GS History
         </h1>
-        <div className="flex items-center gap-2">
-            <Button onClick={() => router.push('/gradesheet')} className="no-print">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <Button onClick={() => router.push('/gradesheet')} className="no-print w-full sm:w-auto">
               <PlusCircle className="mr-2 h-4 w-4" /> Create New Gradesheet
             </Button>
             {historyItems.length > 0 && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="no-print">
+                  <Button variant="destructive" className="no-print w-full sm:w-auto">
                     <Trash2 className="mr-2 h-4 w-4" /> Clear All History
                   </Button>
                 </AlertDialogTrigger>
@@ -280,19 +279,19 @@ export default function GradesheetHistoryPage() {
           <CardContent className="pt-6">
             <Alert className="border-primary/20 bg-primary/5">
               <ClipboardList className="h-5 w-5 text-primary" />
-              <AlertTitle className="text-primary">No Gradesheet History Yet</AlertTitle>
-              <AlertDescription className="text-foreground/80">
+              <AlertTitle className="text-primary text-base sm:text-lg">No Gradesheet History Yet</AlertTitle>
+              <AlertDescription className="text-foreground/80 text-xs sm:text-sm">
                 You haven't generated any gradesheets yet. Click "Create New Gradesheet" above or go to "Gradesheet" in the sidebar to get started. Your generated gradesheets will appear here.
               </AlertDescription>
             </Alert>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 mt-4">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 mt-4">
           {historyItems.map((item) => (
             <Card key={item.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-200 rounded-lg">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-primary flex items-center"><User className="mr-2 h-5 w-5"/>{item.gradesheetData.studentName}</CardTitle>
+              <CardHeader className="pb-2 sm:pb-3">
+                <CardTitle className="text-md sm:text-lg text-primary flex items-center"><User className="mr-2 h-4 w-4 sm:h-5 sm:w-5"/>{item.gradesheetData.studentName}</CardTitle>
                 <div className="text-xs text-muted-foreground space-y-0.5">
                     <p>{item.gradesheetData.studentClass} - Roll: {item.gradesheetData.rollNo}</p>
                     {item.gradesheetData.symbolNo && <p className="flex items-center"><Hash className="h-3 w-3 mr-1"/>Symbol: {item.gradesheetData.symbolNo}</p>}
@@ -300,22 +299,22 @@ export default function GradesheetHistoryPage() {
                     <p className="flex items-center"><BookOpen className="h-3 w-3 mr-1"/>{item.gradesheetData.schoolName}</p>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-1 text-sm flex-grow">
-                <p className="flex items-center"><Percent className="h-4 w-4 mr-1.5"/><strong>Percentage:</strong> {item.gradesheetData.percentage.toFixed(2)}%</p>
-                <p className="flex items-center"><Star className="h-4 w-4 mr-1.5"/><strong>Grade:</strong> {item.gradesheetData.grade} (GPA: {item.gradesheetData.gpa.toFixed(1)})</p>
+              <CardContent className="space-y-1 text-xs sm:text-sm flex-grow">
+                <p className="flex items-center"><Percent className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5"/><strong>Percentage:</strong> {item.gradesheetData.percentage.toFixed(2)}%</p>
+                <p className="flex items-center"><Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5"/><strong>Grade:</strong> {item.gradesheetData.grade} (GPA: {item.gradesheetData.gpa.toFixed(1)})</p>
                 <p><strong>Result:</strong> <span className={item.gradesheetData.resultStatus === "Pass" ? "text-green-600 font-semibold" : "text-red-600 font-semibold"}>{item.gradesheetData.resultStatus}</span></p>
-                 <p className="mt-3 text-xs text-muted-foreground pt-2 border-t flex items-center">
+                 <p className="mt-2 sm:mt-3 text-xs text-muted-foreground pt-1 sm:pt-2 border-t flex items-center">
                     <CalendarDays className="h-3 w-3 mr-1"/> 
-                    Generated: {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString()}
+                    Generated: {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                  </p>
               </CardContent>
-              <CardFooter className="border-t pt-3 pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-2 items-stretch">
-                <Button variant="ghost" size="sm" onClick={() => handleViewGradeSheet(item)} className="text-primary hover:bg-primary/10 flex-1 text-center">
+              <CardFooter className="border-t pt-2 pb-2 sm:pt-3 sm:pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-1 sm:gap-2 items-stretch">
+                <Button variant="ghost" size="sm" onClick={() => handleViewGradeSheet(item)} className="text-primary hover:bg-primary/10 flex-1 text-center text-xs sm:text-sm">
                   <Eye className="mr-1 h-3 w-3" /> View
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-center">
+                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-center text-xs sm:text-sm">
                         <Trash2 className="mr-1 h-3 w-3" /> Delete
                       </Button>
                     </AlertDialogTrigger>

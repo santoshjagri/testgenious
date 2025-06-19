@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { History as HistoryIcon, Trash2, Eye, ArrowLeft, LanguagesIcon, PlusSquare } from "lucide-react";
 import type { StoredQuestionPaper, ExamTypes } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
-// Removed: import { AuthGuard } from '@/components/auth/AuthGuard';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -105,12 +104,11 @@ export default function HistoryPage() {
     };
 
     return (
-      // Removed AuthGuard wrapper
-      <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8">
+      <div className="flex-1 flex flex-col p-2 sm:p-4 md:p-6 lg:p-8">
         <Button 
           variant="outline" 
           onClick={() => setSelectedPaperForView(null)} 
-          className="mb-6 self-start no-print"
+          className="mb-4 sm:mb-6 self-start no-print w-full sm:w-auto"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to History
         </Button>
@@ -123,21 +121,20 @@ export default function HistoryPage() {
   }
 
   return (
-    // Removed AuthGuard wrapper
-    <div className="flex-1 flex flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="font-semibold text-2xl md:text-3xl flex items-center">
-          <HistoryIcon className="mr-3 h-8 w-8 text-primary" />
+    <div className="flex-1 flex flex-col gap-4 p-2 sm:p-4 md:gap-6 md:p-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <h1 className="font-semibold text-xl sm:text-2xl md:text-3xl flex items-center">
+          <HistoryIcon className="mr-2 sm:mr-3 h-6 w-6 sm:h-8 sm:w-8 text-primary" />
           Paper History
         </h1>
-        <div className="flex items-center gap-2">
-            <Button onClick={() => router.push('/')} className="no-print">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <Button onClick={() => router.push('/')} className="no-print w-full sm:w-auto">
               <PlusSquare className="mr-2 h-4 w-4" /> Create New Paper
             </Button>
             {historyItems.length > 0 && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="no-print">
+                  <Button variant="destructive" className="no-print w-full sm:w-auto">
                     <Trash2 className="mr-2 h-4 w-4" /> Clear All History
                   </Button>
                 </AlertDialogTrigger>
@@ -162,30 +159,30 @@ export default function HistoryPage() {
           <CardContent className="pt-6">
             <Alert className="border-primary/20 bg-primary/5">
               <HistoryIcon className="h-5 w-5 text-primary" />
-              <AlertTitle className="text-primary">No History Yet</AlertTitle>
-              <AlertDescription className="text-foreground/80">
+              <AlertTitle className="text-primary text-base sm:text-lg">No History Yet</AlertTitle>
+              <AlertDescription className="text-foreground/80 text-xs sm:text-sm">
                 You haven't generated or manually created any question papers yet. Click "Create New Paper" above or go to "Create New Paper" in the sidebar to get started. Your papers will appear here.
               </AlertDescription>
             </Alert>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 mt-4">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 mt-4">
           {historyItems.map((item) => (
             <Card key={item.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-200 rounded-lg">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-primary">{item.formSnapshot.subject} - {item.formSnapshot.classLevel}</CardTitle>
+              <CardHeader className="pb-2 sm:pb-3">
+                <CardTitle className="text-md sm:text-lg text-primary">{item.formSnapshot.subject} - {item.formSnapshot.classLevel}</CardTitle>
                 <div className="text-xs text-muted-foreground space-y-0.5">
                     <p>{item.formSnapshot.examType || 'General Paper'}</p>
                     {item.formSnapshot.institutionName && item.formSnapshot.institutionName !== "ExamGenius AI Institute" && <p>{item.formSnapshot.institutionName}</p>}
                     {item.formSnapshot.language && <p className="flex items-center"><LanguagesIcon className="h-3 w-3 mr-1"/>{item.formSnapshot.language}</p>}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-1 text-sm flex-grow">
+              <CardContent className="space-y-1 text-xs sm:text-sm flex-grow">
                 <p><span className="font-medium">Total Marks:</span> {item.formSnapshot.totalMarks}</p>
                 <p><span className="font-medium">Pass Marks:</span> {item.formSnapshot.passMarks}</p>
                 <p><span className="font-medium">Time:</span> {item.formSnapshot.timeLimit}</p>
-                <hr className="my-2"/>
+                <hr className="my-1 sm:my-2"/>
                 <p className="text-xs text-muted-foreground">Question Counts/Mode:</p>
                 <div className="grid grid-cols-2 gap-x-2 text-xs">
                   {item.formSnapshot.generationMode === 'ai' ? (
@@ -201,27 +198,27 @@ export default function HistoryPage() {
                   ) : (
                     <>
                       <p><span className="font-medium">MCQs:</span> {item.generatedPaper.mcqs.length}</p>
-                      {item.generatedPaper.veryShortQuestions && <p><span className="font-medium">Very Short:</span> {item.generatedPaper.veryShortQuestions.length}</p>}
-                      {item.generatedPaper.fillInTheBlanks && <p><span className="font-medium">Fill Blanks:</span> {item.generatedPaper.fillInTheBlanks.length}</p>}
-                      {item.generatedPaper.trueFalseQuestions && <p><span className="font-medium">True/False:</span> {item.generatedPaper.trueFalseQuestions.length}</p>}
+                      {item.generatedPaper.veryShortQuestions && item.generatedPaper.veryShortQuestions.length > 0 && <p><span className="font-medium">Very Short:</span> {item.generatedPaper.veryShortQuestions.length}</p>}
+                      {item.generatedPaper.fillInTheBlanks && item.generatedPaper.fillInTheBlanks.length > 0 && <p><span className="font-medium">Fill Blanks:</span> {item.generatedPaper.fillInTheBlanks.length}</p>}
+                      {item.generatedPaper.trueFalseQuestions && item.generatedPaper.trueFalseQuestions.length > 0 &&  <p><span className="font-medium">True/False:</span> {item.generatedPaper.trueFalseQuestions.length}</p>}
                       <p><span className="font-medium">Short Qs:</span> {item.generatedPaper.shortQuestions.length}</p>
                       <p><span className="font-medium">Long Qs:</span> {item.generatedPaper.longQuestions.length}</p>
-                      {item.generatedPaper.numericalPracticalQuestions && <p><span className="font-medium">Numerical:</span> {item.generatedPaper.numericalPracticalQuestions.length}</p>}
+                      {item.generatedPaper.numericalPracticalQuestions && item.generatedPaper.numericalPracticalQuestions.length > 0 && <p><span className="font-medium">Numerical:</span> {item.generatedPaper.numericalPracticalQuestions.length}</p>}
                     </>
                   )}
                 </div>
-                 <p className="mt-3 text-xs text-muted-foreground pt-2 border-t">
-                    <span className="font-medium">Date:</span> {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString()}
+                 <p className="mt-2 sm:mt-3 text-xs text-muted-foreground pt-1 sm:pt-2 border-t">
+                    <span className="font-medium">Date:</span> {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     {item.formSnapshot.generationMode && <span className="block capitalize"><span className="font-medium">Mode:</span> {item.formSnapshot.generationMode}</span>}
                  </p>
               </CardContent>
-              <CardFooter className="border-t pt-3 pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-2 items-stretch">
-                <Button variant="ghost" size="sm" onClick={() => handleViewPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-center">
+              <CardFooter className="border-t pt-2 pb-2 sm:pt-3 sm:pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-1 sm:gap-2 items-stretch">
+                <Button variant="ghost" size="sm" onClick={() => handleViewPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-center text-xs sm:text-sm">
                   <Eye className="mr-1 h-3 w-3" /> View Paper
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-center">
+                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-center text-xs sm:text-sm">
                         <Trash2 className="mr-1 h-3 w-3" /> Delete
                       </Button>
                     </AlertDialogTrigger>
