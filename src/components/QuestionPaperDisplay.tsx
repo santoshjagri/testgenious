@@ -41,9 +41,9 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
         const pdfPageWidth = pdf.internal.pageSize.getWidth();
         const pdfPageHeight = pdf.internal.pageSize.getHeight();
 
-        const marginTopMM = 25.4;
+        const marginTopMM = 25.4; 
         const marginBottomMM = 25.4;
-        const marginLeftMM = 31.8;
+        const marginLeftMM = 31.8; 
         const marginRightMM = 25.4;
 
         const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
@@ -54,7 +54,10 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
           useCORS: true,
           logging: false,
            onclone: (document) => {
-            // You can add custom DOM manipulations here if needed before canvas capture
+            // This function is called when html2canvas clones the document.
+            // You can make temporary DOM modifications here before the canvas is rendered
+            // if needed (e.g., force certain styles, hide non-printable elements temporarily).
+            // For this specific issue, we are not modifying the DOM, but it's a good place for such logic.
           }
         });
 
@@ -62,7 +65,12 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
         const fullCanvasHeightPx = fullCanvas.height;
 
         const pxPerMm = fullCanvasWidthPx / contentWidthMM; 
-        const pageSliceHeightPx = contentHeightMM * pxPerMm;
+        let pageSliceHeightPx = contentHeightMM * pxPerMm;
+
+        // Introduce a small buffer (e.g., 3%) to reduce the chance of cutting content at the very edge of a page.
+        // This means slightly less content per page, but might prevent items from being split.
+        pageSliceHeightPx *= 0.97; 
+
 
         let currentYpx = 0; 
 
