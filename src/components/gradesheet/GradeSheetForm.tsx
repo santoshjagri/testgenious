@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { gradeSheetFormSchema, type GradeSheetFormValues, GradeSheetExamTypes, type SubjectMarkInput } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -11,11 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Loader2, User, BookOpen, CalendarDays, Hash, School, Award, PlusCircle, Trash2, Info } from 'lucide-react';
+import { Loader2, User, BookOpen, CalendarDays, Hash, School, Award, PlusCircle, Trash2 } from 'lucide-react';
 import { DatePicker } from '@/components/ui/date-picker';
 import { format } from 'date-fns';
-
 
 interface GradeSheetFormProps {
   onSubmit: (values: GradeSheetFormValues) => Promise<void>;
@@ -23,8 +21,8 @@ interface GradeSheetFormProps {
   initialValues?: GradeSheetFormValues;
 }
 
-const defaultSubject: SubjectMarkInput = {
-  id: `subject-${Date.now()}`,
+// Template for a new subject, ID will be added dynamically
+const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
   subjectName: '',
   fullMarks: 100,
   passMarks: 40,
@@ -41,9 +39,11 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
       rollNo: '',
       schoolName: 'ExamGenius Academy',
       examType: 'Final Examination',
-      academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
-      examDate: format(new Date(), "yyyy-MM-dd"), // Defaults to today as string
-      subjects: [defaultSubject],
+      academicYear: "", // Placeholder, will be set in useEffect for new forms
+      examDate: "",     // Placeholder, will be set in useEffect for new forms
+      subjects: [
+        { ...newSubjectTemplate, subjectName: 'Sample Subject' } // ID will be added in useEffect for new forms
+      ],
     },
   });
 
@@ -51,17 +51,35 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     control: form.control,
     name: "subjects",
   });
-
-  const handleAddSubject = () => {
-    append({ ...defaultSubject, id: `subject-${Date.now()}-${Math.random()}` });
-  };
   
   React.useEffect(() => {
     if (initialValues) {
-      form.reset(initialValues);
+      form.reset(initialValues); // Populate form if editing existing gradesheet
+    } else {
+      // For new forms, set dynamic defaults client-side to avoid hydration issues
+      if (typeof window !== 'undefined') { // Ensure this runs only on the client
+        if (form.getValues('examDate') === "") {
+          form.setValue('examDate', format(new Date(), "yyyy-MM-dd"));
+        }
+        if (form.getValues('academicYear') === "") {
+          const currentYear = new Date().getFullYear();
+          form.setValue('academicYear', `${currentYear}-${currentYear + 1}`);
+        }
+        const subjects = form.getValues('subjects');
+        if (subjects.length > 0 && !subjects[0].id) { 
+          form.setValue('subjects.0.id', crypto.randomUUID());
+        }
+      }
     }
   }, [initialValues, form]);
 
+
+  const handleAddSubject = () => {
+    append({
+      ...newSubjectTemplate,
+      id: crypto.randomUUID(), // Assign unique ID on client
+    });
+  };
 
   return (
     <Form {...form}>
@@ -145,7 +163,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Exam Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Select exam type" /></SelectTrigger></FormControl>
                       <SelectContent>
                         {GradeSheetExamTypes.map(type => (
@@ -246,6 +264,16 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                     )}
                   />
                 </div>
+                {/* Hidden field for subject id, managed by the form logic */}
+                <FormField
+                    control={form.control}
+                    name={`subjects.${index}.id`}
+                    render={({ field: subjectField }) => (
+                      <FormItem className="hidden">
+                        <FormControl><Input type="hidden" {...subjectField} /></FormControl>
+                      </FormItem>
+                    )}
+                  />
                 {fields.length > 1 && (
                   <Button
                     type="button"
@@ -283,8 +311,6 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                     {form.formState.errors.subjects.message}
                  </FormMessage>
             )}
-
-
           </CardContent>
         </Card>
 
@@ -302,4 +328,3 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     </Form>
   );
 }
-
