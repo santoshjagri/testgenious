@@ -26,6 +26,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     if (formData.manualDate) {
       setDisplayDate(formData.manualDate);
     } else {
+      // Client-side effect to avoid hydration mismatch for date
       setDisplayDate(new Date().toLocaleDateString());
     }
   }, [formData.manualDate]);
@@ -127,6 +128,8 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     );
   };
 
+  const isValidLogoDataUri = formData.logoDataUri && formData.logoDataUri.startsWith('data:');
+
 
   return (
     <div className="mt-8 sm:mt-12">
@@ -154,9 +157,9 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
         <CardHeader className="p-4 sm:p-6 border-b-2 border-black">
             <div className="flex flex-col sm:flex-row items-center sm:items-start w-full gap-4">
                 <div className="flex-shrink-0">
-                  {formData.logoDataUri ? (
+                  {isValidLogoDataUri ? (
                     <Image
-                      src={formData.logoDataUri}
+                      src={formData.logoDataUri!}
                       alt={formData.institutionName ? `${formData.institutionName} Logo` : "Uploaded Institute Logo"}
                       width={60}
                       height={60}
@@ -307,3 +310,4 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
+
