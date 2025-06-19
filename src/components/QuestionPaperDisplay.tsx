@@ -36,7 +36,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
         const contentHeightMM = pdfPageHeight - 2 * marginValue;
 
         const fullCanvas = await html2canvas(paperElement, {
-          scale: 2, // Use a higher scale for better resolution
+          scale: 2, 
           useCORS: true,
           logging: false,
            onclone: (document) => {
@@ -47,34 +47,31 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
         const fullCanvasWidthPx = fullCanvas.width;
         const fullCanvasHeightPx = fullCanvas.height;
 
-        // Calculate how many pixels from the fullCanvas correspond to the content height of one PDF page
-        const pxPerMm = fullCanvasWidthPx / contentWidthMM; // Assumes width fits, derive pixel density
+        const pxPerMm = fullCanvasWidthPx / contentWidthMM; 
         const pageSliceHeightPx = contentHeightMM * pxPerMm;
 
-        let currentYpx = 0; // Current Y position on the fullCanvas to start slicing from
+        let currentYpx = 0; 
 
         while (currentYpx < fullCanvasHeightPx) {
           const remainingHeightPx = fullCanvasHeightPx - currentYpx;
           const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
 
-          // Create a temporary canvas for the current page's slice
           const pageCanvas = document.createElement('canvas');
           pageCanvas.width = fullCanvasWidthPx;
           pageCanvas.height = sliceForThisPagePx;
           const pageCtx = pageCanvas.getContext('2d');
 
           if (pageCtx) {
-            // Draw the slice from fullCanvas to pageCanvas
             pageCtx.drawImage(
               fullCanvas,
-              0, // sx (source x)
-              currentYpx, // sy (source y - where to start slicing from fullCanvas)
-              fullCanvasWidthPx, // sWidth (source width - full width of original)
-              sliceForThisPagePx, // sHeight (source height - height of the slice for this page)
-              0, // dx (destination x on pageCanvas)
-              0, // dy (destination y on pageCanvas)
-              fullCanvasWidthPx, // dWidth (destination width on pageCanvas)
-              sliceForThisPagePx // dHeight (destination height on pageCanvas)
+              0, 
+              currentYpx, 
+              fullCanvasWidthPx, 
+              sliceForThisPagePx, 
+              0, 
+              0, 
+              fullCanvasWidthPx, 
+              sliceForThisPagePx 
             );
 
             const pageImgData = pageCanvas.toDataURL('image/png', 0.9); 
@@ -297,5 +294,3 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
-
-    
