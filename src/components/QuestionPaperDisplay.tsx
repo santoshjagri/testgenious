@@ -171,15 +171,26 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
         <CardHeader className="p-6 border-b-2 border-black">
             <div className="flex flex-row items-start w-full">
                 <div className="flex-shrink-0 mr-6">
-                  <Image
-                    src={formData.logoDataUri || "https://placehold.co/80x80.png"}
-                    alt={formData.institutionName ? `${formData.institutionName} Logo` : "Institute Logo"}
-                    width={80}
-                    height={80}
-                    className="rounded-md object-contain"
-                    data-ai-hint="school emblem"
-                    unoptimized 
-                  />
+                  {formData.logoDataUri ? (
+                    <Image
+                      src={formData.logoDataUri}
+                      alt={formData.institutionName ? `${formData.institutionName} Logo` : "Uploaded Institute Logo"}
+                      width={80}
+                      height={80}
+                      className="rounded-md object-contain"
+                      unoptimized
+                    />
+                  ) : (
+                    <Image
+                      src="https://placehold.co/80x80.png"
+                      alt="Institute Logo Placeholder"
+                      width={80}
+                      height={80}
+                      className="rounded-md object-contain"
+                      data-ai-hint="school emblem"
+                      unoptimized
+                    />
+                  )}
                 </div>
                 <div className="flex-grow flex flex-col items-center text-center">
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1">{formData.institutionName || "ExamGenius AI Institute"}</h1>
@@ -319,4 +330,3 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
-
