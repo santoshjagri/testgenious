@@ -40,10 +40,14 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfPageWidth = pdf.internal.pageSize.getWidth();
         const pdfPageHeight = pdf.internal.pageSize.getHeight();
-        const marginValue = 10; // 10mm margin on all sides
 
-        const contentWidthMM = pdfPageWidth - 2 * marginValue;
-        const contentHeightMM = pdfPageHeight - 2 * marginValue;
+        const marginTopMM = 25.4;
+        const marginBottomMM = 25.4;
+        const marginLeftMM = 31.8;
+        const marginRightMM = 25.4;
+
+        const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
+        const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
 
         const fullCanvas = await html2canvas(paperElement, {
           scale: 2, 
@@ -88,7 +92,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             
             const actualContentHeightMMForThisPage = (sliceForThisPagePx / pxPerMm);
 
-            pdf.addImage(pageImgData, 'PNG', marginValue, marginValue, contentWidthMM, actualContentHeightMMForThisPage);
+            pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
           }
 
           currentYpx += sliceForThisPagePx;
@@ -177,12 +181,12 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-1 text-sm mt-4 pt-4 border-t border-gray-300">
+             <div className="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-1 text-sm mt-4 pt-4 border-t border-gray-300">
                 <div><strong>Subject:</strong> {formData.subject}</div>
                 <div>{formData.subjectCode ? <><strong>Subject Code:</strong> {formData.subjectCode}</> : <span>&nbsp;</span>}</div>
 
                 <div><strong>Class/Level:</strong> {formData.classLevel}</div>
-                <div> 
+                 <div className="flex flex-col">
                     <div><strong>Full Marks:</strong> {formData.totalMarks}</div>
                     <div className="mt-px"><strong>Pass Marks:</strong> {formData.passMarks}</div>
                 </div>
@@ -307,3 +311,4 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     </div>
   );
 }
+
