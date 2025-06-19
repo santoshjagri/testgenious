@@ -77,9 +77,8 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
               sliceForThisPagePx // dHeight (destination height on pageCanvas)
             );
 
-            const pageImgData = pageCanvas.toDataURL('image/png', 0.9); // Use JPEG for potentially smaller size, or PNG for quality
+            const pageImgData = pageCanvas.toDataURL('image/png', 0.9); 
             
-            // Calculate the actual height this slice should take on the PDF page to maintain aspect ratio
             const actualContentHeightMMForThisPage = (sliceForThisPagePx / pxPerMm);
 
             pdf.addImage(pageImgData, 'PNG', marginValue, marginValue, contentWidthMM, actualContentHeightMMForThisPage);
@@ -100,7 +99,6 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
 
       } catch (error) {
         console.error("Error generating PDF:", error);
-        // Potentially show a toast to the user
       }
     }
     setIsDownloading(false);
@@ -204,7 +202,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
               <div className="space-y-4 text-sm">
                 {questions.mcqs.map((questionText, index) => (
                   <div key={`mcq-${index}`} className="pb-2">
-                    <p className="mb-2">{questionText}</p>
+                    <p className="mb-2 text-sm">{questionText}</p>
                   </div>
                 ))}
               </div>
@@ -300,3 +298,4 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
   );
 }
 
+    
