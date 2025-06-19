@@ -2,7 +2,7 @@
 "use client";
 
 import type * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import type { QuestionPaperDisplayFormData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,15 @@ interface QuestionPaperDisplayProps {
 
 export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDisplayProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [displayDate, setDisplayDate] = useState('');
+
+  useEffect(() => {
+    if (formData.manualDate) {
+      setDisplayDate(formData.manualDate);
+    } else {
+      setDisplayDate(new Date().toLocaleDateString());
+    }
+  }, [formData.manualDate]);
 
   const handleDownloadPdf = async () => {
     setIsDownloading(true);
@@ -162,7 +171,8 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
                 <div className="flex-grow flex flex-col items-center text-center">
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1">{formData.institutionName || "ExamGenius AI Institute"}</h1>
                   {formData.institutionAddress && <p className="text-xs sm:text-sm text-gray-700 mb-2">{formData.institutionAddress}</p>}
-                  <h2 className="text-lg sm:text-xl font-semibold">{formData.examType} - {new Date().getFullYear()}</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold mb-1">{formData.examType}</h2>
+                  {displayDate && <p className="text-xs sm:text-sm text-gray-700">Date: {displayDate}</p>}
                 </div>
             </div>
             

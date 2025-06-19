@@ -13,6 +13,7 @@ export const questionPaperFormSchema = z.object({
   subject: z.string().min(1, "Subject is required."),
   subjectCode: z.string().optional(),
   examType: z.enum(ExamTypes).default("Final Examination"),
+  manualDate: z.string().optional().describe("Optional manual date for the paper, e.g., YYYY-MM-DD"),
   totalMarks: z.coerce.number().min(1, "Total marks must be at least 1.").max(1000, "Total marks cannot exceed 1000."),
   passMarks: z.coerce.number().min(1, "Pass marks must be at least 1.").max(1000, "Pass marks cannot exceed 1000."),
   timeLimit: z.string().min(1, "Time limit is required. (e.g., 2 hours, 90 minutes)"),

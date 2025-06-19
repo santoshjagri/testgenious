@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles, CalendarIcon } from 'lucide-react';
 import { generateQuestions, type GenerateQuestionsInput, type GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { fileToDataUri } from '@/lib/utils';
@@ -47,6 +47,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       subject: '',
       subjectCode: '',
       examType: 'Final Examination',
+      manualDate: '',
       totalMarks: 70,
       passMarks: 23,
       timeLimit: '2 hours',
@@ -83,6 +84,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
         subject: '',
         subjectCode: '',
         examType: 'Final Examination',
+        manualDate: '',
         totalMarks: 70,
         passMarks: 23,
         timeLimit: '2 hours',
@@ -364,8 +366,8 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                   )}
                 />
               </div>
-
-              <FormField
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
                   control={form.control}
                   name="language"
                   render={({ field }) => (
@@ -388,6 +390,21 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="manualDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><CalendarIcon className="mr-2 h-4 w-4" />Paper Date (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., 2024-07-15" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormDescription>Enter if specific date needed. Else, today's date is used.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             <div className="space-y-6">
@@ -584,3 +601,4 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     </Card>
   );
 }
+
