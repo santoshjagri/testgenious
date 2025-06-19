@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation'; 
-import { AuthGuard } from '@/components/auth/AuthGuard';
+// Removed: import { AuthGuard } from '@/components/auth/AuthGuard';
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
 import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, StorableQuestionPaperFormValues } from '@/lib/types';
@@ -242,74 +242,73 @@ export default function Home() {
 
 
   return (
-    <AuthGuard>
-      <main className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
-        <div className="w-full max-w-4xl space-y-8 sm:space-y-12">
-          {editingPaperId && (
-              <Alert variant="default" className="border-accent bg-accent/10 text-accent-foreground mb-6 no-print">
-                  <Edit3 className="h-5 w-5" />
-                  <AlertTitle>Editing Mode</AlertTitle>
-                  <AlertDescription>
-                  You are currently editing a previously saved paper. Make your changes and click "Generate Question Paper" to update it.
-                  <Button variant="outline" size="sm" onClick={clearFormAndEditState} className="ml-4">
-                      Create New Instead
-                  </Button>
-                  </AlertDescription>
-              </Alert>
-          )}
-          
-          <QuestionPaperForm 
-              key={initialFormValues ? editingPaperId : 'new'} 
-              onSubmit={handleFormSubmit} 
-              isLoading={isLoading}
-              initialValues={initialFormValues} 
-          />
-
-          {isLoading && (
-            <div className="flex justify-center items-center p-10 bg-card rounded-lg shadow-md">
-              <div className="animate-pulse flex flex-col items-center space-y-2">
-                <svg className="animate-spin h-12 w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p className="text-lg text-primary font-medium">Preparing your masterpiece...</p>
-                <p className="text-sm text-muted-foreground">This might take a moment.</p>
-              </div>
-            </div>
-          )}
-
-          {!isLoading && generatedPaper && formSnapshotForDisplay && (
-            <div className="animate-fadeInUp">
-              <QuestionPaperDisplay formData={formSnapshotForDisplay} questions={generatedPaper} />
-            </div>
-          )}
-
-          {!isLoading && !generatedPaper && !editingPaperId && ( 
-             <Alert className="mt-8 border-primary/30 bg-primary/5 text-primary no-print">
-              <Terminal className="h-5 w-5" />
-              <AlertTitle className="font-headline">Welcome to ExamGenius AI!</AlertTitle>
-              <AlertDescription>
-                Fill out the form above to generate or manually create your custom question paper. The AI can craft questions, or you can write your own!
-              </AlertDescription>
+    // Removed AuthGuard wrapper
+    <main className="flex-1 flex flex-col items-center justify-start p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
+      <div className="w-full max-w-4xl space-y-8 sm:space-y-12">
+        {editingPaperId && (
+            <Alert variant="default" className="border-accent bg-accent/10 text-accent-foreground mb-6 no-print">
+                <Edit3 className="h-5 w-5" />
+                <AlertTitle>Editing Mode</AlertTitle>
+                <AlertDescription>
+                You are currently editing a previously saved paper. Make your changes and click "Generate Question Paper" to update it.
+                <Button variant="outline" size="sm" onClick={clearFormAndEditState} className="ml-4">
+                    Create New Instead
+                </Button>
+                </AlertDescription>
             </Alert>
-          )}
-        </div>
-        <style jsx global>{`
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
+        )}
+        
+        <QuestionPaperForm 
+            key={initialFormValues ? editingPaperId : 'new'} 
+            onSubmit={handleFormSubmit} 
+            isLoading={isLoading}
+            initialValues={initialFormValues} 
+        />
+
+        {isLoading && (
+          <div className="flex justify-center items-center p-10 bg-card rounded-lg shadow-md">
+            <div className="animate-pulse flex flex-col items-center space-y-2">
+              <svg className="animate-spin h-12 w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p className="text-lg text-primary font-medium">Preparing your masterpiece...</p>
+              <p className="text-sm text-muted-foreground">This might take a moment.</p>
+            </div>
+          </div>
+        )}
+
+        {!isLoading && generatedPaper && formSnapshotForDisplay && (
+          <div className="animate-fadeInUp">
+            <QuestionPaperDisplay formData={formSnapshotForDisplay} questions={generatedPaper} />
+          </div>
+        )}
+
+        {!isLoading && !generatedPaper && !editingPaperId && ( 
+           <Alert className="mt-8 border-primary/30 bg-primary/5 text-primary no-print">
+            <Terminal className="h-5 w-5" />
+            <AlertTitle className="font-headline">Welcome to ExamGenius AI!</AlertTitle>
+            <AlertDescription>
+              Fill out the form above to generate or manually create your custom question paper. The AI can craft questions, or you can write your own!
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+      <style jsx global>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
           }
-          .animate-fadeInUp {
-            animation: fadeInUp 0.5s ease-out forwards;
+          to {
+            opacity: 1;
+            transform: translateY(0);
           }
-        `}</style>
-      </main>
-    </AuthGuard>
+        }
+        .animate-fadeInUp {
+          animation: fadeInUp 0.5s ease-out forwards;
+        }
+      `}</style>
+    </main>
   );
 }
