@@ -26,6 +26,7 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
     if (formData.manualDate) {
       setDisplayDate(formData.manualDate);
     } else {
+      // This will only run on the client, after initial hydration
       setDisplayDate(new Date().toLocaleDateString());
     }
   }, [formData.manualDate]);
@@ -179,10 +180,10 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
             <div className="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-1 text-sm mt-4 pt-4 border-t border-gray-300">
                 <div><strong>Subject:</strong> {formData.subject}</div>
                 {formData.subjectCode && <div><strong>Subject Code:</strong> {formData.subjectCode}</div>}
-                <div><strong>Class/Level:</strong> {formData.classLevel}</div>
                 <div><strong>Full Marks:</strong> {formData.totalMarks}</div>
-                <div><strong>Time Allowed:</strong> {formData.timeLimit}</div>
+                <div><strong>Class/Level:</strong> {formData.classLevel}</div>
                 <div><strong>Pass Marks:</strong> {formData.passMarks}</div>
+                <div><strong>Time Allowed:</strong> {formData.timeLimit}</div>
             </div>
         </CardHeader>
 
@@ -302,3 +303,5 @@ export function QuestionPaperDisplay({ formData, questions }: QuestionPaperDispl
   );
 }
 
+
+    
