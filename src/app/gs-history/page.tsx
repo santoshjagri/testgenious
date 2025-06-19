@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle } from "lucide-react";
+import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle, Loader2 } from "lucide-react";
 import type { StoredGradeSheet } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,12 +21,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { GradeSheetDisplay } from '@/components/gradesheet/GradeSheetDisplay';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const LOCAL_STORAGE_KEY = "gradesheetHistory";
 
 export default function GradesheetHistoryPage() {
   const [historyItems, setHistoryItems] = useState<StoredGradeSheet[]>([]);
   const [selectedGradeSheetForView, setSelectedGradeSheetForView] = useState<StoredGradeSheet | null>(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -98,8 +101,6 @@ export default function GradesheetHistoryPage() {
   };
 
   const handlePrint = () => {
-    // This relies on the GradeSheetDisplay component being rendered
-    // and the print styles in globals.css
     if (selectedGradeSheetForView) {
       window.print();
     } else {
@@ -111,14 +112,100 @@ export default function GradesheetHistoryPage() {
     }
   };
 
-  const handleDownloadPdf = () => {
-    // Placeholder, actual PDF generation logic is complex and would be similar to QuestionPaperDisplay
-     toast({
-        title: "Feature Not Yet Implemented",
-        description: "PDF download for gradesheets will be available in a future update.",
-        variant: "default"
+  const handleDownloadPdf = async () => {
+    if (!selectedGradeSheetForView) {
+      toast({
+        title: "No Gradesheet Selected",
+        description: "Please view a gradesheet before trying to download PDF.",
+        variant: "destructive"
       });
+      return;
+    }
+
+    setIsDownloadingPdf(true);
+    const paperElement = document.getElementById('gradesheet-printable-area'); // This ID is on GradeSheetDisplay
+    
+    if (paperElement) {
+      try {
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfPageWidth = pdf.internal.pageSize.getWidth();
+        const pdfPageHeight = pdf.internal.pageSize.getHeight();
+
+        const marginTopMM = 20; 
+        const marginBottomMM = 20;
+        const marginLeftMM = 15; 
+        const marginRightMM = 15;
+
+        const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
+        const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
+
+        const fullCanvas = await html2canvas(paperElement, {
+          scale: 2, 
+          useCORS: true,
+          logging: false,
+        });
+
+        const fullCanvasWidthPx = fullCanvas.width;
+        const fullCanvasHeightPx = fullCanvas.height;
+
+        const pxPerMm = fullCanvasWidthPx / contentWidthMM; 
+        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97; // 3% buffer
+
+        let currentYpx = 0; 
+
+        while (currentYpx < fullCanvasHeightPx) {
+          const remainingHeightPx = fullCanvasHeightPx - currentYpx;
+          const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
+
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = fullCanvasWidthPx;
+          pageCanvas.height = sliceForThisPagePx;
+          const pageCtx = pageCanvas.getContext('2d');
+
+          if (pageCtx) {
+            pageCtx.drawImage(
+              fullCanvas,
+              0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 
+              0, 0, fullCanvasWidthPx, sliceForThisPagePx 
+            );
+            const pageImgData = pageCanvas.toDataURL('image/png', 0.9); 
+            const actualContentHeightMMForThisPage = (sliceForThisPagePx / pxPerMm);
+            pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
+          }
+          currentYpx += sliceForThisPagePx;
+          if (currentYpx < fullCanvasHeightPx) {
+            pdf.addPage();
+          }
+        }
+        
+        const safeStudentName = selectedGradeSheetForView.gradesheetData.studentName?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'student';
+        const safeExamType = selectedGradeSheetForView.gradesheetData.examType?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'exam';
+        const filename = `gradesheet_${safeStudentName}_${safeExamType}.pdf`;
+        
+        pdf.save(filename);
+        toast({
+          title: "PDF Downloaded",
+          description: "Gradesheet PDF has been successfully downloaded.",
+        });
+
+      } catch (error) {
+        console.error("Error generating PDF from history:", error);
+        toast({
+          title: "PDF Generation Failed",
+          description: "Could not generate PDF for the gradesheet. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } else {
+         toast({
+            title: "PDF Generation Error",
+            description: "Could not find the gradesheet content to generate PDF.",
+            variant: "destructive",
+        });
+    }
+    setIsDownloadingPdf(false);
   };
+
 
   if (selectedGradeSheetForView) {
     return (
@@ -134,11 +221,21 @@ export default function GradesheetHistoryPage() {
             <Button onClick={handlePrint} variant="outline">
               <PrinterIcon className="mr-2 h-4 w-4" /> Print Gradesheet
             </Button>
-            <Button onClick={handleDownloadPdf} variant="default" disabled>
-              <Download className="mr-2 h-4 w-4" /> Download PDF (Soon)
+            <Button onClick={handleDownloadPdf} variant="default" disabled={isDownloadingPdf}>
+               {isDownloadingPdf ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" /> Download PDF
+                </>
+              )}
             </Button>
         </div>
-        <GradeSheetDisplay result={selectedGradeSheetForView.gradesheetData} />
+        {/* The GradeSheetDisplay component has id="gradesheet-printable-area" on its root Card */}
+        <GradeSheetDisplay result={selectedGradeSheetForView.gradesheetData} /> 
       </div>
     );
   }
@@ -243,4 +340,3 @@ export default function GradesheetHistoryPage() {
     </div>
   );
 }
-

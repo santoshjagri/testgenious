@@ -1,28 +1,96 @@
 
 "use client";
 
+import { useState, useEffect } from 'react';
 import type { CalculatedGradeSheetResult } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, XCircle, Award, User, CalendarCheck2, Percent, Star, TrendingUp, BookOpen, Edit, Download, Printer, School } from 'lucide-react';
+import { CheckCircle, XCircle, Award, User, CalendarCheck2, Percent, Star, TrendingUp, BookOpen, Edit, Download, Printer as PrinterIcon, School, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface GradeSheetDisplayProps {
   result: CalculatedGradeSheetResult;
 }
 
 export function GradeSheetDisplay({ result }: GradeSheetDisplayProps) {
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   
   const handlePrint = () => {
     window.print();
   };
 
-  // Placeholder for PDF Download logic (can be complex, similar to QuestionPaperDisplay)
-  const handleDownloadPdf = () => {
-    alert("PDF Download functionality will be implemented in a future update.");
-    // Similar logic to QuestionPaperDisplay's PDF generation would go here
-    // using html2canvas and jsPDF, targeting the 'gradesheet-printable-area'.
+  const handleDownloadPdf = async () => {
+    setIsDownloadingPdf(true);
+    const paperElement = document.getElementById('gradesheet-printable-area');
+    
+    if (paperElement) {
+      try {
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfPageWidth = pdf.internal.pageSize.getWidth();
+        const pdfPageHeight = pdf.internal.pageSize.getHeight();
+
+        const marginTopMM = 20; 
+        const marginBottomMM = 20;
+        const marginLeftMM = 15; 
+        const marginRightMM = 15;
+
+        const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
+        const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
+
+        const fullCanvas = await html2canvas(paperElement, {
+          scale: 2, 
+          useCORS: true,
+          logging: false,
+        });
+
+        const fullCanvasWidthPx = fullCanvas.width;
+        const fullCanvasHeightPx = fullCanvas.height;
+
+        const pxPerMm = fullCanvasWidthPx / contentWidthMM; 
+        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97; // 3% buffer
+
+        let currentYpx = 0; 
+
+        while (currentYpx < fullCanvasHeightPx) {
+          const remainingHeightPx = fullCanvasHeightPx - currentYpx;
+          const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
+
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = fullCanvasWidthPx;
+          pageCanvas.height = sliceForThisPagePx;
+          const pageCtx = pageCanvas.getContext('2d');
+
+          if (pageCtx) {
+            pageCtx.drawImage(
+              fullCanvas,
+              0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 
+              0, 0, fullCanvasWidthPx, sliceForThisPagePx 
+            );
+            const pageImgData = pageCanvas.toDataURL('image/png', 0.9); 
+            const actualContentHeightMMForThisPage = (sliceForThisPagePx / pxPerMm);
+            pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
+          }
+          currentYpx += sliceForThisPagePx;
+          if (currentYpx < fullCanvasHeightPx) {
+            pdf.addPage();
+          }
+        }
+        
+        const safeStudentName = result.studentName?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'student';
+        const safeExamType = result.examType?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'exam';
+        const filename = `gradesheet_${safeStudentName}_${safeExamType}.pdf`;
+        
+        pdf.save(filename);
+
+      } catch (error) {
+        console.error("Error generating PDF for gradesheet:", error);
+        alert("Failed to generate PDF. Please try again.");
+      }
+    }
+    setIsDownloadingPdf(false);
   };
   
   return (
@@ -121,16 +189,25 @@ export function GradeSheetDisplay({ result }: GradeSheetDisplayProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="p-6 border-t border-primary/10 flex-col items-center text-center space-y-2 text-xs text-muted-foreground">
+      <CardFooter className="p-6 border-t border-primary/10 flex-col items-center text-center space-y-2">
          <div className="flex flex-wrap gap-3 mb-4 no-print">
             <Button onClick={handlePrint} variant="outline" size="sm">
-                <Printer className="mr-2 h-4 w-4" /> Print Gradesheet
+                <PrinterIcon className="mr-2 h-4 w-4" /> Print Gradesheet
             </Button>
-            <Button onClick={handleDownloadPdf} variant="default" size="sm" disabled> {/* Disabled for now */}
-                <Download className="mr-2 h-4 w-4" /> Download PDF
+            <Button onClick={handleDownloadPdf} variant="default" size="sm" disabled={isDownloadingPdf}>
+              {isDownloadingPdf ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" /> Download PDF
+                </>
+              )}
             </Button>
         </div>
-        <p>Generated by ExamGenius AI &copy; {new Date().getFullYear()}</p>
+        <p className="text-xs text-muted-foreground">Generated by ExamGenius AI &copy; {new Date().getFullYear()}</p>
       </CardFooter>
     </Card>
   );
