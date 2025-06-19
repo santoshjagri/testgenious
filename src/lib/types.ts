@@ -87,6 +87,7 @@ export type SubjectMarkInput = z.infer<typeof subjectMarkSchema>;
 
 export const gradeSheetFormSchema = z.object({
   studentId: z.string().optional(),
+  symbolNo: z.string().optional(),
   studentName: z.string().min(1, "Student name is required."),
   studentClass: z.string().min(1, "Class is required."),
   rollNo: z.string().min(1, "Roll number is required."),

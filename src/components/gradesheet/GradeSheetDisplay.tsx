@@ -6,7 +6,7 @@ import type { CalculatedGradeSheetResult } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, XCircle, Award, User, CalendarCheck2, Percent, Star, TrendingUp, BookOpen, Edit, Download, Printer as PrinterIcon, School, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Award, User, CalendarCheck2, Percent, Star, TrendingUp, BookOpen, Edit, Download, Printer as PrinterIcon, School, Loader2, Hash } from 'lucide-react';
 import { Button } from '../ui/button';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -35,6 +35,7 @@ export function GradeSheetDisplay({ result }: GradeSheetDisplayProps) {
           <div><strong>Class:</strong> {result.studentClass}</div>
           <div><strong>Roll No:</strong> {result.rollNo}</div>
           {result.studentId && <div><strong>Student ID:</strong> {result.studentId}</div>}
+          {result.symbolNo && <div><strong>Symbol No:</strong> {result.symbolNo}</div>}
           <div><strong>Academic Year:</strong> {result.academicYear}</div>
           <div><strong>Exam Date:</strong> {new Date(result.examDate).toLocaleDateString()}</div>
         </div>

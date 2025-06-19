@@ -34,6 +34,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     resolver: zodResolver(gradeSheetFormSchema),
     defaultValues: initialValues || {
       studentId: '',
+      symbolNo: '',
       studentName: '',
       studentClass: '',
       rollNo: '',
@@ -113,14 +114,14 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 )}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FormField
                 control={form.control}
                 name="studentClass"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Class</FormLabel>
-                    <FormControl><Input placeholder="e.g., Class 10, Grade A" {...field} /></FormControl>
+                    <FormControl><Input placeholder="e.g., Class 10" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -132,6 +133,17 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                   <FormItem>
                     <FormLabel className="flex items-center"><Hash className="mr-2 h-4 w-4"/>Roll No.</FormLabel>
                     <FormControl><Input placeholder="e.g., 25" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="symbolNo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center"><Hash className="mr-2 h-4 w-4"/>Symbol No. (Optional)</FormLabel>
+                    <FormControl><Input placeholder="e.g., 0012345A" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

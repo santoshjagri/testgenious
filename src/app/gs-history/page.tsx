@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle, Loader2 } from "lucide-react";
+import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle, Loader2, Hash } from "lucide-react";
 import type { StoredGradeSheet } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -295,6 +295,7 @@ export default function GradesheetHistoryPage() {
                 <CardTitle className="text-lg text-primary flex items-center"><User className="mr-2 h-5 w-5"/>{item.gradesheetData.studentName}</CardTitle>
                 <div className="text-xs text-muted-foreground space-y-0.5">
                     <p>{item.gradesheetData.studentClass} - Roll: {item.gradesheetData.rollNo}</p>
+                    {item.gradesheetData.symbolNo && <p className="flex items-center"><Hash className="h-3 w-3 mr-1"/>Symbol: {item.gradesheetData.symbolNo}</p>}
                     <p>{item.gradesheetData.examType}</p>
                     <p className="flex items-center"><BookOpen className="h-3 w-3 mr-1"/>{item.gradesheetData.schoolName}</p>
                 </div>
@@ -341,4 +342,3 @@ export default function GradesheetHistoryPage() {
     </div>
   );
 }
-
