@@ -4,10 +4,11 @@ import type { GradeSheetFormValues, GradeSheetCalculationOutput } from './types'
 interface GradingRule {
   minPercentage: number;
   grade: string;
-  gpa: number;
+  // The gpa field in GradingRule is now illustrative, as GPA is calculated directly.
+  gpa: number; 
 }
 
-// Define your grading scale here
+// Define your grading scale here (primarily for letter grades now)
 const GRADING_SCALE: GradingRule[] = [
   { minPercentage: 90, grade: 'A+', gpa: 4.0 },
   { minPercentage: 80, grade: 'A', gpa: 3.6 },
@@ -39,13 +40,13 @@ export function calculateGradeSheet(formData: GradeSheetFormValues): GradeSheetC
   const percentage = totalFullMarks > 0 ? (totalObtainedMarks / totalFullMarks) * 100 : 0;
 
   let calculatedGrade = 'N/A';
-  let calculatedGpa = 0.0;
+  // Calculate GPA using the formula: (Percentage / 100) * 4
+  const calculatedGpa = (percentage / 100) * 4.0;
 
-  // Grade and GPA are determined by overall percentage
+  // Determine Grade (letter grade) from the GRADING_SCALE based on percentage
   for (const rule of GRADING_SCALE) {
     if (percentage >= rule.minPercentage) {
       calculatedGrade = rule.grade;
-      calculatedGpa = rule.gpa;
       break;
     }
   }
@@ -67,18 +68,20 @@ export function calculateGradeSheet(formData: GradeSheetFormValues): GradeSheetC
     if (!allSubjectsPassed) {
         failReasons.push("one or more subjects not passed");
     }
-    if (!overallPercentagePass && allSubjectsPassed) { // Only add this if they passed subjects but not overall %
+    if (!overallPercentagePass && allSubjectsPassed) { 
+        failReasons.push(`overall percentage (${percentage.toFixed(2)}%) is below the pass threshold of ${OVERALL_PASS_PERCENTAGE_THRESHOLD}%`);
+    } else if (!overallPercentagePass && !allSubjectsPassed) { // If both conditions for failure are met
         failReasons.push(`overall percentage (${percentage.toFixed(2)}%) is below the pass threshold of ${OVERALL_PASS_PERCENTAGE_THRESHOLD}%`);
     }
     
     if (failReasons.length > 0) {
       remarks = `Needs significant improvement. Reason(s): ${failReasons.join('; ')}.`;
-    } else if (!allSubjectsPassed) { // Fallback if reasons array somehow remains empty
+    } else if (!allSubjectsPassed) { 
        remarks = "Needs significant improvement. Failed in one or more subjects."
     } else if (!overallPercentagePass) {
        remarks = "Needs significant improvement. Overall percentage is below pass threshold."
     } else {
-       remarks = "Needs improvement to pass." // Generic fallback
+       remarks = "Needs improvement to pass." 
     }
   }
 
@@ -88,9 +91,10 @@ export function calculateGradeSheet(formData: GradeSheetFormValues): GradeSheetC
     totalFullMarks,
     percentage: parseFloat(percentage.toFixed(2)),
     grade: calculatedGrade, 
-    gpa: parseFloat(calculatedGpa.toFixed(1)), 
+    gpa: parseFloat(calculatedGpa.toFixed(2)), // GPA rounded to two decimal places
     resultStatus,
     individualSubjectStatus,
     remarks,
   };
 }
+
