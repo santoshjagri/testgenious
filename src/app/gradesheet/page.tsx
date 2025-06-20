@@ -7,10 +7,13 @@ import { GradeSheetDisplay } from "@/components/gradesheet/GradeSheetDisplay";
 import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet, GradeSheetCalculationOutput } from "@/lib/types";
 import { calculateGradeSheet } from "@/lib/gradesheet-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, FileText, AlertCircle } from "lucide-react";
+import { GraduationCap, FileText, AlertCircle, Download, Printer as PrinterIcon, Loader2 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { fileToDataUri } from '@/lib/utils';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const GRADESHEET_LOCAL_STORAGE_KEY = "gradesheetHistory";
 
@@ -18,6 +21,7 @@ export default function GradesheetPage() {
   const [calculatedResult, setCalculatedResult] = React.useState<CalculatedGradeSheetResult | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = React.useState(false);
   const { toast } = useToast();
 
   const handleFormSubmit = async (values: GradeSheetFormValues) => {
@@ -25,7 +29,7 @@ export default function GradesheetPage() {
     setError(null);
     setCalculatedResult(null);
     try {
-      await new Promise(resolve => setTimeout(resolve, 100)); // Simulate short delay
+      // await new Promise(resolve => setTimeout(resolve, 100)); // Simulate short delay
 
       const { logo, ...otherFormValues } = values;
       let logoDataUri: string | undefined = undefined;
@@ -46,14 +50,13 @@ export default function GradesheetPage() {
       const calculationOutput: GradeSheetCalculationOutput = calculateGradeSheet(values);
       
       const fullResult: CalculatedGradeSheetResult = {
-        ...otherFormValues, // Contains all form values except 'logo'
-        logoDataUri,      // Contains the processed logo data URI
-        ...calculationOutput, // Contains all calculated fields
+        ...otherFormValues, 
+        logoDataUri,      
+        ...calculationOutput, 
       };
       
       setCalculatedResult(fullResult);
 
-      // Save to local storage
       if (typeof window !== 'undefined') {
         try {
           const existingHistoryString = localStorage.getItem(GRADESHEET_LOCAL_STORAGE_KEY);
@@ -62,7 +65,7 @@ export default function GradesheetPage() {
           const newGradeSheetEntry: StoredGradeSheet = {
             id: crypto.randomUUID(), 
             dateGenerated: new Date().toISOString(),
-            gradesheetData: fullResult, // Save the complete result
+            gradesheetData: fullResult,
           };
           existingHistory = [newGradeSheetEntry, ...existingHistory];
           localStorage.setItem(GRADESHEET_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20))); 
@@ -95,6 +98,114 @@ export default function GradesheetPage() {
     }
   };
 
+  const handlePrint = () => {
+    if (calculatedResult) {
+      window.print();
+    } else {
+      toast({
+        title: "No Gradesheet Available",
+        description: "Please generate a gradesheet before trying to print.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!calculatedResult) {
+      toast({
+        title: "No Gradesheet Available",
+        description: "Please generate a gradesheet before trying to download PDF.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsDownloadingPdf(true);
+    const paperElement = document.getElementById('gradesheet-printable-area'); 
+    
+    if (paperElement) {
+      try {
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfPageWidth = pdf.internal.pageSize.getWidth();
+        const pdfPageHeight = pdf.internal.pageSize.getHeight();
+
+        const marginMM = 10; 
+        const marginTopMM = marginMM; 
+        const marginBottomMM = marginMM;
+        const marginLeftMM = marginMM; 
+        const marginRightMM = marginMM;
+
+        const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
+        const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
+
+        const fullCanvas = await html2canvas(paperElement, {
+          scale: 2, 
+          useCORS: true,
+          logging: false,
+        });
+
+        const fullCanvasWidthPx = fullCanvas.width;
+        const fullCanvasHeightPx = fullCanvas.height;
+
+        const pxPerMm = fullCanvasWidthPx / contentWidthMM; 
+        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97; 
+
+        let currentYpx = 0; 
+
+        while (currentYpx < fullCanvasHeightPx) {
+          const remainingHeightPx = fullCanvasHeightPx - currentYpx;
+          const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
+
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = fullCanvasWidthPx;
+          pageCanvas.height = sliceForThisPagePx;
+          const pageCtx = pageCanvas.getContext('2d');
+
+          if (pageCtx) {
+            pageCtx.drawImage(
+              fullCanvas,
+              0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 
+              0, 0, fullCanvasWidthPx, sliceForThisPagePx 
+            );
+            const pageImgData = pageCanvas.toDataURL('image/png', 0.9); 
+            const actualContentHeightMMForThisPage = (sliceForThisPagePx / pxPerMm);
+            pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
+          }
+          currentYpx += sliceForThisPagePx;
+          if (currentYpx < fullCanvasHeightPx) {
+            pdf.addPage();
+          }
+        }
+        
+        const safeStudentName = calculatedResult.studentName?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'student';
+        const safeExamType = calculatedResult.examType?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'exam';
+        const filename = `gradesheet_${safeStudentName}_${safeExamType}.pdf`;
+        
+        pdf.save(filename);
+        toast({
+          title: "PDF Downloaded",
+          description: "Gradesheet PDF has been successfully downloaded.",
+        });
+
+      } catch (error) {
+        console.error("Error generating PDF from gradesheet page:", error);
+        toast({
+          title: "PDF Generation Failed",
+          description: "Could not generate PDF for the gradesheet. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } else {
+         toast({
+            title: "PDF Generation Error",
+            description: "Could not find the gradesheet content to generate PDF.",
+            variant: "destructive",
+        });
+    }
+    setIsDownloadingPdf(false);
+  };
+
+
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
       <div className="w-full max-w-5xl space-y-6 sm:space-y-8">
@@ -115,7 +226,7 @@ export default function GradesheetPage() {
                 <AlertTitle className="text-base sm:text-lg">Work in Progress</AlertTitle>
                 <AlertDescription className="text-xs sm:text-sm">
                   This GradeSheet tool is currently in client-side mode. Data is saved to your browser's local storage.
-                  Firebase/Firestore integration for cloud data persistence, enhanced PDF download, and printing features will be added in future updates.
+                  Enhanced PDF download, and printing features are available.
                 </AlertDescription>
             </Alert>
             <GradeSheetForm onSubmit={handleFormSubmit} isLoading={isProcessing} />
@@ -144,9 +255,28 @@ export default function GradesheetPage() {
         )}
 
         {calculatedResult && !isProcessing && (
-          <div className="animate-fadeInUp mt-6 sm:mt-8">
-            <GradeSheetDisplay result={calculatedResult} />
-          </div>
+          <>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 mt-6 sm:mt-8 mb-4 sm:mb-6 no-print">
+                <Button onClick={handlePrint} variant="outline" className="w-full sm:w-auto">
+                  <PrinterIcon className="mr-2 h-4 w-4" /> Print Gradesheet
+                </Button>
+                <Button onClick={handleDownloadPdf} variant="default" disabled={isDownloadingPdf} className="w-full sm:w-auto">
+                   {isDownloadingPdf ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Downloading...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="mr-2 h-4 w-4" /> Download PDF
+                    </>
+                  )}
+                </Button>
+            </div>
+            <div className="animate-fadeInUp">
+              <GradeSheetDisplay result={calculatedResult} />
+            </div>
+          </>
         )}
       </div>
        <style jsx global>{`
@@ -167,3 +297,4 @@ export default function GradesheetPage() {
     </main>
   );
 }
+
