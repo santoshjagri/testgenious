@@ -4,12 +4,13 @@
 import * as React from 'react';
 import { GradeSheetForm } from "@/components/gradesheet/GradeSheetForm";
 import { GradeSheetDisplay } from "@/components/gradesheet/GradeSheetDisplay";
-import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet } from "@/lib/types";
+import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet, GradeSheetCalculationOutput } from "@/lib/types";
 import { calculateGradeSheet } from "@/lib/gradesheet-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, FileText, AlertCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { fileToDataUri } from '@/lib/utils';
 
 const GRADESHEET_LOCAL_STORAGE_KEY = "gradesheetHistory";
 
@@ -24,9 +25,33 @@ export default function GradesheetPage() {
     setError(null);
     setCalculatedResult(null);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-      const result = calculateGradeSheet(values);
-      setCalculatedResult(result);
+      await new Promise(resolve => setTimeout(resolve, 100)); // Simulate short delay
+
+      const { logo, ...otherFormValues } = values;
+      let logoDataUri: string | undefined = undefined;
+
+      if (logo) {
+        try {
+          logoDataUri = await fileToDataUri(logo);
+        } catch (e) {
+          console.error("Error converting logo to data URI:", e);
+          toast({
+            title: "Logo Error",
+            description: "Could not process the uploaded logo. Continuing without it.",
+            variant: "destructive",
+          });
+        }
+      }
+      
+      const calculationOutput: GradeSheetCalculationOutput = calculateGradeSheet(values);
+      
+      const fullResult: CalculatedGradeSheetResult = {
+        ...otherFormValues, // Contains all form values except 'logo'
+        logoDataUri,      // Contains the processed logo data URI
+        ...calculationOutput, // Contains all calculated fields
+      };
+      
+      setCalculatedResult(fullResult);
 
       // Save to local storage
       if (typeof window !== 'undefined') {
@@ -37,10 +62,10 @@ export default function GradesheetPage() {
           const newGradeSheetEntry: StoredGradeSheet = {
             id: crypto.randomUUID(), 
             dateGenerated: new Date().toISOString(),
-            gradesheetData: result,
+            gradesheetData: fullResult, // Save the complete result
           };
           existingHistory = [newGradeSheetEntry, ...existingHistory];
-          localStorage.setItem(GRADESHEET_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20))); // Keep last 20 entries
+          localStorage.setItem(GRADESHEET_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20))); 
           
           toast({
             title: "GradeSheet Generated!",

@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, User, BookOpen, CalendarDays, Hash, School, Award, PlusCircle, Trash2 } from 'lucide-react';
+import { Loader2, User, BookOpen, CalendarDays, Hash, School, Award, PlusCircle, Trash2, ImagePlus } from 'lucide-react';
 import { DatePicker } from '@/components/ui/date-picker';
 import { format } from 'date-fns';
 
@@ -38,6 +38,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
       studentClass: '',
       rollNo: '',
       schoolName: 'ExamGenius Academy',
+      logo: undefined,
       examType: 'Final Examination',
       academicYear: "", 
       examDate: "",     
@@ -56,6 +57,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     if (initialValues) {
       form.reset(initialValues); 
     } else {
+      // Ensure client-side specific initializations are done in useEffect
       if (typeof window !== 'undefined') { 
         if (form.getValues('examDate') === "") {
           form.setValue('examDate', format(new Date(), "yyyy-MM-dd"));
@@ -85,16 +87,49 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
         <Card className="border-primary/20">
           <CardHeader className="p-3 sm:p-4">
-            <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><User className="mr-2 h-5 w-5" />Student Information</CardTitle>
+            <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><School className="mr-2 h-5 w-5" />School & Student Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
+                name="schoolName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm sm:text-base">School Name</FormLabel>
+                    <FormControl><Input placeholder="e.g., Springfield High" {...field} className="text-sm sm:text-base"/></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="logo"
+                render={({ field: { onChange, value, ...rest } }) => ( 
+                  <FormItem>
+                    <FormLabel className="flex items-center text-sm sm:text-base"><ImagePlus className="mr-2 h-4 w-4" />School Logo (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={(e) => onChange(e.target.files?.[0])}
+                        {...rest} 
+                        className="file:mr-2 file:py-1.5 file:px-3 sm:file:mr-4 sm:file:py-2 sm:file:px-4 file:rounded-full file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs sm:text-sm">Upload your school's logo (PNG, JPG, GIF).</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              <FormField
+                control={form.control}
                 name="studentName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">Student Name</FormLabel>
+                    <FormLabel className="flex items-center text-sm sm:text-base"><User className="mr-2 h-4 w-4"/>Student Name</FormLabel>
                     <FormControl><Input placeholder="e.g., John Doe" {...field} className="text-sm sm:text-base"/></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -147,17 +182,6 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="schoolName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center text-sm sm:text-base"><School className="mr-2 h-4 w-4"/>School Name</FormLabel>
-                  <FormControl><Input placeholder="e.g., Springfield High" {...field} className="text-sm sm:text-base"/></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </CardContent>
         </Card>
 
@@ -202,7 +226,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 name="examDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="mb-1 sm:mb-1.5 text-sm sm:text-base">Exam Date</FormLabel>
+                    <FormLabel className="mb-1 sm:mb-1.5 text-sm sm:text-base flex items-center"><CalendarDays className="mr-2 h-4 w-4"/>Exam Date</FormLabel>
                     <FormControl>
                        <DatePicker
                         date={field.value ? new Date(field.value) : undefined}
