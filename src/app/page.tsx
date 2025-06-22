@@ -158,7 +158,6 @@ export default function Home() {
           institutionName: values.institutionName || 'ExamGenius AI Institute',
           institutionAddress: values.institutionAddress || '',
           subjectCode: values.subjectCode || '',
-          logoDataUri: logoDataUri,
           language: values.language,
           customPrompt: values.customPrompt,
           mcqCount: values.mcqCount,
@@ -192,7 +191,7 @@ export default function Home() {
             );
           } else {
             const newPaperEntry: StoredQuestionPaper = {
-              id: crypto.randomUUID(), // Changed from Date.now().toString()
+              id: crypto.randomUUID(),
               dateGenerated: new Date().toISOString(),
               formSnapshot: storableFormValues,
               generatedPaper: result,
@@ -310,4 +309,3 @@ export default function Home() {
     </main>
   );
 }
-

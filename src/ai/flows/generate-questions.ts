@@ -24,7 +24,6 @@ const GenerateQuestionsInputSchema = z.object({
   examType: z.string().describe('The type of exam (e.g., First Term, Mid Term, Final Examination).'), // Kept as string for broader AI understanding but UI will use enum
   institutionName: z.string().optional().describe('The name of the institution. Defaults to "ExamGenius AI Institute" if not provided by user.'),
   institutionAddress: z.string().optional().describe('The address of the institution. e.g., "123 Main Street, Anytown, ST 12345".'),
-  logoDataUri: z.string().optional().describe("A data URI of the institution's logo, if provided by the user."),
   subjectCode: z.string().optional().describe('The subject code for the paper.'),
   language: z.string().describe('The language in which the questions should be generated (e.g., English, Nepali, Hindi).'),
   customPrompt: z.string().optional().describe('Specific instructions, topics, or keywords provided by the user to guide question generation.'),
@@ -99,8 +98,6 @@ Generate the following number of questions:
 - Short Answer Questions: {{shortQuestionCount}}
 - Long Answer Questions: {{longQuestionCount}}
 - Numerical/Practical Questions: {{numericalPracticalCount}} (Generate these only if applicable to the subject. If not applicable, or if the count is 0, omit this section from the output.)
-
-The user might provide a logoDataUri for the institution's logo. You do not need to do anything with this logoDataUri; it is handled by the frontend for display.
 
 The output must be a JSON object strictly adhering to the 'GenerateQuestionsOutputSchema'.
 Each array in the JSON should contain the question strings as described.
