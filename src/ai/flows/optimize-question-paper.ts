@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -33,6 +34,7 @@ export async function optimizeQuestionPaper(input: OptimizeQuestionPaperInput): 
 
 const prompt = ai.definePrompt({
   name: 'optimizeQuestionPaperPrompt',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: OptimizeQuestionPaperInputSchema},
   output: {schema: OptimizeQuestionPaperOutputSchema},
   prompt: `You are an expert teacher specializing in creating and optimizing question papers.
@@ -60,6 +62,9 @@ const optimizeQuestionPaperFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+        throw new Error("The AI failed to optimize the paper. This may be due to a content safety filter or an internal error. Please try adjusting the content.");
+    }
+    return output;
   }
 );

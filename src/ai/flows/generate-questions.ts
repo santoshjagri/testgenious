@@ -57,6 +57,7 @@ export async function generateQuestions(input: GenerateQuestionsInput): Promise<
 
 const generateQuestionsPrompt = ai.definePrompt({
   name: 'generateQuestionsPrompt',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: GenerateQuestionsInputSchema},
   output: {schema: GenerateQuestionsOutputSchema},
   prompt: `You are an expert educator tasked with creating a comprehensive and well-structured question paper.
@@ -115,7 +116,10 @@ const generateQuestionsFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await generateQuestionsPrompt(input);
-    const result = output!;
+    if (!output) {
+      throw new Error("The AI failed to generate a response. This may be due to a content safety filter or an internal error. Please try adjusting your prompt.");
+    }
+    const result = output;
     // Ensure arrays are present if count > 0, even if AI ommitted them (shouldn't happen with schema but good fallback)
     if (input.veryShortQuestionCount > 0 && !result.veryShortQuestions) {
       result.veryShortQuestions = [];
