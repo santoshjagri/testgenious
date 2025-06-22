@@ -37,6 +37,18 @@ const prompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: OptimizeQuestionPaperInputSchema},
   output: {schema: OptimizeQuestionPaperOutputSchema},
+  config: {
+    safetySettings: [
+      {
+        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+        threshold: 'BLOCK_NONE',
+      },
+       {
+        category: 'HARM_CATEGORY_HARASSMENT',
+        threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+      },
+    ],
+  },
   prompt: `You are an expert teacher specializing in creating and optimizing question papers.
 
 You will use this information to optimize the question paper, ensuring the difficulty and length are appropriate for the students, considering the total marks, pass marks, and time limit.
