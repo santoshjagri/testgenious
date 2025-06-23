@@ -7,7 +7,7 @@ import { GradeSheetDisplay } from "@/components/gradesheet/GradeSheetDisplay";
 import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet, GradeSheetCalculationOutput } from "@/lib/types";
 import { calculateGradeSheet } from "@/lib/gradesheet-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, FileText, AlertCircle, Download, Printer as PrinterIcon, Loader2 } from "lucide-react";
+import { GraduationCap, FileText, AlertCircle, Download, Printer as PrinterIcon, Loader2, Edit3, RotateCcw } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +16,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 const GRADESHEET_LOCAL_STORAGE_KEY = "gradesheetHistory";
+const EDIT_GRADESHEET_ID_KEY = "editGradeSheetId";
 
 export default function GradesheetPage() {
   const [calculatedResult, setCalculatedResult] = React.useState<CalculatedGradeSheetResult | null>(null);
@@ -23,14 +24,61 @@ export default function GradesheetPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = React.useState(false);
   const { toast } = useToast();
+  const [initialFormValues, setInitialFormValues] = React.useState<GradeSheetFormValues | undefined>(undefined);
+  const [editingGradeSheetId, setEditingGradeSheetId] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const gradeSheetIdToEdit = localStorage.getItem(EDIT_GRADESHEET_ID_KEY);
+      if (gradeSheetIdToEdit) {
+        try {
+          const storedHistory = localStorage.getItem(GRADESHEET_LOCAL_STORAGE_KEY);
+          if (storedHistory) {
+            const historyItems: StoredGradeSheet[] = JSON.parse(storedHistory);
+            const gradeSheetToEdit = historyItems.find(item => item.id === gradeSheetIdToEdit);
+
+            if (gradeSheetToEdit) {
+              const formValues: GradeSheetFormValues = {
+                ...gradeSheetToEdit.gradesheetData,
+                logo: undefined, // Cannot restore file object
+              };
+
+              setInitialFormValues(formValues);
+              setCalculatedResult(gradeSheetToEdit.gradesheetData);
+              setEditingGradeSheetId(gradeSheetToEdit.id);
+              toast({
+                title: "Editing Gradesheet",
+                description: `Loaded gradesheet for "${gradeSheetToEdit.gradesheetData.studentName}" for editing.`,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load gradesheet for editing:", error);
+          toast({
+            title: "Error Loading Gradesheet",
+            description: "Could not load the selected gradesheet for editing.",
+            variant: "destructive",
+          });
+        } finally {
+          localStorage.removeItem(EDIT_GRADESHEET_ID_KEY);
+        }
+      } else {
+        // Clear form if not editing
+        setInitialFormValues(undefined);
+        setCalculatedResult(null);
+        setEditingGradeSheetId(null);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleFormSubmit = async (values: GradeSheetFormValues) => {
     setIsProcessing(true);
     setError(null);
-    setCalculatedResult(null);
+    if (!editingGradeSheetId) {
+      setCalculatedResult(null);
+    }
     try {
-      // await new Promise(resolve => setTimeout(resolve, 100)); // Simulate short delay
-
       const { logo, ...otherFormValues } = values;
       let logoDataUri: string | undefined = undefined;
 
@@ -45,6 +93,8 @@ export default function GradesheetPage() {
             variant: "destructive",
           });
         }
+      } else if (editingGradeSheetId && calculatedResult?.logoDataUri) {
+        logoDataUri = calculatedResult.logoDataUri;
       }
       
       const calculationOutput: GradeSheetCalculationOutput = calculateGradeSheet(values);
@@ -62,24 +112,36 @@ export default function GradesheetPage() {
           const existingHistoryString = localStorage.getItem(GRADESHEET_LOCAL_STORAGE_KEY);
           let existingHistory: StoredGradeSheet[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
           
-          const newGradeSheetEntry: StoredGradeSheet = {
-            id: crypto.randomUUID(), 
-            dateGenerated: new Date().toISOString(),
-            gradesheetData: fullResult,
-          };
-          existingHistory = [newGradeSheetEntry, ...existingHistory];
+          if (editingGradeSheetId) {
+            existingHistory = existingHistory.map(item =>
+              item.id === editingGradeSheetId
+              ? { ...item, gradesheetData: fullResult, dateGenerated: new Date().toISOString() }
+              : item
+            );
+            toast({
+              title: "Gradesheet Updated!",
+              description: "The gradesheet has been updated and saved to GS History.",
+            });
+          } else {
+            const newGradeSheetEntry: StoredGradeSheet = {
+              id: crypto.randomUUID(), 
+              dateGenerated: new Date().toISOString(),
+              gradesheetData: fullResult,
+            };
+            existingHistory = [newGradeSheetEntry, ...existingHistory];
+            toast({
+              title: "GradeSheet Generated!",
+              description: "The gradesheet has been generated and saved to GS History.",
+            });
+          }
+
           localStorage.setItem(GRADESHEET_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20))); 
-          
-          toast({
-            title: "GradeSheet Generated!",
-            description: "The gradesheet has been generated and saved to GS History.",
-          });
 
         } catch (storageError) {
           console.error("Error saving gradesheet to local storage:", storageError);
           toast({
             title: "Warning",
-            description: "GradeSheet prepared, but failed to save to GS History.",
+            description: `Gradesheet ${editingGradeSheetId ? 'updated' : 'prepared'}, but failed to save to GS History.`,
             variant: "destructive", 
           });
         }
@@ -96,6 +158,13 @@ export default function GradesheetPage() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const clearFormAndEditState = () => {
+    setInitialFormValues(undefined);
+    setCalculatedResult(null);
+    setEditingGradeSheetId(null);
+    toast({ title: "Form Cleared", description: "Ready for a new gradesheet."});
   };
 
   const handlePrint = () => {
@@ -209,6 +278,18 @@ export default function GradesheetPage() {
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
       <div className="w-full max-w-5xl space-y-6 sm:space-y-8">
+        {editingGradeSheetId && (
+            <Alert variant="default" className="border-accent bg-accent/10 text-accent-foreground no-print">
+                <Edit3 className="h-4 w-4 sm:h-5 sm:w-5" />
+                <AlertTitle className="text-base sm:text-lg">Editing Mode</AlertTitle>
+                <AlertDescription className="text-xs sm:text-sm">
+                You are currently editing a saved gradesheet. Make your changes and click the button below to update it.
+                <Button variant="outline" size="sm" onClick={clearFormAndEditState} className="ml-2 sm:ml-4 mt-1 sm:mt-0 text-xs">
+                    <RotateCcw className="mr-1 h-3 w-3" /> Create New Instead
+                </Button>
+                </AlertDescription>
+            </Alert>
+        )}
         <Card className="shadow-xl">
           <CardHeader className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mb-2">
@@ -229,7 +310,12 @@ export default function GradesheetPage() {
                   Enhanced PDF download, and printing features are available.
                 </AlertDescription>
             </Alert>
-            <GradeSheetForm onSubmit={handleFormSubmit} isLoading={isProcessing} />
+            <GradeSheetForm
+              key={editingGradeSheetId || 'new'}
+              onSubmit={handleFormSubmit}
+              isLoading={isProcessing}
+              initialValues={initialFormValues}
+            />
           </CardContent>
         </Card>
 
@@ -297,4 +383,3 @@ export default function GradesheetPage() {
     </main>
   );
 }
-

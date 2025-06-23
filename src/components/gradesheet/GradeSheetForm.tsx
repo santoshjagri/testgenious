@@ -57,7 +57,6 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     if (initialValues) {
       form.reset(initialValues); 
     } else {
-      // Ensure client-side specific initializations are done in useEffect
       if (typeof window !== 'undefined') { 
         if (form.getValues('examDate') === "") {
           form.setValue('examDate', format(new Date(), "yyyy-MM-dd"));
@@ -117,7 +116,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                         className="file:mr-2 file:py-1.5 file:px-3 sm:file:mr-4 sm:file:py-2 sm:file:px-4 file:rounded-full file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                       />
                     </FormControl>
-                    <FormDescription className="text-xs sm:text-sm">Upload your school's logo (PNG, JPG, GIF).</FormDescription>
+                    <FormDescription className="text-xs sm:text-sm">Upload a new logo to change it.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -352,10 +351,10 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-              Processing GradeSheet...
+              {initialValues ? "Updating GradeSheet..." : "Processing GradeSheet..."}
             </>
           ) : (
-            "Generate GradeSheet"
+             initialValues ? "Update GradeSheet" : "Generate GradeSheet"
           )}
         </Button>
       </form>

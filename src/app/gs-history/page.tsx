@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle, Loader2, Hash } from "lucide-react";
+import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle, Loader2, Hash, Edit } from "lucide-react";
 import type { StoredGradeSheet } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +25,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 const LOCAL_STORAGE_KEY = "gradesheetHistory";
+const EDIT_GRADESHEET_ID_KEY = "editGradeSheetId";
 
 export default function GradesheetHistoryPage() {
   const [historyItems, setHistoryItems] = useState<StoredGradeSheet[]>([]);
@@ -93,6 +94,13 @@ export default function GradesheetHistoryPage() {
           variant: "destructive",
         });
       }
+    }
+  };
+
+  const handleEditGradeSheet = (gradesheetId: string) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(EDIT_GRADESHEET_ID_KEY, gradesheetId);
+      router.push('/gradesheet');
     }
   };
   
@@ -311,6 +319,9 @@ export default function GradesheetHistoryPage() {
               <CardFooter className="border-t pt-2 pb-2 sm:pt-3 sm:pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-1 sm:gap-2 items-stretch">
                 <Button variant="ghost" size="sm" onClick={() => handleViewGradeSheet(item)} className="text-primary hover:bg-primary/10 flex-1 text-center text-xs sm:text-sm">
                   <Eye className="mr-1 h-3 w-3" /> View
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => handleEditGradeSheet(item.id)} className="text-foreground hover:bg-secondary flex-1 text-center text-xs sm:text-sm">
+                  <Edit className="mr-1 h-3 w-3" /> Edit
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
