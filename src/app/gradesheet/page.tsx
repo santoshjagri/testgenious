@@ -40,9 +40,11 @@ const getNewFormDefaults = (): GradeSheetFormValues => ({
 
 export default function GradesheetPage() {
   const [calculatedResult, setCalculatedResult] = React.useState<CalculatedGradeSheetResult | null>(null);
+  const [bulkResults, setBulkResults] = React.useState<CalculatedGradeSheetResult[] | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = React.useState(false);
+  const [isDownloadingBulkPdf, setIsDownloadingBulkPdf] = React.useState(false);
   const { toast } = useToast();
   const [initialFormValues, setInitialFormValues] = React.useState<GradeSheetFormValues | undefined>(undefined);
   const [editingGradeSheetId, setEditingGradeSheetId] = React.useState<string | null>(null);
@@ -99,6 +101,7 @@ export default function GradesheetPage() {
   const handleFormSubmit = async (values: GradeSheetFormValues) => {
     setIsProcessing(true);
     setError(null);
+    setBulkResults(null); // Clear any bulk results
     if (!editingGradeSheetId) {
       setCalculatedResult(null);
     }
@@ -156,7 +159,8 @@ export default function GradesheetPage() {
   const handleBulkFormSubmit = async (values: BulkGradeSheetFormValues) => {
     setIsProcessing(true);
     setError(null);
-    setCalculatedResult(null);
+    setCalculatedResult(null); // Clear single result view
+    setBulkResults(null);
 
     try {
         const { logo, students, subjects, ...sharedData } = values;
@@ -171,6 +175,7 @@ export default function GradesheetPage() {
         }
 
         const newHistoryItems: StoredGradeSheet[] = [];
+        const generatedResults: CalculatedGradeSheetResult[] = [];
 
         for (const student of students) {
             const singleStudentSubjects: SubjectMarkInput[] = subjects.map(s => ({
@@ -196,6 +201,7 @@ export default function GradesheetPage() {
             
             const newEntry: StoredGradeSheet = { id: crypto.randomUUID(), dateGenerated: new Date().toISOString(), gradesheetData: fullResult };
             newHistoryItems.push(newEntry);
+            generatedResults.push(fullResult);
         }
 
         if (typeof window !== 'undefined') {
@@ -204,10 +210,12 @@ export default function GradesheetPage() {
             const updatedHistory = [...newHistoryItems, ...existingHistory];
             localStorage.setItem(GRADESHEET_LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory.slice(0, 50)));
         }
+        
+        setBulkResults(generatedResults);
 
         toast({
             title: `Success: ${newHistoryItems.length} Gradesheets Generated!`,
-            description: "All gradesheets have been saved to your GS History.",
+            description: "All gradesheets saved to history. You can now download them as a single PDF.",
         });
 
     } catch (e) {
@@ -224,6 +232,7 @@ export default function GradesheetPage() {
     setInitialFormValues(getNewFormDefaults());
     setCalculatedResult(null);
     setEditingGradeSheetId(null);
+    setBulkResults(null);
     toast({ title: "Form Cleared", description: "Ready for a new gradesheet."});
   };
 
@@ -249,29 +258,18 @@ export default function GradesheetPage() {
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfPageWidth = pdf.internal.pageSize.getWidth();
         const pdfPageHeight = pdf.internal.pageSize.getHeight();
-        const marginMM = 10, contentWidthMM = pdfPageWidth - marginMM * 2, contentHeightMM = pdfPageHeight - marginMM * 2;
+        const marginMM = 10, contentWidthMM = pdfPageWidth - marginMM * 2;
         const fullCanvas = await html2canvas(paperElement, { scale: 2, useCORS: true, logging: false });
-        const fullCanvasWidthPx = fullCanvas.width, fullCanvasHeightPx = fullCanvas.height;
-        const pxPerMm = fullCanvasWidthPx / contentWidthMM;
-        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97;
-        let currentYpx = 0;
 
-        while (currentYpx < fullCanvasHeightPx) {
-          const remainingHeightPx = fullCanvasHeightPx - currentYpx;
-          const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
-          const pageCanvas = document.createElement('canvas');
-          pageCanvas.width = fullCanvasWidthPx;
-          pageCanvas.height = sliceForThisPagePx;
-          const pageCtx = pageCanvas.getContext('2d');
+        const canvasWidth = fullCanvas.width;
+        const canvasHeight = fullCanvas.height;
+        const ratio = canvasWidth / canvasHeight;
+        const contentHeight = contentWidthMM / ratio;
+        
+        let yPos = (pdfPageHeight - contentHeight) / 2;
+        if (yPos < marginMM) yPos = marginMM;
 
-          if (pageCtx) {
-            pageCtx.drawImage(fullCanvas, 0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 0, 0, fullCanvasWidthPx, sliceForThisPagePx);
-            const pageImgData = pageCanvas.toDataURL('image/png', 0.9);
-            pdf.addImage(pageImgData, 'PNG', marginMM, marginMM, contentWidthMM, (sliceForThisPagePx / pxPerMm));
-          }
-          currentYpx += sliceForThisPagePx;
-          if (currentYpx < fullCanvasHeightPx) pdf.addPage();
-        }
+        pdf.addImage(fullCanvas, 'PNG', marginMM, yPos, contentWidthMM, contentHeight);
         
         const safeStudentName = calculatedResult.studentName?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'student';
         const filename = `gradesheet_${safeStudentName}_${calculatedResult.examType?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'exam'}.pdf`;
@@ -287,6 +285,60 @@ export default function GradesheetPage() {
     setIsDownloadingPdf(false);
   };
   
+  const handleBulkDownloadPdf = async () => {
+    if (!bulkResults) {
+        toast({ title: "No Gradesheets", description: "No bulk gradesheets are ready for download.", variant: "destructive" });
+        return;
+    }
+    setIsDownloadingBulkPdf(true);
+    
+    const elements = document.querySelectorAll('#bulk-printable-area > .gradesheet-wrapper');
+    if (elements.length === 0) {
+        toast({ title: "Error", description: "Could not find gradesheet elements to download.", variant: "destructive" });
+        setIsDownloadingBulkPdf(false);
+        return;
+    }
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    
+    try {
+        for (let i = 0; i < elements.length; i++) {
+            const el = elements[i] as HTMLElement;
+            const canvas = await html2canvas(el, { scale: 2, useCORS: true, logging: false });
+            const imgData = canvas.toDataURL('image/png', 0.9);
+
+            const pdfPageWidth = pdf.internal.pageSize.getWidth();
+            const pdfPageHeight = pdf.internal.pageSize.getHeight();
+            const marginMM = 10;
+            
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const ratio = canvasWidth / canvasHeight;
+
+            const pdfImgWidth = pdfPageWidth - (marginMM * 2);
+            const pdfImgHeight = pdfImgWidth / ratio;
+
+            let yPos = (pdfPageHeight - pdfImgHeight) / 2;
+            if (yPos < marginMM) yPos = marginMM;
+
+            if (i > 0) {
+                pdf.addPage();
+            }
+            
+            pdf.addImage(imgData, 'PNG', marginMM, yPos, pdfImgWidth, pdfImgHeight);
+        }
+        
+        pdf.save('all_gradesheets.pdf');
+        toast({ title: 'Download Complete!', description: 'All gradesheets have been saved to a single PDF file.' });
+
+    } catch (error) {
+        console.error("Error during bulk PDF generation:", error);
+        toast({ title: 'Error', description: 'Failed to generate bulk PDF.', variant: 'destructive' });
+    } finally {
+        setIsDownloadingBulkPdf(false);
+    }
+};
+
   if (!initialFormValues && entryMode === 'single') {
     return (
         <div className="flex-1 flex justify-center items-center p-6">
@@ -326,7 +378,11 @@ export default function GradesheetPage() {
                 <Switch
                   id="entry-mode-switch"
                   checked={entryMode === 'bulk'}
-                  onCheckedChange={(checked) => setEntryMode(checked ? 'bulk' : 'single')}
+                  onCheckedChange={(checked) => {
+                    setEntryMode(checked ? 'bulk' : 'single');
+                    setBulkResults(null);
+                    setCalculatedResult(null);
+                  }}
                   disabled={!!editingGradeSheetId}
                   aria-label="Toggle between single student and bulk entry modes"
                 />
@@ -401,11 +457,52 @@ export default function GradesheetPage() {
             </div>
           </>
         )}
+        
+        {bulkResults && !isProcessing && (
+           <>
+            <div className="flex justify-center mt-6 no-print">
+              <Button onClick={handleBulkDownloadPdf} disabled={isDownloadingBulkPdf} size="lg">
+                {isDownloadingBulkPdf ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-5 w-5" />
+                    Download All ({bulkResults.length}) Gradesheets as PDF
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            <div className="absolute left-[-9999px] top-0 z-[-1] no-print">
+                <div id="bulk-printable-area">
+                    {bulkResults.map((res, index) => (
+                        <div key={res.studentId || res.rollNo || index} className="gradesheet-wrapper" style={{ pageBreakAfter: 'always' }}>
+                           <GradeSheetDisplay result={res} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+          </>
+        )}
       </div>
        <style jsx global>{`
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; }
+        .gradesheet-wrapper {
+            width: 210mm; /* A4 width */
+            min-height: 297mm; /* A4 height */
+            box-sizing: border-box;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
       `}</style>
     </main>
   );
 }
+
+    
