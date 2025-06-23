@@ -7,17 +7,17 @@ import { GradeSheetDisplay } from "@/components/gradesheet/GradeSheetDisplay";
 import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet, GradeSheetCalculationOutput, SubjectMarkInput, BulkGradeSheetFormValues } from "@/lib/types";
 import { calculateGradeSheet } from "@/lib/gradesheet-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, FileText, AlertCircle, Download, Printer as PrinterIcon, Loader2, Edit3, RotateCcw, Users, User } from "lucide-react";
+import { GraduationCap, FileText, AlertCircle, Download, Printer as PrinterIcon, Loader2, Edit3, RotateCcw, Users, User, Palette } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { fileToDataUri } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { format } from 'date-fns';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { BulkGradeSheetForm } from '@/components/gradesheet/BulkGradeSheetForm';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const GRADESHEET_LOCAL_STORAGE_KEY = "gradesheetHistory";
 const EDIT_GRADESHEET_ID_KEY = "editGradeSheetId";
@@ -32,7 +32,7 @@ const getNewFormDefaults = (): GradeSheetFormValues => ({
     logo: undefined,
     examType: 'Final Examination',
     academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
-    examDate: format(new Date(), "yyyy-MM-dd"),
+    examDate: '', // Set dynamically in effect
     subjects: [
         { subjectName: 'Sample Subject', fullMarks: 100, passMarks: 40, obtainedMarks: 0, id: crypto.randomUUID() }
     ],
@@ -49,12 +49,14 @@ export default function GradesheetPage() {
   const [initialFormValues, setInitialFormValues] = React.useState<GradeSheetFormValues | undefined>(undefined);
   const [editingGradeSheetId, setEditingGradeSheetId] = React.useState<string | null>(null);
   const [entryMode, setEntryMode] = React.useState<'single' | 'bulk'>('single');
+  
+  const [template, setTemplate] = React.useState('normal');
+  const [showGradeGpa, setShowGradeGpa] = React.useState(true);
 
   React.useEffect(() => {
-    // This effect runs on the client to determine if we are editing or creating a new form.
     const gradeSheetIdToEdit = localStorage.getItem(EDIT_GRADESHEET_ID_KEY);
     if (gradeSheetIdToEdit) {
-      setEntryMode('single'); // Force single mode for editing
+      setEntryMode('single');
       try {
         const storedHistory = localStorage.getItem(GRADESHEET_LOCAL_STORAGE_KEY);
         if (storedHistory) {
@@ -64,7 +66,7 @@ export default function GradesheetPage() {
           if (gradeSheetToEdit) {
             const formValues: GradeSheetFormValues = {
               ...gradeSheetToEdit.gradesheetData,
-              logo: undefined, // Cannot restore file object
+              logo: undefined,
             };
             setInitialFormValues(formValues);
             setCalculatedResult(gradeSheetToEdit.gradesheetData);
@@ -96,12 +98,12 @@ export default function GradesheetPage() {
       setCalculatedResult(null);
       setEditingGradeSheetId(null);
     }
-  }, []);
+  }, [toast]);
 
   const handleFormSubmit = async (values: GradeSheetFormValues) => {
     setIsProcessing(true);
     setError(null);
-    setBulkResults(null); // Clear any bulk results
+    setBulkResults(null); 
     if (!editingGradeSheetId) {
       setCalculatedResult(null);
     }
@@ -159,7 +161,7 @@ export default function GradesheetPage() {
   const handleBulkFormSubmit = async (values: BulkGradeSheetFormValues) => {
     setIsProcessing(true);
     setError(null);
-    setCalculatedResult(null); // Clear single result view
+    setCalculatedResult(null); 
     setBulkResults(null);
 
     try {
@@ -237,7 +239,7 @@ export default function GradesheetPage() {
   };
 
   const handlePrint = () => {
-    if (calculatedResult) {
+    if (calculatedResult || bulkResults) {
       window.print();
     } else {
       toast({ title: "No Gradesheet Available", description: "Please generate a gradesheet before trying to print.", variant: "destructive" });
@@ -338,6 +340,36 @@ export default function GradesheetPage() {
         setIsDownloadingBulkPdf(false);
     }
 };
+
+  const renderControls = () => (
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 no-print my-4 p-4 border rounded-lg bg-card shadow-sm">
+       <div className="flex items-center space-x-2">
+         <Switch
+           id="show-grade-gpa-toggle"
+           checked={showGradeGpa}
+           onCheckedChange={setShowGradeGpa}
+           aria-label="Toggle Grade and GPA visibility"
+         />
+         <Label htmlFor="show-grade-gpa-toggle">Show Grade & GPA</Label>
+       </div>
+       <div className="flex items-center space-x-2">
+         <Palette className="h-4 w-4 text-muted-foreground" />
+         <Label htmlFor="template-select" className="text-sm font-medium">Template</Label>
+         <Select value={template} onValueChange={setTemplate}>
+           <SelectTrigger id="template-select" className="w-[180px]">
+             <SelectValue placeholder="Select Template" />
+           </SelectTrigger>
+           <SelectContent>
+             <SelectItem value="normal">Normal</SelectItem>
+             <SelectItem value="good">Good</SelectItem>
+             <SelectItem value="better">Better</SelectItem>
+             <SelectItem value="best">Best</SelectItem>
+           </SelectContent>
+         </Select>
+       </div>
+     </div>
+  );
+
 
   if (!initialFormValues && entryMode === 'single') {
     return (
@@ -452,8 +484,9 @@ export default function GradesheetPage() {
                    {isDownloadingPdf ? ( <> <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Downloading... </> ) : ( <> <Download className="mr-2 h-4 w-4" /> Download PDF </> )}
                 </Button>
             </div>
+            {renderControls()}
             <div className="animate-fadeInUp">
-              <GradeSheetDisplay result={calculatedResult} />
+              <GradeSheetDisplay result={calculatedResult} template={template} showGradeGpa={showGradeGpa} />
             </div>
           </>
         )}
@@ -475,12 +508,33 @@ export default function GradesheetPage() {
                 )}
               </Button>
             </div>
+
+            {renderControls()}
+
+            <div className="mt-8 space-y-8 no-print">
+                <h2 className="text-2xl font-bold text-center">Gradesheet Previews</h2>
+                {bulkResults.map((res, index) => (
+                    <div key={`preview-${res.rollNo || index}`} className="p-4 border rounded-lg bg-white shadow-lg">
+                        <GradeSheetDisplay 
+                            result={res} 
+                            template={template} 
+                            showGradeGpa={showGradeGpa} 
+                            printableId={`gradesheet-preview-${res.rollNo || index}`}
+                        />
+                    </div>
+                ))}
+            </div>
             
             <div className="absolute left-[-9999px] top-0 z-[-1] no-print">
                 <div id="bulk-printable-area">
                     {bulkResults.map((res, index) => (
-                        <div key={res.studentId || res.rollNo || index} className="gradesheet-wrapper" style={{ pageBreakAfter: 'always' }}>
-                           <GradeSheetDisplay result={res} />
+                        <div key={`print-${res.rollNo || index}`} className="gradesheet-wrapper">
+                           <GradeSheetDisplay 
+                            result={res} 
+                            template={template} 
+                            showGradeGpa={showGradeGpa} 
+                            printableId={`gradesheet-print-${res.rollNo || index}`}
+                           />
                         </div>
                     ))}
                 </div>
@@ -504,5 +558,3 @@ export default function GradesheetPage() {
     </main>
   );
 }
-
-    

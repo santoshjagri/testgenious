@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle, Loader2, Hash, Edit } from "lucide-react";
+import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle, Loader2, Hash, Edit, Palette } from "lucide-react";
 import type { StoredGradeSheet } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +23,9 @@ import { useToast } from '@/hooks/use-toast';
 import { GradeSheetDisplay } from '@/components/gradesheet/GradeSheetDisplay';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const LOCAL_STORAGE_KEY = "gradesheetHistory";
 const EDIT_GRADESHEET_ID_KEY = "editGradeSheetId";
@@ -33,6 +36,9 @@ export default function GradesheetHistoryPage() {
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  const [template, setTemplate] = useState('normal');
+  const [showGradeGpa, setShowGradeGpa] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -131,7 +137,7 @@ export default function GradesheetHistoryPage() {
     }
 
     setIsDownloadingPdf(true);
-    const paperElement = document.getElementById('gradesheet-printable-area'); 
+    const paperElement = document.getElementById('gradesheet-printable-area-history'); 
     
     if (paperElement) {
       try {
@@ -243,7 +249,38 @@ export default function GradesheetHistoryPage() {
               )}
             </Button>
         </div>
-        <GradeSheetDisplay result={selectedGradeSheetForView.gradesheetData} /> 
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 no-print my-4 p-4 border rounded-lg bg-card shadow-sm">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="show-grade-gpa-toggle"
+              checked={showGradeGpa}
+              onCheckedChange={setShowGradeGpa}
+              aria-label="Toggle Grade and GPA visibility"
+            />
+            <Label htmlFor="show-grade-gpa-toggle">Show Grade & GPA</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Palette className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="template-select" className="text-sm font-medium">Template</Label>
+            <Select value={template} onValueChange={setTemplate}>
+              <SelectTrigger id="template-select" className="w-[180px]">
+                <SelectValue placeholder="Select Template" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="good">Good</SelectItem>
+                <SelectItem value="better">Better</SelectItem>
+                <SelectItem value="best">Best</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <GradeSheetDisplay 
+          result={selectedGradeSheetForView.gradesheetData}
+          template={template}
+          showGradeGpa={showGradeGpa}
+          printableId="gradesheet-printable-area-history"
+        /> 
       </div>
     );
   }
@@ -352,5 +389,3 @@ export default function GradesheetHistoryPage() {
     </div>
   );
 }
-
-    
