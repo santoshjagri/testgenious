@@ -90,38 +90,51 @@ body {
 
 /* GradeSheet Template Styles */
 .printable-area[data-template="good"] .gs-header {
-  background-color: hsl(var(--primary) / 0.08);
-  border-color: hsl(var(--primary) / 0.5);
+  background-color: hsl(var(--primary) / 0.05);
+  border-bottom: 1px solid hsl(var(--primary) / 0.3);
 }
 .printable-area[data-template="good"] .gs-title {
   color: hsl(var(--primary));
-  letter-spacing: 0.5px;
+  font-weight: 600;
 }
 .printable-area[data-template="good"] .gs-summary-box {
-  background-color: hsl(var(--secondary));
+  background-color: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-left-width: 4px;
+  border-left-color: hsl(var(--accent));
+}
+.printable-area[data-template="good"] .gs-table thead {
+  background-color: hsl(var(--muted));
 }
 
 .printable-area[data-template="better"] {
-  border: 1px solid hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.6);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 .printable-area[data-template="better"] .gs-header {
-  background-color: hsl(var(--primary) / 0.15);
+  background-color: hsl(var(--primary) / 0.8);
+  color: hsl(var(--primary-foreground));
 }
-.printable-area[data-template="better"] .gs-table thead tr {
-  background-color: hsl(var(--primary) / 0.2);
-  border-bottom: 2px solid hsl(var(--primary) / 0.4);
-}
-.printable-area[data-template="better"] .gs-table tbody tr:nth-of-type(odd) {
-  background-color: hsl(var(--primary) / 0.04);
+.printable-area[data-template="better"] .gs-header .text-muted-foreground {
+  color: hsl(var(--primary-foreground) / 0.8) !important;
 }
 .printable-area[data-template="better"] .gs-title {
-  color: hsl(var(--primary));
+  color: inherit;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none; /* Removed uppercase for a cleaner look */
+}
+.printable-area[data-template="better"] .gs-table thead tr {
+  background-color: hsl(var(--primary) / 0.1);
+  border-bottom: 2px solid hsl(var(--primary) / 0.5);
+}
+.printable-area[data-template="better"] .gs-table tbody tr:nth-of-type(even) {
+  background-color: hsl(var(--primary) / 0.04);
 }
 .printable-area[data-template="better"] .gs-footer {
-  background-color: hsl(var(--primary) / 0.05);
+  background-color: transparent;
+  border-top: 1px solid hsl(var(--primary) / 0.4);
+  margin-top: 1rem;
+  padding-top: 1rem;
 }
 
 
