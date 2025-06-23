@@ -5,9 +5,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle, Loader2, Hash, Edit, Palette } from "lucide-react";
+import { ClipboardList, Trash2, Eye, ArrowLeft, Download, Printer as PrinterIcon, User, CalendarDays, BookOpen, Percent, Star, PlusCircle, Loader2, Hash, Edit, Palette, Search } from "lucide-react";
 import type { StoredGradeSheet } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +38,7 @@ export default function GradesheetHistoryPage() {
   const { toast } = useToast();
   const router = useRouter();
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [template, setTemplate] = useState('normal');
   const [showGradeGpa, setShowGradeGpa] = useState(true);
 
@@ -57,6 +59,10 @@ export default function GradesheetHistoryPage() {
       }
     }
   }, [toast]);
+
+  const filteredHistoryItems = historyItems.filter(item =>
+    item.gradesheetData.studentName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const clearHistory = () => {
     if (typeof window !== 'undefined') {
@@ -287,14 +293,24 @@ export default function GradesheetHistoryPage() {
 
   return (
     <div className="flex-1 flex flex-col gap-4 p-2 sm:p-4 md:gap-6 md:p-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="font-semibold text-xl sm:text-2xl md:text-3xl flex items-center">
           <ClipboardList className="mr-2 sm:mr-3 h-6 w-6 sm:h-8 sm:w-8 text-primary" />
           GS History
         </h1>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:w-auto">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder="Search by student name..."
+                    className="pl-8 sm:w-[200px] md:w-[250px]"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
             <Button onClick={() => router.push('/gradesheet')} className="no-print w-full sm:w-auto">
-              <PlusCircle className="mr-2 h-4 w-4" /> Create New Gradesheet
+              <PlusCircle className="mr-2 h-4 w-4" /> Create New
             </Button>
             {historyItems.length > 0 && (
               <AlertDialog>
@@ -326,44 +342,56 @@ export default function GradesheetHistoryPage() {
               <ClipboardList className="h-5 w-5 text-primary" />
               <AlertTitle className="text-primary text-base sm:text-lg">No Gradesheet History Yet</AlertTitle>
               <AlertDescription className="text-foreground/80 text-xs sm:text-sm">
-                You haven't generated any gradesheets yet. Click "Create New Gradesheet" above or go to "Gradesheet" in the sidebar to get started. Your generated gradesheets will appear here.
+                You haven't generated any gradesheets yet. Click "Create New" above or go to "Gradesheet" in the sidebar to get started. Your generated gradesheets will appear here.
               </AlertDescription>
             </Alert>
           </CardContent>
         </Card>
+      ) : filteredHistoryItems.length === 0 ? (
+         <Card className="mt-4 shadow-md col-span-full">
+            <CardContent className="pt-6">
+                <Alert>
+                    <Search className="h-5 w-5 text-primary" />
+                    <AlertTitle className="text-primary text-base sm:text-lg">No Results Found</AlertTitle>
+                    <AlertDescription className="text-foreground/80 text-xs sm:text-sm">
+                        No gradesheets match your search for "{searchQuery}". Try a different name.
+                    </AlertDescription>
+                </Alert>
+            </CardContent>
+        </Card>
       ) : (
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 mt-4">
-          {historyItems.map((item) => (
-            <Card key={item.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-200 rounded-lg">
-              <CardHeader className="pb-2 sm:pb-3">
-                <CardTitle className="text-md sm:text-lg text-primary flex items-center"><User className="mr-2 h-4 w-4 sm:h-5 sm:w-5"/>{item.gradesheetData.studentName}</CardTitle>
-                <div className="text-xs text-muted-foreground space-y-0.5">
-                    <p>{item.gradesheetData.studentClass} - Roll: {item.gradesheetData.rollNo}</p>
-                    {item.gradesheetData.symbolNo && <p className="flex items-center"><Hash className="h-3 w-3 mr-1"/>Symbol: {item.gradesheetData.symbolNo}</p>}
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
+          {filteredHistoryItems.map((item) => (
+            <Card key={item.id} className="flex flex-col shadow-md hover:shadow-lg transition-shadow duration-200 rounded-lg">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold text-primary flex items-center gap-2">
+                    <User className="h-5 w-5 flex-shrink-0"/>
+                    <span className="truncate">{item.gradesheetData.studentName}</span>
+                </CardTitle>
+                <div className="text-xs text-muted-foreground space-y-0.5 pt-1">
+                    <p>Class: {item.gradesheetData.studentClass} - Roll: {item.gradesheetData.rollNo}</p>
                     <p>{item.gradesheetData.examType}</p>
-                    <p className="flex items-center"><BookOpen className="h-3 w-3 mr-1"/>{item.gradesheetData.schoolName}</p>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-1 text-xs sm:text-sm flex-grow">
-                <p className="flex items-center"><Percent className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5"/><strong>Percentage:</strong> {item.gradesheetData.percentage.toFixed(2)}%</p>
-                <p className="flex items-center"><Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5"/><strong>Grade:</strong> {item.gradesheetData.grade} (GPA: {item.gradesheetData.gpa.toFixed(1)})</p>
+              <CardContent className="space-y-2 text-xs flex-grow py-0 pb-3">
                 <p><strong>Result:</strong> <span className={item.gradesheetData.resultStatus === "Pass" ? "text-green-600 font-semibold" : "text-red-600 font-semibold"}>{item.gradesheetData.resultStatus}</span></p>
-                 <p className="mt-2 sm:mt-3 text-xs text-muted-foreground pt-1 sm:pt-2 border-t flex items-center">
-                    <CalendarDays className="h-3 w-3 mr-1"/> 
-                    Generated: {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <p className="flex items-center"><Star className="h-3 w-3 mr-1.5"/><strong>Grade:</strong> {item.gradesheetData.grade}</p>
+                 <p className="mt-2 text-xs text-muted-foreground pt-2 border-t flex items-center">
+                    <CalendarDays className="h-3 w-3 mr-1.5"/> 
+                    {new Date(item.dateGenerated).toLocaleDateString()}
                  </p>
               </CardContent>
-              <CardFooter className="border-t pt-2 pb-2 sm:pt-3 sm:pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-1 sm:gap-2 items-stretch">
-                <Button variant="ghost" size="sm" onClick={() => handleViewGradeSheet(item)} className="text-primary hover:bg-primary/10 flex-1 text-center text-xs sm:text-sm">
+              <CardFooter className="border-t p-1 flex justify-around items-center">
+                <Button variant="ghost" size="sm" onClick={() => handleViewGradeSheet(item)} className="text-primary hover:bg-primary/10 flex-1 text-xs h-8">
                   <Eye className="mr-1 h-3 w-3" /> View
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => handleEditGradeSheet(item.id)} className="text-foreground hover:bg-secondary flex-1 text-center text-xs sm:text-sm">
+                <Button variant="ghost" size="sm" onClick={() => handleEditGradeSheet(item.id)} className="text-foreground hover:bg-secondary flex-1 text-xs h-8">
                   <Edit className="mr-1 h-3 w-3" /> Recorrect
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-center text-xs sm:text-sm">
-                        <Trash2 className="mr-1 h-3 w-3" /> Delete
+                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-xs h-8">
+                        <Trash2 className="mr-1 h-3 w-3" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -389,3 +417,5 @@ export default function GradesheetHistoryPage() {
     </div>
   );
 }
+
+    
