@@ -28,7 +28,8 @@ const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
   obtainedMarks: 0,
 };
 
-const defaultFormValues: GradeSheetFormValues = {
+// Static default values for initial render to avoid hydration mismatch
+const staticDefaultFormValues: GradeSheetFormValues = {
   studentId: '',
   symbolNo: '',
   studentName: '',
@@ -37,17 +38,17 @@ const defaultFormValues: GradeSheetFormValues = {
   schoolName: 'ExamGenius Academy',
   logo: undefined,
   examType: 'Final Examination',
-  academicYear: typeof window !== 'undefined' ? `${new Date().getFullYear()}-${new Date().getFullYear() + 1}` : "",
-  examDate: typeof window !== 'undefined' ? format(new Date(), "yyyy-MM-dd") : "",
+  academicYear: "", // Initialized as empty
+  examDate: "", // Initialized as empty
   subjects: [
-    { ...newSubjectTemplate, subjectName: 'Sample Subject', id: typeof window !== 'undefined' ? crypto.randomUUID() : '1' }
+    { ...newSubjectTemplate, subjectName: 'Sample Subject', id: 'static-id-1' } // Use a static ID
   ],
 };
 
 export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeSheetFormProps) {
   const form = useForm<GradeSheetFormValues>({
     resolver: zodResolver(gradeSheetFormSchema),
-    defaultValues: initialValues || defaultFormValues,
+    defaultValues: initialValues || staticDefaultFormValues,
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -59,9 +60,19 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     if (initialValues) {
       form.reset(initialValues); 
     } else {
-      form.reset(defaultFormValues);
+      // Set dynamic default values only on the client-side after hydration
+      const dynamicDefaults = {
+        ...staticDefaultFormValues,
+        academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
+        examDate: format(new Date(), "yyyy-MM-dd"),
+        subjects: [
+          { ...newSubjectTemplate, subjectName: 'Sample Subject', id: crypto.randomUUID() }
+        ],
+      };
+      form.reset(dynamicDefaults);
     }
-  }, [initialValues, form]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValues]);
 
 
   const handleAddSubject = () => {
@@ -351,3 +362,5 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     </Form>
   );
 }
+
+    
