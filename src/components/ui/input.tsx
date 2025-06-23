@@ -5,6 +5,11 @@ import { cn } from "@/lib/utils"
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, value: propValue, ...props }, ref) => {
+    // For file inputs, we should not control the value programmatically.
+    // The browser handles it for security reasons. Setting it to `undefined`
+    // ensures React doesn't try to set the `value` attribute on the DOM element.
+    const value = type === 'file' ? undefined : propValue ?? '';
+
     return (
       <input
         type={type}
@@ -13,7 +18,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
-        value={propValue ?? ''}
+        value={value}
         {...props}
       />
     )
