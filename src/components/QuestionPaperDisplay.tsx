@@ -87,7 +87,7 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
             pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
           }
 
-          currentYpx += sliceForThisPagePx;
+          currentYpx += pageSliceHeightPx;
 
           if (currentYpx < fullCanvasHeightPx) {
             pdf.addPage();

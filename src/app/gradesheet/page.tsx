@@ -248,41 +248,68 @@ export default function GradesheetPage() {
 
   const handleDownloadPdf = async () => {
     if (!calculatedResult) {
-      toast({ title: "No Gradesheet Available", description: "Please generate a gradesheet before trying to download PDF.", variant: "destructive" });
-      return;
+        toast({ title: "No Gradesheet Available", description: "Please generate a gradesheet before trying to download PDF.", variant: "destructive" });
+        return;
     }
 
     setIsDownloadingPdf(true);
-    const paperElement = document.getElementById('gradesheet-printable-area'); 
-    
+    const paperElement = document.getElementById('gradesheet-printable-area');
+
     if (paperElement) {
-      try {
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfPageWidth = pdf.internal.pageSize.getWidth();
-        const pdfPageHeight = pdf.internal.pageSize.getHeight();
-        const marginMM = 10, contentWidthMM = pdfPageWidth - marginMM * 2;
-        const fullCanvas = await html2canvas(paperElement, { scale: 2, useCORS: true, logging: false });
+        try {
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfPageWidth = pdf.internal.pageSize.getWidth();
+            const pdfPageHeight = pdf.internal.pageSize.getHeight();
 
-        const canvasWidth = fullCanvas.width;
-        const canvasHeight = fullCanvas.height;
-        const ratio = canvasWidth / canvasHeight;
-        const contentHeight = contentWidthMM / ratio;
-        
-        let yPos = (pdfPageHeight - contentHeight) / 2;
-        if (yPos < marginMM) yPos = marginMM;
+            const marginTopMM = 15;
+            const marginBottomMM = 15;
+            const marginLeftMM = 10;
+            const marginRightMM = 10;
 
-        pdf.addImage(fullCanvas, 'PNG', marginMM, yPos, contentWidthMM, contentHeight);
-        
-        const safeStudentName = calculatedResult.studentName?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'student';
-        const filename = `gradesheet_${safeStudentName}_${calculatedResult.examType?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'exam'}.pdf`;
-        pdf.save(filename);
-        toast({ title: "PDF Downloaded", description: "Gradesheet PDF has been successfully downloaded." });
-      } catch (error) {
-        console.error("Error generating PDF:", error);
-        toast({ title: "PDF Generation Failed", description: "Could not generate PDF. Please try again.", variant: "destructive" });
-      }
+            const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
+            const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
+
+            const fullCanvas = await html2canvas(paperElement, { scale: 2, useCORS: true, logging: false });
+
+            const fullCanvasWidthPx = fullCanvas.width;
+            const fullCanvasHeightPx = fullCanvas.height;
+
+            const pxPerMm = fullCanvasWidthPx / contentWidthMM;
+            let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.98; // Buffer
+
+            let currentYpx = 0;
+            while (currentYpx < fullCanvasHeightPx) {
+                const remainingHeightPx = fullCanvasHeightPx - currentYpx;
+                const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
+
+                const pageCanvas = document.createElement('canvas');
+                pageCanvas.width = fullCanvasWidthPx;
+                pageCanvas.height = sliceForThisPagePx;
+                const pageCtx = pageCanvas.getContext('2d');
+
+                if (pageCtx) {
+                    pageCtx.drawImage(fullCanvas, 0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 0, 0, fullCanvasWidthPx, sliceForThisPagePx);
+                    const pageImgData = pageCanvas.toDataURL('image/png', 0.95);
+                    const actualContentHeightMMForThisPage = sliceForThisPagePx / pxPerMm;
+                    pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
+                }
+
+                currentYpx += pageSliceHeightPx;
+                if (currentYpx < fullCanvasHeightPx) {
+                    pdf.addPage();
+                }
+            }
+
+            const safeStudentName = calculatedResult.studentName?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'student';
+            const filename = `gradesheet_${safeStudentName}_${calculatedResult.examType?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'exam'}.pdf`;
+            pdf.save(filename);
+            toast({ title: "PDF Downloaded", description: "Gradesheet PDF has been successfully downloaded." });
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+            toast({ title: "PDF Generation Failed", description: "Could not generate PDF. Please try again.", variant: "destructive" });
+        }
     } else {
-         toast({ title: "PDF Generation Error", description: "Could not find the gradesheet content to generate PDF.", variant: "destructive" });
+        toast({ title: "PDF Generation Error", description: "Could not find the gradesheet content to generate PDF.", variant: "destructive" });
     }
     setIsDownloadingPdf(false);
   };
@@ -304,30 +331,47 @@ export default function GradesheetPage() {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     try {
-        for (let i = 0; i < elements.length; i++) {
-            const el = elements[i] as HTMLElement;
-            const canvas = await html2canvas(el, { scale: 2, useCORS: true, logging: false });
-            const imgData = canvas.toDataURL('image/png', 0.9);
+        let isFirstPageOfPdf = true;
+        for (const el of Array.from(elements)) {
+            const pageElement = el as HTMLElement;
 
             const pdfPageWidth = pdf.internal.pageSize.getWidth();
             const pdfPageHeight = pdf.internal.pageSize.getHeight();
-            const marginMM = 10;
-            
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height;
-            const ratio = canvasWidth / canvasHeight;
+            const marginTopMM = 15, marginBottomMM = 15, marginLeftMM = 10, marginRightMM = 10;
+            const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
+            const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
 
-            const pdfImgWidth = pdfPageWidth - (marginMM * 2);
-            const pdfImgHeight = pdfImgWidth / ratio;
+            const fullCanvas = await html2canvas(pageElement, { scale: 2, useCORS: true, logging: false });
+            const fullCanvasWidthPx = fullCanvas.width;
+            const fullCanvasHeightPx = fullCanvas.height;
+            const pxPerMm = fullCanvasWidthPx / contentWidthMM;
+            const pageSliceHeightPx = contentHeightMM * pxPerMm * 0.98;
 
-            let yPos = (pdfPageHeight - pdfImgHeight) / 2;
-            if (yPos < marginMM) yPos = marginMM;
+            let currentYpx = 0;
+            while (currentYpx < fullCanvasHeightPx) {
+                if (!isFirstPageOfPdf) {
+                    pdf.addPage();
+                } else {
+                    isFirstPageOfPdf = false;
+                }
+                
+                const remainingHeightPx = fullCanvasHeightPx - currentYpx;
+                const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
 
-            if (i > 0) {
-                pdf.addPage();
+                const pageCanvas = document.createElement('canvas');
+                pageCanvas.width = fullCanvasWidthPx;
+                pageCanvas.height = sliceForThisPagePx;
+                const pageCtx = pageCanvas.getContext('2d');
+                
+                if (pageCtx) {
+                    pageCtx.drawImage(fullCanvas, 0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 0, 0, fullCanvasWidthPx, sliceForThisPagePx);
+                    const pageImgData = pageCanvas.toDataURL('image/png', 0.95);
+                    const actualContentHeightMMForThisPage = sliceForThisPagePx / pxPerMm;
+                    pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
+                }
+
+                currentYpx += pageSliceHeightPx;
             }
-            
-            pdf.addImage(imgData, 'PNG', marginMM, yPos, pdfImgWidth, pdfImgHeight);
         }
         
         pdf.save('all_gradesheets.pdf');
