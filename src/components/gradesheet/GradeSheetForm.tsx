@@ -18,7 +18,7 @@ import { format } from 'date-fns';
 interface GradeSheetFormProps {
   onSubmit: (values: GradeSheetFormValues) => Promise<void>;
   isLoading: boolean;
-  initialValues?: GradeSheetFormValues;
+  initialValues: GradeSheetFormValues; // Changed to be non-optional
 }
 
 const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
@@ -28,51 +28,24 @@ const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
   obtainedMarks: 0,
 };
 
-// Static default values for initial render to avoid hydration mismatch
-const staticDefaultFormValues: GradeSheetFormValues = {
-  studentId: '',
-  symbolNo: '',
-  studentName: '',
-  studentClass: '',
-  rollNo: '',
-  schoolName: 'ExamGenius Academy',
-  logo: undefined,
-  examType: 'Final Examination',
-  academicYear: "", // Initialized as empty
-  examDate: "", // Initialized as empty
-  subjects: [
-    { ...newSubjectTemplate, subjectName: 'Sample Subject', id: 'static-id-1' } // Use a static ID
-  ],
-};
-
 export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeSheetFormProps) {
   const form = useForm<GradeSheetFormValues>({
     resolver: zodResolver(gradeSheetFormSchema),
-    defaultValues: initialValues || staticDefaultFormValues,
+    // The form is now initialized directly with the values from the parent page.
+    // The parent handles both new and editing scenarios.
+    defaultValues: initialValues,
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "subjects",
   });
-  
+
+  // This effect ensures the form is reset if the initialValues prop changes,
+  // which can happen if a user navigates between editing different items without a full page reload.
   React.useEffect(() => {
-    if (initialValues) {
-      form.reset(initialValues); 
-    } else {
-      // Set dynamic default values only on the client-side after hydration
-      const dynamicDefaults = {
-        ...staticDefaultFormValues,
-        academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
-        examDate: format(new Date(), "yyyy-MM-dd"),
-        subjects: [
-          { ...newSubjectTemplate, subjectName: 'Sample Subject', id: crypto.randomUUID() }
-        ],
-      };
-      form.reset(dynamicDefaults);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValues]);
+    form.reset(initialValues);
+  }, [initialValues, form]);
 
 
   const handleAddSubject = () => {
@@ -352,15 +325,13 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-              {initialValues ? "Updating GradeSheet..." : "Processing GradeSheet..."}
+              {initialValues.studentName ? "Updating GradeSheet..." : "Processing GradeSheet..."}
             </>
           ) : (
-             initialValues ? "Update GradeSheet" : "Generate GradeSheet"
+             initialValues.studentName ? "Update GradeSheet" : "Generate GradeSheet"
           )}
         </Button>
       </form>
     </Form>
   );
 }
-
-    

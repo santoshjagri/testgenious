@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { GradeSheetForm } from "@/components/gradesheet/GradeSheetForm";
 import { GradeSheetDisplay } from "@/components/gradesheet/GradeSheetDisplay";
-import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet, GradeSheetCalculationOutput } from "@/lib/types";
+import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet, GradeSheetCalculationOutput, SubjectMarkInput } from "@/lib/types";
 import { calculateGradeSheet } from "@/lib/gradesheet-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, FileText, AlertCircle, Download, Printer as PrinterIcon, Loader2, Edit3, RotateCcw } from "lucide-react";
@@ -14,9 +14,34 @@ import { useToast } from '@/hooks/use-toast';
 import { fileToDataUri } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { format } from 'date-fns';
 
 const GRADESHEET_LOCAL_STORAGE_KEY = "gradesheetHistory";
 const EDIT_GRADESHEET_ID_KEY = "editGradeSheetId";
+
+const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
+  subjectName: '',
+  fullMarks: 100,
+  passMarks: 40,
+  obtainedMarks: 0,
+};
+
+const getNewFormDefaults = (): GradeSheetFormValues => ({
+    studentId: '',
+    symbolNo: '',
+    studentName: '',
+    studentClass: '',
+    rollNo: '',
+    schoolName: 'ExamGenius Academy',
+    logo: undefined,
+    examType: 'Final Examination',
+    academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
+    examDate: format(new Date(), "yyyy-MM-dd"),
+    subjects: [
+        { ...newSubjectTemplate, subjectName: 'Sample Subject', id: crypto.randomUUID() }
+    ],
+});
+
 
 export default function GradesheetPage() {
   const [calculatedResult, setCalculatedResult] = React.useState<CalculatedGradeSheetResult | null>(null);
@@ -28,46 +53,52 @@ export default function GradesheetPage() {
   const [editingGradeSheetId, setEditingGradeSheetId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const gradeSheetIdToEdit = localStorage.getItem(EDIT_GRADESHEET_ID_KEY);
-      if (gradeSheetIdToEdit) {
-        try {
-          const storedHistory = localStorage.getItem(GRADESHEET_LOCAL_STORAGE_KEY);
-          if (storedHistory) {
-            const historyItems: StoredGradeSheet[] = JSON.parse(storedHistory);
-            const gradeSheetToEdit = historyItems.find(item => item.id === gradeSheetIdToEdit);
+    // This effect runs on the client to determine if we are editing or creating a new form.
+    const gradeSheetIdToEdit = localStorage.getItem(EDIT_GRADESHEET_ID_KEY);
+    if (gradeSheetIdToEdit) {
+      try {
+        const storedHistory = localStorage.getItem(GRADESHEET_LOCAL_STORAGE_KEY);
+        if (storedHistory) {
+          const historyItems: StoredGradeSheet[] = JSON.parse(storedHistory);
+          const gradeSheetToEdit = historyItems.find(item => item.id === gradeSheetIdToEdit);
 
-            if (gradeSheetToEdit) {
-              const formValues: GradeSheetFormValues = {
-                ...gradeSheetToEdit.gradesheetData,
-                logo: undefined, // Cannot restore file object
-              };
-
-              setInitialFormValues(formValues);
-              setCalculatedResult(gradeSheetToEdit.gradesheetData);
-              setEditingGradeSheetId(gradeSheetToEdit.id);
-              toast({
-                title: "Editing Gradesheet",
-                description: `Loaded gradesheet for "${gradeSheetToEdit.gradesheetData.studentName}" for editing.`,
-              });
-            }
+          if (gradeSheetToEdit) {
+            const formValues: GradeSheetFormValues = {
+              ...gradeSheetToEdit.gradesheetData,
+              logo: undefined, // Cannot restore file object
+            };
+            setInitialFormValues(formValues);
+            setCalculatedResult(gradeSheetToEdit.gradesheetData);
+            setEditingGradeSheetId(gradeSheetToEdit.id);
+            toast({
+              title: "Editing Gradesheet",
+              description: `Loaded gradesheet for "${gradeSheetToEdit.gradesheetData.studentName}" for editing.`,
+            });
+          } else {
+             // If ID is invalid, clear it and load a new form.
+             localStorage.removeItem(EDIT_GRADESHEET_ID_KEY);
+             setInitialFormValues(getNewFormDefaults());
           }
-        } catch (error) {
-          console.error("Failed to load gradesheet for editing:", error);
-          toast({
-            title: "Error Loading Gradesheet",
-            description: "Could not load the selected gradesheet for editing.",
-            variant: "destructive",
-          });
-        } finally {
-          localStorage.removeItem(EDIT_GRADESHEET_ID_KEY);
         }
-      } else {
-        // Clear form if not editing
-        setInitialFormValues(undefined);
-        setCalculatedResult(null);
-        setEditingGradeSheetId(null);
+      } catch (error) {
+        console.error("Failed to load gradesheet for editing:", error);
+        toast({
+          title: "Error Loading Gradesheet",
+          description: "Could not load the selected gradesheet. Starting a new one.",
+          variant: "destructive",
+        });
+        setInitialFormValues(getNewFormDefaults());
+      } finally {
+        // Clean up the ID from storage after using it
+        if (gradeSheetIdToEdit) {
+             localStorage.removeItem(EDIT_GRADESHEET_ID_KEY);
+        }
       }
+    } else {
+      // No ID found, so we are creating a new gradesheet
+      setInitialFormValues(getNewFormDefaults());
+      setCalculatedResult(null);
+      setEditingGradeSheetId(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -136,6 +167,10 @@ export default function GradesheetPage() {
           }
 
           localStorage.setItem(GRADESHEET_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20))); 
+          // After successful submission of an edit, clear the editing state
+          if (editingGradeSheetId) {
+            setEditingGradeSheetId(null);
+          }
 
         } catch (storageError) {
           console.error("Error saving gradesheet to local storage:", storageError);
@@ -160,8 +195,8 @@ export default function GradesheetPage() {
     }
   };
 
-  const clearFormAndEditState = () => {
-    setInitialFormValues(undefined);
+  const clearFormAndStartNew = () => {
+    setInitialFormValues(getNewFormDefaults());
     setCalculatedResult(null);
     setEditingGradeSheetId(null);
     toast({ title: "Form Cleared", description: "Ready for a new gradesheet."});
@@ -273,6 +308,17 @@ export default function GradesheetPage() {
     }
     setIsDownloadingPdf(false);
   };
+  
+  if (!initialFormValues) {
+    return (
+        <div className="flex-1 flex justify-center items-center p-6">
+            <div className="flex items-center space-x-2">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-lg text-muted-foreground">Loading Gradesheet Tool...</p>
+            </div>
+        </div>
+    );
+  }
 
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
@@ -283,7 +329,7 @@ export default function GradesheetPage() {
                 <AlertTitle className="text-base sm:text-lg">Editing Mode</AlertTitle>
                 <AlertDescription className="text-xs sm:text-sm">
                 You are currently editing a saved gradesheet. Make your changes and click the button below to update it.
-                <Button variant="outline" size="sm" onClick={clearFormAndEditState} className="ml-2 sm:ml-4 mt-1 sm:mt-0 text-xs">
+                <Button variant="outline" size="sm" onClick={clearFormAndStartNew} className="ml-2 sm:ml-4 mt-1 sm:mt-0 text-xs">
                     <RotateCcw className="mr-1 h-3 w-3" /> Create New Instead
                 </Button>
                 </AlertDescription>
@@ -310,7 +356,7 @@ export default function GradesheetPage() {
                 </AlertDescription>
             </Alert>
             <GradeSheetForm
-              key={editingGradeSheetId || 'new'}
+              key={editingGradeSheetId || 'new-form'}
               onSubmit={handleFormSubmit}
               isLoading={isProcessing}
               initialValues={initialFormValues}
@@ -382,5 +428,3 @@ export default function GradesheetPage() {
     </main>
   );
 }
-
-    
