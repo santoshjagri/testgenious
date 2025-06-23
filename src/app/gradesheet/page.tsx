@@ -274,7 +274,6 @@ export default function GradesheetPage() {
     setIsDownloadingPdf(false);
   };
 
-
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
       <div className="w-full max-w-5xl space-y-6 sm:space-y-8">
@@ -365,7 +364,7 @@ export default function GradesheetPage() {
           </>
         )}
       </div>
-       <style jsx global>{\`
+       <style jsx global>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;
@@ -379,7 +378,7 @@ export default function GradesheetPage() {
         .animate-fadeInUp {
           animation: fadeInUp 0.5s ease-out forwards;
         }
-      \`}</style>
+      `}</style>
     </main>
   );
 }
