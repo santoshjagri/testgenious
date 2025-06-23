@@ -44,37 +44,37 @@ body {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
     --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
     --ring: 217.2 91.2% 59.8%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 224 71.4% 4.1%;
-    --sidebar-foreground: 210 20% 98%;
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 217.2 91.2% 59.8%;
-    --sidebar-primary-foreground: 210 20% 98%;
-    --sidebar-accent: 215 27.9% 16.9%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 215 27.9% 16.9%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -179,6 +179,109 @@ body {
  margin: 8px auto 0;
  border-bottom: 2px solid hsl(var(--primary));
 }
+
+/* Question Paper Template Styles */
+/* Note: The 'normal' template uses the default component styles. */
+
+/* --- Good Template --- */
+.printable-area[data-template="good"] .qp-header {
+  border-bottom: 2px solid hsl(var(--primary) / 0.5);
+}
+.printable-area[data-template="good"] .qp-title {
+  color: hsl(var(--primary));
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+.printable-area[data-template="good"] .qp-section-header {
+  background-color: hsl(var(--muted));
+  border-color: hsl(var(--border));
+  color: hsl(var(--card-foreground));
+}
+.printable-area[data-template="good"] .qp-instructions {
+  background-color: hsl(var(--accent) / 0.1);
+  border-color: hsl(var(--accent) / 0.4);
+}
+
+
+/* --- Better Template --- */
+.printable-area[data-template="better"] {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.printable-area[data-template="better"] .qp-header {
+  background-color: hsl(var(--primary) / 0.9);
+  color: hsl(var(--primary-foreground));
+  border-bottom: none;
+}
+.printable-area[data-template="better"] .qp-header,
+.printable-area[data-template="better"] .qp-header .text-gray-700,
+.printable-area[data-template="better"] .qp-header strong {
+  color: hsl(var(--primary-foreground)) !important;
+}
+.printable-area[data-template="better"] .qp-header .grid {
+   color: hsl(var(--primary-foreground)) !important;
+}
+.printable-area[data-template="better"] .qp-section-header {
+  background-color: hsl(var(--primary) / 0.15);
+  border-left: 4px solid hsl(var(--primary));
+  padding-left: 0.75rem;
+  border-bottom: 1px solid hsl(var(--primary) / 0.3);
+}
+.printable-area[data-template="better"] .qp-footer {
+  border-top: 1px solid hsl(var(--primary) / 0.3);
+}
+
+/* --- Best Template --- */
+.printable-area[data-template="best"] {
+  font-family: "Times New Roman", Times, serif;
+  border: 1px solid #aaa;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  outline: 6px solid hsl(var(--primary) / 0.1);
+  outline-offset: 0;
+  position: relative;
+}
+.printable-area[data-template="best"]::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  border: 2px solid hsl(var(--primary) / 0.5);
+  pointer-events: none;
+}
+.printable-area[data-template="best"] .qp-header {
+  text-align: center;
+  border-bottom: 2px double hsl(var(--primary));
+  padding-bottom: 1rem;
+}
+.printable-area[data-template="best"] .qp-title {
+  font-size: 1.75rem;
+  letter-spacing: 1px;
+}
+.printable-area[data-template="best"] .qp-section-header {
+  background: transparent;
+  border: none;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+.printable-area[data-template="best"] .qp-section-header > * {
+  margin: auto;
+}
+.printable-area[data-template="best"] .qp-footer {
+  font-style: italic;
+  padding: 1rem;
+}
+.printable-area[data-template="best"] .qp-footer::before {
+  content: " ";
+  display: block;
+  width: 80px;
+  margin: 0 auto 8px;
+  border-bottom: 1px solid #ccc;
+}
+
 
 @media print {
   body * {

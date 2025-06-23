@@ -9,9 +9,12 @@ import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplay
 import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, Edit3, RotateCcw } from "lucide-react";
+import { Terminal, Edit3, RotateCcw, Palette } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { fileToDataUri } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 const EDIT_PAPER_ID_KEY = "editPaperId";
@@ -27,6 +30,7 @@ export default function Home() {
   const [generatedPaper, setGeneratedPaper] = React.useState<GenerateQuestionsOutput | null>(null);
   const [formSnapshotForDisplay, setFormSnapshotForDisplay] = React.useState<QuestionPaperDisplayFormData | null>(null);
   const [editingPaperId, setEditingPaperId] = React.useState<string | null>(null);
+  const [template, setTemplate] = React.useState('normal');
   const { toast } = useToast();
   const router = useRouter();
 
@@ -277,7 +281,24 @@ export default function Home() {
 
         {!isLoading && generatedPaper && formSnapshotForDisplay && (
           <div className="animate-fadeInUp">
-            <QuestionPaperDisplay formData={formSnapshotForDisplay} questions={generatedPaper} />
+             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 no-print my-4 p-4 border rounded-lg bg-card shadow-sm">
+                <div className="flex items-center space-x-2">
+                    <Palette className="h-4 w-4 text-muted-foreground" />
+                    <Label htmlFor="template-select" className="text-sm font-medium">Template</Label>
+                    <Select value={template} onValueChange={setTemplate}>
+                    <SelectTrigger id="template-select" className="w-[180px]">
+                        <SelectValue placeholder="Select Template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="normal">Normal</SelectItem>
+                        <SelectItem value="good">Good</SelectItem>
+                        <SelectItem value="better">Better</SelectItem>
+                        <SelectItem value="best">Best</SelectItem>
+                    </SelectContent>
+                    </Select>
+                </div>
+            </div>
+            <QuestionPaperDisplay formData={formSnapshotForDisplay} questions={generatedPaper} template={template} />
           </div>
         )}
 

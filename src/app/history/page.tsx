@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { History as HistoryIcon, Trash2, Eye, ArrowLeft, PlusSquare, FileQuestion, CalendarDays } from "lucide-react";
+import { History as HistoryIcon, Trash2, Eye, ArrowLeft, PlusSquare, FileQuestion, CalendarDays, Palette } from "lucide-react";
 import type { StoredQuestionPaper, ExamTypes } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,12 +21,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 
 export default function HistoryPage() {
   const [historyItems, setHistoryItems] = useState<StoredQuestionPaper[]>([]);
   const [selectedPaperForView, setSelectedPaperForView] = useState<StoredQuestionPaper | null>(null);
+  const [template, setTemplate] = useState('normal');
   const { toast } = useToast();
   const router = useRouter();
 
@@ -105,16 +108,36 @@ export default function HistoryPage() {
 
     return (
       <div className="flex-1 flex flex-col p-2 sm:p-4 md:p-6 lg:p-8">
-        <Button 
-          variant="outline" 
-          onClick={() => setSelectedPaperForView(null)} 
-          className="mb-4 sm:mb-6 self-start no-print w-full sm:w-auto"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to History
-        </Button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setSelectedPaperForView(null)} 
+              className="mb-4 sm:mb-6 self-start no-print w-full sm:w-auto"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to History
+            </Button>
+        </div>
+         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 no-print my-4 p-4 border rounded-lg bg-card shadow-sm">
+            <div className="flex items-center space-x-2">
+                <Palette className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="template-select" className="text-sm font-medium">Template</Label>
+                <Select value={template} onValueChange={setTemplate}>
+                <SelectTrigger id="template-select" className="w-[180px]">
+                    <SelectValue placeholder="Select Template" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="good">Good</SelectItem>
+                    <SelectItem value="better">Better</SelectItem>
+                    <SelectItem value="best">Best</SelectItem>
+                </SelectContent>
+                </Select>
+            </div>
+        </div>
         <QuestionPaperDisplay 
           formData={displayFormData} 
           questions={selectedPaperForView.generatedPaper} 
+          template={template}
         />
       </div>
     );
