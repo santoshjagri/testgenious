@@ -321,7 +321,7 @@ export default function GradesheetHistoryPage() {
                   <Eye className="mr-1 h-3 w-3" /> View
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => handleEditGradeSheet(item.id)} className="text-foreground hover:bg-secondary flex-1 text-center text-xs sm:text-sm">
-                  <Edit className="mr-1 h-3 w-3" /> Edit
+                  <Edit className="mr-1 h-3 w-3" /> Recorrect
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -352,4 +352,5 @@ export default function GradesheetHistoryPage() {
     </div>
   );
 }
+
     
