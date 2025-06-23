@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -97,7 +96,7 @@ export default function GradesheetHistoryPage() {
     }
   };
 
-  const handleEditGradeSheet = (gradesheetId: string) => {
+  const handleRecorrectGradeSheet = (gradesheetId: string) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(EDIT_GRADESHEET_ID_KEY, gradesheetId);
       router.push('/gradesheet');
@@ -320,8 +319,8 @@ export default function GradesheetHistoryPage() {
                 <Button variant="ghost" size="sm" onClick={() => handleViewGradeSheet(item)} className="text-primary hover:bg-primary/10 flex-1 text-center text-xs sm:text-sm">
                   <Eye className="mr-1 h-3 w-3" /> View
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => handleEditGradeSheet(item.id)} className="text-foreground hover:bg-secondary flex-1 text-center text-xs sm:text-sm">
-                  <Edit className="mr-1 h-3 w-3" /> Edit
+                <Button variant="ghost" size="sm" onClick={() => handleRecorrectGradeSheet(item.id)} className="text-foreground hover:bg-secondary flex-1 text-center text-xs sm:text-sm">
+                  <Edit className="mr-1 h-3 w-3" /> Recorrect
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
