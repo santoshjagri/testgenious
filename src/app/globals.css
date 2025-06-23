@@ -126,27 +126,32 @@ body {
 
 
 .printable-area[data-template="best"] {
-  border: 2px solid hsl(var(--primary) / 0.8);
-  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  border: 2px solid hsl(var(--primary) / 0.7);
+  outline: 4px solid hsl(var(--primary) / 0.1);
+  outline-offset: 4px;
+  box-shadow: 0 4px 12px -4px rgb(0 0 0 / 0.1);
   font-family: Georgia, 'Times New Roman', Times, serif;
+  position: relative;
 }
 .printable-area[data-template="best"] .gs-header {
-  background: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--primary) / 0.7));
-  color: hsl(var(--primary-foreground));
-  border-bottom-color: hsl(var(--primary));
+  background: transparent;
+  color: hsl(var(--primary));
+  border-bottom: 2px solid hsl(var(--primary) / 0.8);
+  border-bottom-color: hsl(var(--primary) / 0.8);
 }
 .printable-area[data-template="best"] .gs-title,
 .printable-area[data-template="best"] .gs-header .text-muted-foreground,
 .printable-area[data-template="best"] .gs-header strong {
-  color: hsl(var(--primary-foreground) / 0.95) !important;
+  color: inherit !important;
 }
 .printable-area[data-template="best"] .gs-table thead {
-  background-color: hsl(var(--primary) / 0.8);
-  color: hsl(var(--primary-foreground));
+  background-color: hsl(var(--primary) / 0.08);
+  color: hsl(var(--primary));
   font-weight: bold;
+  border-bottom: 1px solid hsl(var(--primary) / 0.5);
 }
 .printable-area[data-template="best"] .gs-table tr:hover {
-  background-color: hsl(var(--accent) / 0.4);
+  background-color: hsl(var(--accent) / 0.3);
 }
 .printable-area[data-template="best"] .gs-summary-box {
   border-left: 4px solid hsl(var(--primary));
