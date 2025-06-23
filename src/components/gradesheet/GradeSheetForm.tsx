@@ -28,24 +28,26 @@ const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
   obtainedMarks: 0,
 };
 
+const defaultFormValues: GradeSheetFormValues = {
+  studentId: '',
+  symbolNo: '',
+  studentName: '',
+  studentClass: '',
+  rollNo: '',
+  schoolName: 'ExamGenius Academy',
+  logo: undefined,
+  examType: 'Final Examination',
+  academicYear: typeof window !== 'undefined' ? `${new Date().getFullYear()}-${new Date().getFullYear() + 1}` : "",
+  examDate: typeof window !== 'undefined' ? format(new Date(), "yyyy-MM-dd") : "",
+  subjects: [
+    { ...newSubjectTemplate, subjectName: 'Sample Subject', id: typeof window !== 'undefined' ? crypto.randomUUID() : '1' }
+  ],
+};
+
 export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeSheetFormProps) {
   const form = useForm<GradeSheetFormValues>({
     resolver: zodResolver(gradeSheetFormSchema),
-    defaultValues: initialValues || {
-      studentId: '',
-      symbolNo: '',
-      studentName: '',
-      studentClass: '',
-      rollNo: '',
-      schoolName: 'ExamGenius Academy',
-      logo: undefined,
-      examType: 'Final Examination',
-      academicYear: "", 
-      examDate: "",     
-      subjects: [
-        { ...newSubjectTemplate, subjectName: 'Sample Subject', id: crypto.randomUUID() } 
-      ],
-    },
+    defaultValues: initialValues || defaultFormValues,
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -57,20 +59,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     if (initialValues) {
       form.reset(initialValues); 
     } else {
-      // Only set default values if not editing
-      if (typeof window !== 'undefined') { 
-        if (form.getValues('examDate') === "") {
-          form.setValue('examDate', format(new Date(), "yyyy-MM-dd"));
-        }
-        if (form.getValues('academicYear') === "") {
-          const currentYear = new Date().getFullYear();
-          form.setValue('academicYear', `${currentYear}-${currentYear + 1}`);
-        }
-        const subjects = form.getValues('subjects');
-        if (subjects.length > 0 && !subjects[0].id) { 
-          form.setValue('subjects.0.id', crypto.randomUUID());
-        }
-      }
+      form.reset(defaultFormValues);
     }
   }, [initialValues, form]);
 
@@ -342,7 +331,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
             )}
             {form.formState.errors.subjects?.message && (
                  <FormMessage className="text-xs sm:text-sm font-medium text-destructive">
-                    {form.formState.errors.subjects.message}
+                    {form.formState.errors.message}
                  </FormMessage>
             )}
           </CardContent>
