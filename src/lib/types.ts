@@ -92,7 +92,7 @@ export const gradeSheetFormSchema = z.object({
   studentClass: z.string().min(1, "Class is required."),
   rollNo: z.string().min(1, "Roll number is required."),
   schoolName: z.string().min(1, "School name is required."),
-  logo: z.instanceof(File).optional(), // Added for logo upload
+  logo: z.instanceof(File).optional(),
   examType: z.enum(GradeSheetExamTypes).default("Final Examination"),
   academicYear: z.string().min(1, "Academic year is required (e.g., 2023-2024).")
                    .regex(/^\d{4}-\d{4}$/, "Format must be YYYY-YYYY (e.g., 2023-2024)."),
@@ -103,9 +103,8 @@ export const gradeSheetFormSchema = z.object({
 export type GradeSheetFormValues = z.infer<typeof gradeSheetFormSchema>;
 
 // Represents the data structure for displaying and storing a complete gradesheet.
-// It omits the 'logo' (File object) from form values and includes 'logoDataUri' (string) instead.
 export interface CalculatedGradeSheetResult extends Omit<GradeSheetFormValues, 'logo'> {
-  logoDataUri?: string; // Added to store the logo as a data URI
+  logoDataUri?: string;
   totalObtainedMarks: number;
   totalFullMarks: number;
   percentage: number;
@@ -122,7 +121,6 @@ export interface StoredGradeSheet {
   gradesheetData: CalculatedGradeSheetResult;
 }
 
-// Represents the output of the core calculation logic.
 export interface GradeSheetCalculationOutput {
   totalObtainedMarks: number;
   totalFullMarks: number;
@@ -133,3 +131,51 @@ export interface GradeSheetCalculationOutput {
   remarks?: string;
   individualSubjectStatus: Array<{ subjectName: string; status: "Pass" | "Fail" }>;
 }
+
+
+// --- Bulk GradeSheet Types ---
+
+export const bulkStudentSchema = z.object({
+  id: z.string(),
+  studentId: z.string().optional(),
+  symbolNo: z.string().optional(),
+  studentName: z.string().min(1, "Name is required."),
+  rollNo: z.string().min(1, "Roll No. is required."),
+  obtainedMarks: z.record(z.coerce.number().min(0, ">= 0")),
+});
+
+export const bulkSubjectSchema = z.object({
+  id: z.string(),
+  subjectName: z.string().min(1, "Subject name is required."),
+  fullMarks: z.coerce.number().min(1, "Full > 0"),
+  passMarks: z.coerce.number().min(0, "Pass >= 0"),
+}).refine(data => data.passMarks <= data.fullMarks, {
+    message: "Pass cannot exceed Full marks.",
+    path: ["passMarks"],
+});
+
+export const bulkGradeSheetFormSchema = z.object({
+  schoolName: z.string().min(1, "School name is required."),
+  logo: z.instanceof(File).optional(),
+  studentClass: z.string().min(1, "Class is required."),
+  examType: z.enum(GradeSheetExamTypes).default("Final Examination"),
+  academicYear: z.string().min(1, "Academic year is required.").regex(/^\d{4}-\d{4}$/, "Format: YYYY-YYYY"),
+  examDate: z.string().min(1, "Exam date is required."),
+  subjects: z.array(bulkSubjectSchema).min(1, "At least one subject is required."),
+  students: z.array(bulkStudentSchema).min(1, "At least one student is required."),
+}).refine(data => {
+  for (const student of data.students) {
+    for (const subjectId in student.obtainedMarks) {
+      const subject = data.subjects.find(s => s.id === subjectId);
+      if (subject && student.obtainedMarks[subjectId] > subject.fullMarks) {
+        return false;
+      }
+    }
+  }
+  return true;
+}, {
+  message: "Obtained marks cannot be greater than Full Marks for any subject.",
+  path: ["students"],
+});
+
+export type BulkGradeSheetFormValues = z.infer<typeof bulkGradeSheetFormSchema>;

@@ -4,10 +4,10 @@
 import * as React from 'react';
 import { GradeSheetForm } from "@/components/gradesheet/GradeSheetForm";
 import { GradeSheetDisplay } from "@/components/gradesheet/GradeSheetDisplay";
-import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet, GradeSheetCalculationOutput, SubjectMarkInput } from "@/lib/types";
+import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet, GradeSheetCalculationOutput, SubjectMarkInput, BulkGradeSheetFormValues } from "@/lib/types";
 import { calculateGradeSheet } from "@/lib/gradesheet-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, FileText, AlertCircle, Download, Printer as PrinterIcon, Loader2, Edit3, RotateCcw } from "lucide-react";
+import { GraduationCap, FileText, AlertCircle, Download, Printer as PrinterIcon, Loader2, Edit3, RotateCcw, Users, User } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -15,16 +15,12 @@ import { fileToDataUri } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { format } from 'date-fns';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { BulkGradeSheetForm } from '@/components/gradesheet/BulkGradeSheetForm';
 
 const GRADESHEET_LOCAL_STORAGE_KEY = "gradesheetHistory";
 const EDIT_GRADESHEET_ID_KEY = "editGradeSheetId";
-
-const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
-  subjectName: '',
-  fullMarks: 100,
-  passMarks: 40,
-  obtainedMarks: 0,
-};
 
 const getNewFormDefaults = (): GradeSheetFormValues => ({
     studentId: '',
@@ -38,10 +34,9 @@ const getNewFormDefaults = (): GradeSheetFormValues => ({
     academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
     examDate: format(new Date(), "yyyy-MM-dd"),
     subjects: [
-        { ...newSubjectTemplate, subjectName: 'Sample Subject', id: crypto.randomUUID() }
+        { subjectName: 'Sample Subject', fullMarks: 100, passMarks: 40, obtainedMarks: 0, id: crypto.randomUUID() }
     ],
 });
-
 
 export default function GradesheetPage() {
   const [calculatedResult, setCalculatedResult] = React.useState<CalculatedGradeSheetResult | null>(null);
@@ -51,11 +46,13 @@ export default function GradesheetPage() {
   const { toast } = useToast();
   const [initialFormValues, setInitialFormValues] = React.useState<GradeSheetFormValues | undefined>(undefined);
   const [editingGradeSheetId, setEditingGradeSheetId] = React.useState<string | null>(null);
+  const [entryMode, setEntryMode] = React.useState<'single' | 'bulk'>('single');
 
   React.useEffect(() => {
     // This effect runs on the client to determine if we are editing or creating a new form.
     const gradeSheetIdToEdit = localStorage.getItem(EDIT_GRADESHEET_ID_KEY);
     if (gradeSheetIdToEdit) {
+      setEntryMode('single'); // Force single mode for editing
       try {
         const storedHistory = localStorage.getItem(GRADESHEET_LOCAL_STORAGE_KEY);
         if (storedHistory) {
@@ -75,7 +72,6 @@ export default function GradesheetPage() {
               description: `Loaded gradesheet for "${gradeSheetToEdit.gradesheetData.studentName}" for editing.`,
             });
           } else {
-             // If ID is invalid, clear it and load a new form.
              localStorage.removeItem(EDIT_GRADESHEET_ID_KEY);
              setInitialFormValues(getNewFormDefaults());
           }
@@ -89,18 +85,15 @@ export default function GradesheetPage() {
         });
         setInitialFormValues(getNewFormDefaults());
       } finally {
-        // Clean up the ID from storage after using it
         if (gradeSheetIdToEdit) {
              localStorage.removeItem(EDIT_GRADESHEET_ID_KEY);
         }
       }
     } else {
-      // No ID found, so we are creating a new gradesheet
       setInitialFormValues(getNewFormDefaults());
       setCalculatedResult(null);
       setEditingGradeSheetId(null);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFormSubmit = async (values: GradeSheetFormValues) => {
@@ -118,24 +111,14 @@ export default function GradesheetPage() {
           logoDataUri = await fileToDataUri(logo);
         } catch (e) {
           console.error("Error converting logo to data URI:", e);
-          toast({
-            title: "Logo Error",
-            description: "Could not process the uploaded logo. Continuing without it.",
-            variant: "destructive",
-          });
+          toast({ title: "Logo Error", description: "Could not process the uploaded logo. Continuing without it.", variant: "destructive" });
         }
       } else if (editingGradeSheetId && calculatedResult?.logoDataUri) {
         logoDataUri = calculatedResult.logoDataUri;
       }
       
       const calculationOutput: GradeSheetCalculationOutput = calculateGradeSheet(values);
-      
-      const fullResult: CalculatedGradeSheetResult = {
-        ...otherFormValues, 
-        logoDataUri,      
-        ...calculationOutput, 
-      };
-      
+      const fullResult: CalculatedGradeSheetResult = { ...otherFormValues, logoDataUri, ...calculationOutput };
       setCalculatedResult(fullResult);
 
       if (typeof window !== 'undefined') {
@@ -145,55 +128,97 @@ export default function GradesheetPage() {
           
           if (editingGradeSheetId) {
             existingHistory = existingHistory.map(item =>
-              item.id === editingGradeSheetId
-              ? { ...item, gradesheetData: fullResult, dateGenerated: new Date().toISOString() }
-              : item
+              item.id === editingGradeSheetId ? { ...item, gradesheetData: fullResult, dateGenerated: new Date().toISOString() } : item
             );
-            toast({
-              title: "Gradesheet Updated!",
-              description: "The gradesheet has been updated and saved to GS History.",
-            });
+            toast({ title: "Gradesheet Updated!", description: "The gradesheet has been updated and saved to GS History." });
           } else {
-            const newGradeSheetEntry: StoredGradeSheet = {
-              id: crypto.randomUUID(), 
-              dateGenerated: new Date().toISOString(),
-              gradesheetData: fullResult,
-            };
+            const newGradeSheetEntry: StoredGradeSheet = { id: crypto.randomUUID(), dateGenerated: new Date().toISOString(), gradesheetData: fullResult };
             existingHistory = [newGradeSheetEntry, ...existingHistory];
-            toast({
-              title: "GradeSheet Generated!",
-              description: "The gradesheet has been generated and saved to GS History.",
-            });
+            toast({ title: "GradeSheet Generated!", description: "The gradesheet has been generated and saved to GS History." });
           }
 
-          localStorage.setItem(GRADESHEET_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 20))); 
-          // After successful submission of an edit, clear the editing state
-          if (editingGradeSheetId) {
-            setEditingGradeSheetId(null);
-          }
-
+          localStorage.setItem(GRADESHEET_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 50)));
+          if (editingGradeSheetId) setEditingGradeSheetId(null);
         } catch (storageError) {
           console.error("Error saving gradesheet to local storage:", storageError);
-          toast({
-            title: "Warning",
-            description: `Gradesheet ${editingGradeSheetId ? 'updated' : 'prepared'}, but failed to save to GS History.`,
-            variant: "destructive", 
-          });
+          toast({ title: "Warning", description: `Gradesheet ${editingGradeSheetId ? 'updated' : 'prepared'}, but failed to save to GS History.`, variant: "destructive" });
         }
       }
-
     } catch (e) {
       console.error("Error processing gradesheet:", e);
       setError("An unexpected error occurred while processing the gradesheet.");
-      toast({
-        title: "Error Processing Gradesheet",
-        description: e instanceof Error ? e.message : "An unknown error occurred.",
-        variant: "destructive",
-      });
+      toast({ title: "Error Processing Gradesheet", description: e instanceof Error ? e.message : "An unknown error occurred.", variant: "destructive" });
     } finally {
       setIsProcessing(false);
     }
   };
+  
+  const handleBulkFormSubmit = async (values: BulkGradeSheetFormValues) => {
+    setIsProcessing(true);
+    setError(null);
+    setCalculatedResult(null);
+
+    try {
+        const { logo, students, subjects, ...sharedData } = values;
+        let logoDataUri: string | undefined = undefined;
+        if (logo) {
+            try {
+                logoDataUri = await fileToDataUri(logo);
+            } catch (e) {
+                console.error("Error converting logo to data URI:", e);
+                toast({ title: "Logo Error", description: "Could not process the logo. Continuing without it.", variant: "destructive" });
+            }
+        }
+
+        const newHistoryItems: StoredGradeSheet[] = [];
+
+        for (const student of students) {
+            const singleStudentSubjects: SubjectMarkInput[] = subjects.map(s => ({
+                id: s.id,
+                subjectName: s.subjectName,
+                fullMarks: s.fullMarks,
+                passMarks: s.passMarks,
+                obtainedMarks: student.obtainedMarks[s.id] || 0,
+            }));
+
+            const singleStudentFormValues: GradeSheetFormValues = {
+                ...sharedData,
+                studentId: student.studentId,
+                symbolNo: student.symbolNo,
+                studentName: student.studentName,
+                rollNo: student.rollNo,
+                subjects: singleStudentSubjects,
+                logo: undefined,
+            };
+
+            const calculationOutput = calculateGradeSheet(singleStudentFormValues);
+            const fullResult: CalculatedGradeSheetResult = { ...singleStudentFormValues, logoDataUri, ...calculationOutput };
+            
+            const newEntry: StoredGradeSheet = { id: crypto.randomUUID(), dateGenerated: new Date().toISOString(), gradesheetData: fullResult };
+            newHistoryItems.push(newEntry);
+        }
+
+        if (typeof window !== 'undefined') {
+            const existingHistoryString = localStorage.getItem(GRADESHEET_LOCAL_STORAGE_KEY);
+            let existingHistory: StoredGradeSheet[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
+            const updatedHistory = [...newHistoryItems, ...existingHistory];
+            localStorage.setItem(GRADESHEET_LOCAL_STORAGE_KEY, JSON.stringify(updatedHistory.slice(0, 50)));
+        }
+
+        toast({
+            title: `Success: ${newHistoryItems.length} Gradesheets Generated!`,
+            description: "All gradesheets have been saved to your GS History.",
+        });
+
+    } catch (e) {
+        console.error("Error processing bulk gradesheets:", e);
+        setError("An unexpected error occurred during bulk processing.");
+        toast({ title: "Error Processing Bulk Submission", description: e instanceof Error ? e.message : "An unknown error occurred.", variant: "destructive" });
+    } finally {
+        setIsProcessing(false);
+    }
+};
+
 
   const clearFormAndStartNew = () => {
     setInitialFormValues(getNewFormDefaults());
@@ -206,21 +231,13 @@ export default function GradesheetPage() {
     if (calculatedResult) {
       window.print();
     } else {
-      toast({
-        title: "No Gradesheet Available",
-        description: "Please generate a gradesheet before trying to print.",
-        variant: "destructive"
-      });
+      toast({ title: "No Gradesheet Available", description: "Please generate a gradesheet before trying to print.", variant: "destructive" });
     }
   };
 
   const handleDownloadPdf = async () => {
     if (!calculatedResult) {
-      toast({
-        title: "No Gradesheet Available",
-        description: "Please generate a gradesheet before trying to download PDF.",
-        variant: "destructive"
-      });
+      toast({ title: "No Gradesheet Available", description: "Please generate a gradesheet before trying to download PDF.", variant: "destructive" });
       return;
     }
 
@@ -232,84 +249,45 @@ export default function GradesheetPage() {
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfPageWidth = pdf.internal.pageSize.getWidth();
         const pdfPageHeight = pdf.internal.pageSize.getHeight();
-
-        const marginMM = 10; 
-        const marginTopMM = marginMM; 
-        const marginBottomMM = marginMM;
-        const marginLeftMM = marginMM; 
-        const marginRightMM = marginMM;
-
-        const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
-        const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
-
-        const fullCanvas = await html2canvas(paperElement, {
-          scale: 2, 
-          useCORS: true,
-          logging: false,
-        });
-
-        const fullCanvasWidthPx = fullCanvas.width;
-        const fullCanvasHeightPx = fullCanvas.height;
-
-        const pxPerMm = fullCanvasWidthPx / contentWidthMM; 
-        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97; 
-
-        let currentYpx = 0; 
+        const marginMM = 10, contentWidthMM = pdfPageWidth - marginMM * 2, contentHeightMM = pdfPageHeight - marginMM * 2;
+        const fullCanvas = await html2canvas(paperElement, { scale: 2, useCORS: true, logging: false });
+        const fullCanvasWidthPx = fullCanvas.width, fullCanvasHeightPx = fullCanvas.height;
+        const pxPerMm = fullCanvasWidthPx / contentWidthMM;
+        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97;
+        let currentYpx = 0;
 
         while (currentYpx < fullCanvasHeightPx) {
           const remainingHeightPx = fullCanvasHeightPx - currentYpx;
           const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
-
           const pageCanvas = document.createElement('canvas');
           pageCanvas.width = fullCanvasWidthPx;
           pageCanvas.height = sliceForThisPagePx;
           const pageCtx = pageCanvas.getContext('2d');
 
           if (pageCtx) {
-            pageCtx.drawImage(
-              fullCanvas,
-              0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 
-              0, 0, fullCanvasWidthPx, sliceForThisPagePx 
-            );
-            const pageImgData = pageCanvas.toDataURL('image/png', 0.9); 
-            const actualContentHeightMMForThisPage = (sliceForThisPagePx / pxPerMm);
-            pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
+            pageCtx.drawImage(fullCanvas, 0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 0, 0, fullCanvasWidthPx, sliceForThisPagePx);
+            const pageImgData = pageCanvas.toDataURL('image/png', 0.9);
+            pdf.addImage(pageImgData, 'PNG', marginMM, marginMM, contentWidthMM, (sliceForThisPagePx / pxPerMm));
           }
           currentYpx += sliceForThisPagePx;
-          if (currentYpx < fullCanvasHeightPx) {
-            pdf.addPage();
-          }
+          if (currentYpx < fullCanvasHeightPx) pdf.addPage();
         }
         
         const safeStudentName = calculatedResult.studentName?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'student';
-        const safeExamType = calculatedResult.examType?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'exam';
-        const filename = `gradesheet_${safeStudentName}_${safeExamType}.pdf`;
-        
+        const filename = `gradesheet_${safeStudentName}_${calculatedResult.examType?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'exam'}.pdf`;
         pdf.save(filename);
-        toast({
-          title: "PDF Downloaded",
-          description: "Gradesheet PDF has been successfully downloaded.",
-        });
-
+        toast({ title: "PDF Downloaded", description: "Gradesheet PDF has been successfully downloaded." });
       } catch (error) {
-        console.error("Error generating PDF from gradesheet page:", error);
-        toast({
-          title: "PDF Generation Failed",
-          description: "Could not generate PDF for the gradesheet. Please try again.",
-          variant: "destructive",
-        });
+        console.error("Error generating PDF:", error);
+        toast({ title: "PDF Generation Failed", description: "Could not generate PDF. Please try again.", variant: "destructive" });
       }
     } else {
-         toast({
-            title: "PDF Generation Error",
-            description: "Could not find the gradesheet content to generate PDF.",
-            variant: "destructive",
-        });
+         toast({ title: "PDF Generation Error", description: "Could not find the gradesheet content to generate PDF.", variant: "destructive" });
     }
     setIsDownloadingPdf(false);
   };
   
-  if (!initialFormValues) {
+  if (!initialFormValues && entryMode === 'single') {
     return (
         <div className="flex-1 flex justify-center items-center p-6">
             <div className="flex items-center space-x-2">
@@ -337,30 +315,53 @@ export default function GradesheetPage() {
         )}
         <Card className="shadow-xl">
           <CardHeader className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mb-2">
-              <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-              <CardTitle className="text-2xl sm:text-3xl font-headline text-primary">Exam GradeSheet Tool</CardTitle>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-2">
+              <div className="flex items-center gap-2">
+                  <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                  <CardTitle className="text-2xl sm:text-3xl font-headline text-primary">Exam GradeSheet Tool</CardTitle>
+              </div>
+              <div className="flex items-center space-x-3 ml-auto">
+                <User className="h-4 w-4" />
+                <Label htmlFor="entry-mode-switch">Single</Label>
+                <Switch
+                  id="entry-mode-switch"
+                  checked={entryMode === 'bulk'}
+                  onCheckedChange={(checked) => setEntryMode(checked ? 'bulk' : 'single')}
+                  disabled={!!editingGradeSheetId}
+                  aria-label="Toggle between single student and bulk entry modes"
+                />
+                <Label htmlFor="entry-mode-switch">Bulk</Label>
+                <Users className="h-4 w-4" />
+              </div>
             </div>
             <CardDescription className="font-body text-sm sm:text-base">
-              Enter student, exam, and subject mark details to generate a comprehensive gradesheet.
-              Calculations for total marks, percentage, grade, GPA, and result status will be performed automatically.
+              {entryMode === 'single'
+                ? "Enter student, exam, and subject mark details to generate a comprehensive gradesheet."
+                : "Efficiently create gradesheets for multiple students at once. Define subjects and then enter marks in the table."}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
              <Alert variant="default" className="mb-4 sm:mb-6 border-accent bg-accent/10 text-accent-foreground">
                 <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
-                <AlertTitle className="text-base sm:text-lg">Work in Progress</AlertTitle>
+                <AlertTitle className="text-base sm:text-lg">Client-Side Operation</AlertTitle>
                 <AlertDescription className="text-xs sm:text-sm">
-                  This GradeSheet tool is currently in client-side mode. Data is saved to your browser's local storage.
-                  Enhanced PDF download, and printing features are available.
+                  This GradeSheet tool operates in your browser. All data is saved to your local device and is not uploaded to any server.
                 </AlertDescription>
             </Alert>
-            <GradeSheetForm
-              key={editingGradeSheetId || 'new-form'}
-              onSubmit={handleFormSubmit}
-              isLoading={isProcessing}
-              initialValues={initialFormValues}
-            />
+            
+            {entryMode === 'single' ? (
+                <GradeSheetForm
+                    key={editingGradeSheetId || 'new-form'}
+                    onSubmit={handleFormSubmit}
+                    isLoading={isProcessing}
+                    initialValues={initialFormValues!}
+                />
+            ) : (
+                <BulkGradeSheetForm
+                    onSubmit={handleBulkFormSubmit}
+                    isLoading={isProcessing}
+                />
+            )}
           </CardContent>
         </Card>
 
@@ -385,23 +386,14 @@ export default function GradesheetPage() {
           </div>
         )}
 
-        {calculatedResult && !isProcessing && (
+        {calculatedResult && !isProcessing && entryMode === 'single' && (
           <>
             <div className="flex flex-col sm:flex-row flex-wrap gap-2 mt-6 sm:mt-8 mb-4 sm:mb-6 no-print">
                 <Button onClick={handlePrint} variant="outline" className="w-full sm:w-auto">
                   <PrinterIcon className="mr-2 h-4 w-4" /> Print Gradesheet
                 </Button>
                 <Button onClick={handleDownloadPdf} variant="default" disabled={isDownloadingPdf} className="w-full sm:w-auto">
-                   {isDownloadingPdf ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Downloading...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="mr-2 h-4 w-4" /> Download PDF
-                    </>
-                  )}
+                   {isDownloadingPdf ? ( <> <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Downloading... </> ) : ( <> <Download className="mr-2 h-4 w-4" /> Download PDF </> )}
                 </Button>
             </div>
             <div className="animate-fadeInUp">
@@ -411,19 +403,8 @@ export default function GradesheetPage() {
         )}
       </div>
        <style jsx global>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeInUp {
-          animation: fadeInUp 0.5s ease-out forwards;
-        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; }
       `}</style>
     </main>
   );
