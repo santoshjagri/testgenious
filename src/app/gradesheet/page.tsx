@@ -365,7 +365,7 @@ export default function GradesheetPage() {
           </>
         )}
       </div>
-       <style jsx global>{`
+       <style jsx global>{\`
         @keyframes fadeInUp {
           from {
             opacity: 0;
@@ -379,7 +379,7 @@ export default function GradesheetPage() {
         .animate-fadeInUp {
           animation: fadeInUp 0.5s ease-out forwards;
         }
-      `}</style>
+      \`}</style>
     </main>
   );
 }

@@ -57,6 +57,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     if (initialValues) {
       form.reset(initialValues); 
     } else {
+      // Only set default values if not editing
       if (typeof window !== 'undefined') { 
         if (form.getValues('examDate') === "") {
           form.setValue('examDate', format(new Date(), "yyyy-MM-dd"));
