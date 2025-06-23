@@ -119,20 +119,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   const handleProcessAiToManual = async () => {
     setIsProcessingAiToManual(true);
     const values = form.getValues();
-    let logoDataUriFromForm: string | undefined = undefined;
-
-    if (values.logo) {
-      try {
-        logoDataUriFromForm = await fileToDataUri(values.logo);
-      } catch (error) {
-        console.error("Error converting logo for AI processing:", error);
-        toast({
-          title: "Logo Error",
-          description: "Could not process logo for AI draft. Continuing without it.",
-          variant: "destructive",
-        });
-      }
-    }
 
     const aiInput: GenerateQuestionsInput = {
       classLevel: values.classLevel,
@@ -145,7 +131,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       institutionName: values.institutionName || 'ExamGenius AI Institute',
       institutionAddress: values.institutionAddress || '',
       subjectCode: values.subjectCode || '',
-      logoDataUri: logoDataUriFromForm, 
       language: values.language,
       customPrompt: values.customPrompt,
       mcqCount: values.mcqCount,
@@ -554,12 +539,12 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                         ) : (
                           <>
                             <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                            Generate Paper from Gemini
+                            Generate AI Draft
                           </>
                         )}
                       </Button>
                       <FormDescription className="mt-1 sm:mt-2 text-center text-xs sm:text-sm">
-                        Click this to let AI generate questions based on the counts above and populate them into the 'Manually Enter Questions' section below. You can then edit them before final generation.
+                        Click this to let AI generate questions based on the counts above and populate them into the 'Manually Enter Questions' section below. You can then edit them before final submission.
                       </FormDescription>
                    </div>
                 </CardContent>
@@ -601,4 +586,3 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     </Card>
   );
 }
-
