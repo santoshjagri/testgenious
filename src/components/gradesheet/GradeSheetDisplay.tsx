@@ -10,6 +10,7 @@ import { CheckCircle, XCircle, Award, User, CalendarCheck2, Percent, Star, Trend
 import Image from 'next/image';
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface GradeSheetDisplayProps {
   result: CalculatedGradeSheetResult;
@@ -17,23 +18,40 @@ interface GradeSheetDisplayProps {
 
 export function GradeSheetDisplay({ result }: GradeSheetDisplayProps) {
   const [showGradeGpa, setShowGradeGpa] = React.useState(true);
+  const [template, setTemplate] = React.useState('normal');
   
   const isValidLogoDataUri = result.logoDataUri && result.logoDataUri.startsWith('data:');
 
   return (
     <div>
-      <div className="flex items-center space-x-2 no-print mb-4">
-        <Switch 
-          id="show-grade-gpa" 
-          checked={showGradeGpa} 
-          onCheckedChange={setShowGradeGpa} 
-          aria-label="Toggle Grade and GPA visibility"
-        />
-        <Label htmlFor="show-grade-gpa">Show Grade & GPA</Label>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 no-print mb-4">
+        <div className="flex items-center space-x-2">
+          <Switch 
+            id="show-grade-gpa" 
+            checked={showGradeGpa} 
+            onCheckedChange={setShowGradeGpa} 
+            aria-label="Toggle Grade and GPA visibility"
+          />
+          <Label htmlFor="show-grade-gpa">Show Grade & GPA</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Label htmlFor="template-select" className="text-sm font-medium">Template</Label>
+          <Select value={template} onValueChange={setTemplate}>
+            <SelectTrigger id="template-select" className="w-[180px]">
+              <SelectValue placeholder="Select Template" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="normal">Normal</SelectItem>
+              <SelectItem value="good">Good</SelectItem>
+              <SelectItem value="better">Better</SelectItem>
+              <SelectItem value="best">Best</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <Card className="shadow-2xl printable-area" id="gradesheet-printable-area">
-        <CardHeader className="bg-primary/5 p-4 sm:p-6 border-b-2 border-primary/20">
+      <Card className="shadow-2xl printable-area" id="gradesheet-printable-area" data-template={template}>
+        <CardHeader className="bg-primary/5 p-4 sm:p-6 border-b-2 border-primary/20 gs-header">
           <div className="flex flex-col sm:flex-row items-center sm:items-start w-full gap-2 sm:gap-4 mb-3 sm:mb-4">
               <div className="flex-shrink-0 order-1 sm:order-none">
                 {isValidLogoDataUri ? (
@@ -59,7 +77,7 @@ export function GradeSheetDisplay({ result }: GradeSheetDisplayProps) {
               </div>
               <div className="flex-grow flex flex-col items-center text-center order-2 sm:order-none">
                 {result.schoolName ? 
-                  <CardTitle className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">{result.schoolName}</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl md:text-3xl font-bold text-primary gs-title">{result.schoolName}</CardTitle>
                   : <Award className="h-10 w-10 sm:h-12 sm:w-12 text-primary mb-1 sm:mb-2" /> 
                 }
                 <CardDescription className="text-sm sm:text-md text-muted-foreground">{result.examType} - Gradesheet</CardDescription>
@@ -88,7 +106,7 @@ export function GradeSheetDisplay({ result }: GradeSheetDisplayProps) {
                   <h3 className="text-lg sm:text-xl font-semibold text-primary/90">Subject Performance</h3>
               </div>
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="gs-table">
                 <TableHeader>
                   <TableRow className="bg-muted/50 hover:bg-muted/60 text-xs sm:text-sm">
                     <TableHead className="w-[30%] sm:w-[40%] whitespace-nowrap">Subject Name</TableHead>
@@ -121,12 +139,12 @@ export function GradeSheetDisplay({ result }: GradeSheetDisplayProps) {
 
           <Separator className="my-4 sm:my-6 bg-primary/15" />
 
-          <div>
+          <div className="gs-summary">
               <div className="flex items-center mb-3 sm:mb-4">
                   <Star className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-primary/80" />
                   <h3 className="text-lg sm:text-xl font-semibold text-primary/90">Overall Summary</h3>
               </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-3 sm:gap-y-4 p-3 sm:p-4 border rounded-lg bg-secondary/30 shadow">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-3 sm:gap-y-4 p-3 sm:p-4 border rounded-lg bg-secondary/30 shadow gs-summary-box">
               <div className="flex flex-col">
                 <span className="text-xs sm:text-sm text-muted-foreground">Total Obtained Marks</span>
                 <span className="text-md sm:text-lg font-bold text-primary">{result.totalObtainedMarks} / {result.totalFullMarks}</span>
@@ -164,7 +182,7 @@ export function GradeSheetDisplay({ result }: GradeSheetDisplayProps) {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="p-4 sm:p-6 border-t border-primary/10 flex-col items-center text-center space-y-1 sm:space-y-2">
+        <CardFooter className="p-4 sm:p-6 border-t border-primary/10 flex-col items-center text-center space-y-1 sm:space-y-2 gs-footer">
         </CardFooter>
       </Card>
     </div>

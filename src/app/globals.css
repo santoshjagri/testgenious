@@ -88,6 +88,80 @@ body {
   }
 }
 
+/* GradeSheet Template Styles */
+.printable-area[data-template="good"] .gs-header {
+  background-color: hsl(var(--primary) / 0.08);
+  border-color: hsl(var(--primary) / 0.5);
+}
+.printable-area[data-template="good"] .gs-title {
+  color: hsl(var(--primary));
+  letter-spacing: 0.5px;
+}
+.printable-area[data-template="good"] .gs-summary-box {
+  background-color: hsl(var(--secondary));
+}
+
+.printable-area[data-template="better"] {
+  border: 1px solid hsl(var(--primary));
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.printable-area[data-template="better"] .gs-header {
+  background-color: hsl(var(--primary) / 0.15);
+}
+.printable-area[data-template="better"] .gs-table thead tr {
+  background-color: hsl(var(--primary) / 0.2);
+  border-bottom: 2px solid hsl(var(--primary) / 0.4);
+}
+.printable-area[data-template="better"] .gs-table tbody tr:nth-of-type(odd) {
+  background-color: hsl(var(--primary) / 0.04);
+}
+.printable-area[data-template="better"] .gs-title {
+  color: hsl(var(--primary));
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.printable-area[data-template="better"] .gs-footer {
+  background-color: hsl(var(--primary) / 0.05);
+}
+
+
+.printable-area[data-template="best"] {
+  border: 2px solid hsl(var(--primary) / 0.8);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+.printable-area[data-template="best"] .gs-header {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--primary) / 0.7));
+  color: hsl(var(--primary-foreground));
+  border-bottom-color: hsl(var(--primary));
+}
+.printable-area[data-template="best"] .gs-title,
+.printable-area[data-template="best"] .gs-header .text-muted-foreground,
+.printable-area[data-template="best"] .gs-header strong {
+  color: hsl(var(--primary-foreground) / 0.95) !important;
+}
+.printable-area[data-template="best"] .gs-table thead {
+  background-color: hsl(var(--primary) / 0.8);
+  color: hsl(var(--primary-foreground));
+  font-weight: bold;
+}
+.printable-area[data-template="best"] .gs-table tr:hover {
+  background-color: hsl(var(--accent) / 0.4);
+}
+.printable-area[data-template="best"] .gs-summary-box {
+  border-left: 4px solid hsl(var(--primary));
+  padding-left: 1rem;
+  background-color: transparent;
+  border-radius: 0;
+}
+.printable-area[data-template="best"] .gs-footer:after {
+ content: " ";
+ display: block;
+ width: 100px;
+ margin: 8px auto 0;
+ border-bottom: 2px solid hsl(var(--primary));
+}
+
 @media print {
   body * {
     visibility: hidden;
@@ -108,7 +182,7 @@ body {
     box-shadow: none;
     background-color: white !important; /* Ensure background is white for printing */
     color: black !important; /* Ensure text is black for printing */
-    font-family: 'Inter', Arial, sans-serif; /* Use a clear sans-serif font */
+    font-family: inherit !important; 
     line-height: 1.4; /* Improve readability */
   }
   .printable-area .prose :where(code):not(:where([class~="not-prose"] *))::before,
@@ -137,6 +211,12 @@ body {
   .printable-area .bg-gray-50, .printable-area .bg-gray-100 {
     background-color: white !important; /* Or a very light gray if preferred for sections, e.g., #f9f9f9 */
   }
-}
 
-    
+  /* Override for "best" template to ensure text is visible on print */
+  .printable-area[data-template="best"] .gs-title,
+  .printable-area[data-template="best"] .gs-header .text-muted-foreground,
+  .printable-area[data-template="best"] .gs-header strong,
+  .printable-area[data-template="best"] .gs-table thead {
+    color: black !important;
+  }
+}
