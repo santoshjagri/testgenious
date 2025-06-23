@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { History as HistoryIcon, Trash2, Eye, ArrowLeft, LanguagesIcon, PlusSquare } from "lucide-react";
+import { History as HistoryIcon, Trash2, Eye, ArrowLeft, PlusSquare, FileQuestion, CalendarDays } from "lucide-react";
 import type { StoredQuestionPaper, ExamTypes } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -167,58 +167,32 @@ export default function HistoryPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 mt-4">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
           {historyItems.map((item) => (
-            <Card key={item.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-200 rounded-lg">
-              <CardHeader className="pb-2 sm:pb-3">
-                <CardTitle className="text-md sm:text-lg text-primary">{item.formSnapshot.subject} - {item.formSnapshot.classLevel}</CardTitle>
-                <div className="text-xs text-muted-foreground space-y-0.5">
-                    <p>{item.formSnapshot.examType || 'General Paper'}</p>
-                    {item.formSnapshot.institutionName && item.formSnapshot.institutionName !== "ExamGenius AI Institute" && <p>{item.formSnapshot.institutionName}</p>}
-                    {item.formSnapshot.language && <p className="flex items-center"><LanguagesIcon className="h-3 w-3 mr-1"/>{item.formSnapshot.language}</p>}
-                </div>
+            <Card key={item.id} className="flex flex-col shadow-md hover:shadow-lg transition-shadow duration-200 rounded-lg">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold text-primary flex items-center gap-2">
+                    <FileQuestion className="h-5 w-5 flex-shrink-0"/>
+                    <span className="truncate">{item.formSnapshot.subject}</span>
+                </CardTitle>
+                <p className="text-sm text-muted-foreground pt-1">{item.formSnapshot.classLevel}</p>
               </CardHeader>
-              <CardContent className="space-y-1 text-xs sm:text-sm flex-grow">
-                <p><span className="font-medium">Total Marks:</span> {item.formSnapshot.totalMarks}</p>
-                <p><span className="font-medium">Pass Marks:</span> {item.formSnapshot.passMarks}</p>
-                <p><span className="font-medium">Time:</span> {item.formSnapshot.timeLimit}</p>
-                <hr className="my-1 sm:my-2"/>
-                <p className="text-xs text-muted-foreground">Question Counts/Mode:</p>
-                <div className="grid grid-cols-2 gap-x-2 text-xs">
-                  {item.formSnapshot.generationMode === 'ai' ? (
-                    <>
-                      <p><span className="font-medium">MCQs:</span> {item.formSnapshot.mcqCount}</p>
-                      {item.formSnapshot.veryShortQuestionCount > 0 && <p><span className="font-medium">Very Short:</span> {item.formSnapshot.veryShortQuestionCount}</p>}
-                      {item.formSnapshot.fillInTheBlanksCount > 0 && <p><span className="font-medium">Fill Blanks:</span> {item.formSnapshot.fillInTheBlanksCount}</p>}
-                      {item.formSnapshot.trueFalseCount > 0 && <p><span className="font-medium">True/False:</span> {item.formSnapshot.trueFalseCount}</p>}
-                      <p><span className="font-medium">Short Qs:</span> {item.formSnapshot.shortQuestionCount}</p>
-                      <p><span className="font-medium">Long Qs:</span> {item.formSnapshot.longQuestionCount}</p>
-                      {item.formSnapshot.numericalPracticalCount > 0 && <p><span className="font-medium">Numerical:</span> {item.formSnapshot.numericalPracticalCount}</p>}
-                    </>
-                  ) : (
-                    <>
-                      <p><span className="font-medium">MCQs:</span> {item.generatedPaper.mcqs.length}</p>
-                      {item.generatedPaper.veryShortQuestions && item.generatedPaper.veryShortQuestions.length > 0 && <p><span className="font-medium">Very Short:</span> {item.generatedPaper.veryShortQuestions.length}</p>}
-                      {item.generatedPaper.fillInTheBlanks && item.generatedPaper.fillInTheBlanks.length > 0 && <p><span className="font-medium">Fill Blanks:</span> {item.generatedPaper.fillInTheBlanks.length}</p>}
-                      {item.generatedPaper.trueFalseQuestions && item.generatedPaper.trueFalseQuestions.length > 0 &&  <p><span className="font-medium">True/False:</span> {item.generatedPaper.trueFalseQuestions.length}</p>}
-                      <p><span className="font-medium">Short Qs:</span> {item.generatedPaper.shortQuestions.length}</p>
-                      <p><span className="font-medium">Long Qs:</span> {item.generatedPaper.longQuestions.length}</p>
-                      {item.generatedPaper.numericalPracticalQuestions && item.generatedPaper.numericalPracticalQuestions.length > 0 && <p><span className="font-medium">Numerical:</span> {item.generatedPaper.numericalPracticalQuestions.length}</p>}
-                    </>
-                  )}
-                </div>
-                 <p className="mt-2 sm:mt-3 text-xs text-muted-foreground pt-1 sm:pt-2 border-t">
-                    <span className="font-medium">Date:</span> {new Date(item.dateGenerated).toLocaleDateString()} at {new Date(item.dateGenerated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    {item.formSnapshot.generationMode && <span className="block capitalize"><span className="font-medium">Mode:</span> {item.formSnapshot.generationMode}</span>}
-                 </p>
+              <CardContent className="space-y-2 text-xs flex-grow py-0 pb-3">
+                <p><strong>Exam:</strong> {item.formSnapshot.examType}</p>
+                <p><strong>Marks:</strong> {item.formSnapshot.totalMarks}</p>
+                <p><strong>Mode:</strong> <span className="capitalize">{item.formSnapshot.generationMode}</span></p>
+                <p className="mt-2 text-xs text-muted-foreground pt-2 border-t flex items-center">
+                    <CalendarDays className="h-3 w-3 mr-1.5"/>
+                    {new Date(item.dateGenerated).toLocaleDateString()}
+                </p>
               </CardContent>
-              <CardFooter className="border-t pt-2 pb-2 sm:pt-3 sm:pb-3 flex flex-col sm:flex-row sm:flex-wrap gap-1 sm:gap-2 items-stretch">
-                <Button variant="ghost" size="sm" onClick={() => handleViewPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-center text-xs sm:text-sm">
-                  <Eye className="mr-1 h-3 w-3" /> View Paper
+              <CardFooter className="border-t p-1 flex justify-around items-center">
+                <Button variant="ghost" size="sm" onClick={() => handleViewPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-xs h-8">
+                  <Eye className="mr-1 h-3 w-3" /> View
                 </Button>
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-center text-xs sm:text-sm">
+                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-xs h-8">
                         <Trash2 className="mr-1 h-3 w-3" /> Delete
                       </Button>
                     </AlertDialogTrigger>
