@@ -238,7 +238,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   };
 
 
-  const manualQuestionField = (name: keyof QuestionPaperFormValues, label: string, icon: React.ReactNode, isMcqSection = false) => (
+  const manualQuestionField = (name: keyof QuestionPaperFormValues, label: string, icon: React.ReactNode, showSymbolToggle = false) => (
     <FormField
       control={form.control}
       name={name}
@@ -246,7 +246,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
         <FormItem>
           <div className="flex justify-between items-center">
             <FormLabel className="flex items-center text-sm sm:text-base">{icon}{label}</FormLabel>
-            {isMcqSection && (
+            {showSymbolToggle && (
                 <Button type="button" variant="outline" size="sm" onClick={() => setShowSymbols(!showSymbols)}>
                    <Sigma className="mr-2 h-4 w-4"/>
                    {showSymbols ? "Hide" : "Show"} Symbols
@@ -624,28 +624,28 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
 
             {generationMode === 'manual' && (
               <Card className="bg-secondary/30 border border-primary/20">
-                <CardHeader className="p-3 sm:p-4">
-                  <CardTitle className="text-lg sm:text-xl font-headline text-primary">Manual Question Entry</CardTitle>
-                  <CardDescription className="text-sm sm:text-base mt-1">
-                      Type your questions directly. If you used "AI Draft", questions appear below for editing.
-                  </CardDescription>
-                </CardHeader>
-                 <CardContent className="p-0">
+                <CardHeader className="p-0">
+                  <div className="p-3 sm:p-4">
+                    <CardTitle className="text-lg sm:text-xl font-headline text-primary">Manual Question Entry</CardTitle>
+                    <CardDescription className="text-sm sm:text-base mt-1">
+                        Type your questions directly. If you used "AI Draft", questions appear below for editing.
+                    </CardDescription>
+                  </div>
                     {showSymbols && (
-                        <div className="sticky top-0 z-10 bg-secondary/95 backdrop-blur-sm shadow-md border-b border-border">
+                        <div className="sticky top-0 z-10 bg-secondary/95 backdrop-blur-sm shadow-md border-b border-t border-border">
                             <SymbolPalette onSymbolClick={handleSymbolClick} />
                         </div>
                     )}
-                    <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
-                        {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, true)}
-                        {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />)}
-                        {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />)}
-                        {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />)}
-                        {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />)}
-                        {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />)}
-                        {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />)}
-                    </div>
-                </CardContent>
+                </CardHeader>
+                 <CardContent className="p-3 sm:p-4 space-y-4 sm:space-y-6">
+                    {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, true)}
+                    {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />)}
+                    {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />)}
+                    {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />)}
+                    {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />)}
+                    {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />)}
+                    {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />, true)}
+                 </CardContent>
               </Card>
             )}
 
