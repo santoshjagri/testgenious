@@ -2,7 +2,7 @@
 "use client";
 
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguages, ExamTypes } from '@/lib/types';
@@ -22,10 +22,11 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles, CalendarIcon } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles, CalendarIcon, Sigma } from 'lucide-react';
 import { generateQuestions, type GenerateQuestionsInput, type GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
-import { fileToDataUri } from '@/lib/utils';
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 interface QuestionPaperFormProps {
@@ -34,9 +35,23 @@ interface QuestionPaperFormProps {
   initialValues?: QuestionPaperFormValues; 
 }
 
+const mathSymbols = [
+  { symbol: 'α', label: 'Alpha' }, { symbol: 'β', label: 'Beta' }, { symbol: 'γ', label: 'Gamma' }, { symbol: 'δ', label: 'Delta' }, { symbol: 'θ', label: 'Theta' }, { symbol: 'π', label: 'Pi' }, { symbol: 'Σ', label: 'Sigma' }, { symbol: 'Ω', label: 'Omega' },
+  { symbol: '√', label: 'Square Root' }, { symbol: '∛', label: 'Cube Root' }, { symbol: '∫', label: 'Integral' }, { symbol: '∂', label: 'Partial Differential' },
+  { symbol: '±', label: 'Plus-Minus' }, { symbol: '×', label: 'Multiply' }, { symbol: '÷', label: 'Divide' },
+  { symbol: '≈', label: 'Approximately Equal' }, { symbol: '≠', label: 'Not Equal' }, { symbol: '≤', label: 'Less Than or Equal' }, { symbol: '≥', label: 'Greater Than or Equal' },
+  { symbol: '²', label: 'Superscript 2' }, { symbol: '³', label: 'Superscript 3' }, { symbol: 'ⁿ', label: 'Superscript n' },
+  { symbol: '₁', label: 'Subscript 1' }, { symbol: '₂', label: 'Subscript 2' }, { symbol: 'ₓ', label: 'Subscript x' },
+  { symbol: '°', label: 'Degree' }, { symbol: '∞', label: 'Infinity' }, { symbol: '→', label: 'Right Arrow' },
+];
+
 export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: QuestionPaperFormProps) {
   const [isProcessingAiToManual, setIsProcessingAiToManual] = useState(false);
   const { toast } = useToast();
+  
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [focusedField, setFocusedField] = useState<keyof QuestionPaperFormValues | null>(null);
+  const textareaRefs = useRef<{ [key: string]: HTMLTextAreaElement | null }>({});
 
   const form = useForm<QuestionPaperFormValues>({
     resolver: zodResolver(questionPaperFormSchema),
@@ -116,6 +131,34 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     name: 'generationMode',
   });
 
+  const handleSymbolInsert = (symbol: string) => {
+    if (!focusedField) {
+      toast({
+        title: "No text field selected",
+        description: "Please click inside a question box before inserting a symbol.",
+      });
+      return;
+    }
+    
+    const textarea = textareaRefs.current[focusedField];
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const currentValue = form.getValues(focusedField as keyof QuestionPaperFormValues) as string || '';
+      const newValue = currentValue.substring(0, start) + symbol + currentValue.substring(end);
+      
+      form.setValue(focusedField, newValue, { shouldValidate: true });
+      
+      setTimeout(() => {
+        const updatedTextarea = textareaRefs.current[focusedField];
+        if (updatedTextarea) {
+            updatedTextarea.focus();
+            updatedTextarea.selectionStart = updatedTextarea.selectionEnd = start + symbol.length;
+        }
+      }, 10);
+    }
+  };
+
   const handleProcessAiToManual = async () => {
     setIsProcessingAiToManual(true);
     const values = form.getValues();
@@ -185,10 +228,12 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
           <FormLabel className="flex items-center text-sm sm:text-base">{icon}{label}</FormLabel>
           <FormControl>
             <Textarea
+              ref={(el) => { if(el) textareaRefs.current[name as string] = el; }}
+              onFocus={() => setFocusedField(name)}
               placeholder={placeholder}
               className="min-h-[80px] sm:min-h-[100px] resize-y text-sm sm:text-base"
               {...field}
-              value={field.value || ""} 
+              value={field.value as string || ""} 
             />
           </FormControl>
           <FormDescription className="text-xs sm:text-sm">Enter one question per line. Include marks, e.g., "Question text? (2 marks)".</FormDescription>
@@ -206,7 +251,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
           <FormItem>
             <FormLabel className="flex items-center text-sm sm:text-base">{icon}{label}</FormLabel>
             <FormControl>
-              <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} value={field.value || 0} className="text-sm sm:text-base"/>
+              <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} value={field.value as number || 0} className="text-sm sm:text-base"/>
             </FormControl>
             {description && <FormDescription className="text-xs sm:text-sm">{description}</FormDescription>}
             <FormMessage />
@@ -554,9 +599,47 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
             {generationMode === 'manual' && (
               <Card className="bg-secondary/30 p-3 sm:p-4 border border-primary/20">
                 <CardHeader className="p-1 sm:p-2">
-                   <CardTitle className="text-lg sm:text-xl font-headline text-primary">Manual Question Entry</CardTitle>
-                   <CardDescription className="text-sm sm:text-base">Type your questions directly into the text areas below. One question per line. If you used the "AI Draft" button, your questions will appear here for editing.</CardDescription>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div className="flex-grow">
+                            <CardTitle className="text-lg sm:text-xl font-headline text-primary">Manual Question Entry</CardTitle>
+                            <CardDescription className="text-sm sm:text-base mt-1">
+                                Type your questions directly. If you used "AI Draft", questions appear below for editing.
+                            </CardDescription>
+                        </div>
+                        <Button type="button" variant="outline" size="sm" onClick={() => setIsPaletteOpen(!isPaletteOpen)} className="text-sm self-start sm:self-center">
+                            <Sigma className="mr-2 h-4 w-4" />
+                            {isPaletteOpen ? 'Hide' : 'Show'} Symbols
+                        </Button>
+                    </div>
                 </CardHeader>
+                
+                {isPaletteOpen && (
+                  <div className="p-2 border-y my-2">
+                    <ScrollArea className="w-full whitespace-nowrap rounded-md">
+                        <div className="flex space-x-1 p-2">
+                          {mathSymbols.map(({ symbol, label }) => (
+                            <Tooltip key={symbol+label}>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  className="h-8 w-8 text-base font-serif"
+                                  onClick={() => handleSymbolInsert(symbol)}
+                                >
+                                  {symbol}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{label}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          ))}
+                        </div>
+                        <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
+                  </div>
+                )}
+
                 <CardContent className="p-1 sm:p-2 space-y-4 sm:space-y-6">
                   {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, "E.g., What is the capital of Nepal? (1 mark)\nA. Kathmandu\nB. Pokhara\nC. Biratnagar\nD. Bhaktapur" )}
                   {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />, "E.g., What is your name? (1 mark)")}
