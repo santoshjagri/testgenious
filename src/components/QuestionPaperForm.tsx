@@ -25,6 +25,49 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles, CalendarIcon, Sigma } from 'lucide-react';
 import { generateQuestions, type GenerateQuestionsInput, type GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+const SYMBOLS = [
+  { symbol: "α", name: "Alpha" }, { symbol: "β", name: "Beta" }, { symbol: "γ", name: "Gamma" }, { symbol: "δ", name: "Delta" },
+  { symbol: "ε", name: "Epsilon" }, { symbol: "θ", name: "Theta" }, { symbol: "λ", name: "Lambda" }, { symbol: "μ", name: "Mu" },
+  { symbol: "π", name: "Pi" }, { symbol: "ρ", name: "Rho" }, { symbol: "σ", name: "Sigma" }, { symbol: "τ", name: "Tau" },
+  { symbol: "ω", name: "Omega" }, { symbol: "Ω", name: "Capital Omega" }, { symbol: "∑", name: "Summation" }, { symbol: "∫", name: "Integral" },
+  { symbol: "√", name: "Square Root" }, { symbol: "∛", name: "Cube Root" }, { symbol: "∞", name: "Infinity" }, { symbol: "≠", name: "Not Equal" },
+  { symbol: "≤", name: "Less Than or Equal" }, { symbol: "≥", name: "Greater Than or Equal" }, { symbol: "≈", name: "Approximately Equal" },
+  { symbol: "°", name: "Degree" }, { symbol: "±", name: "Plus-Minus" }, { symbol: "→", name: "Right Arrow" }, { symbol: "←", name: "Left Arrow" },
+  { symbol: "↔", name: "Left-Right Arrow" }, { symbol: "⇒", name: "Rightwards Double Arrow" }, { symbol: "⇔", name: "Left-Right Double Arrow" },
+  { symbol: "∀", name: "For All" }, { symbol: "∃", name: "There Exists" }, { symbol: "∇", name: "Nabla" }, { symbol: "∂", name: "Partial Derivative" },
+  { symbol: "⊂", name: "Subset of" }, { symbol: "⊃", name: "Superset of" }, { symbol: "∈", name: "Element of" }, { symbol: "∉", name: "Not an Element of" },
+  { symbol: "∩", name: "Intersection" }, { symbol: "∪", name: "Union" }, { symbol: "∅", name: "Empty Set" }
+];
+
+const SymbolPalette = ({ onSymbolClick }: { onSymbolClick: (symbol: string) => void }) => {
+  return (
+    <div className="overflow-x-auto">
+        <div className="flex items-center space-x-1 whitespace-nowrap p-1">
+            {SYMBOLS.map((symbol, index) => (
+                <TooltipProvider key={index} delayDuration={100}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="p-2 h-9 w-9 text-base font-serif"
+                                onClick={() => onSymbolClick(symbol.symbol)}
+                            >
+                                {symbol.symbol}
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{symbol.name}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            ))}
+        </div>
+    </div>
+  );
+};
 
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
@@ -34,6 +77,8 @@ interface QuestionPaperFormProps {
 
 export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: QuestionPaperFormProps) {
   const [isProcessingAiToManual, setIsProcessingAiToManual] = useState(false);
+  const [showSymbols, setShowSymbols] = useState(false);
+  const activeInputRef = useRef<HTMLTextAreaElement | null>(null);
   const { toast } = useToast();
   
   const form = useForm<QuestionPaperFormValues>({
@@ -172,21 +217,49 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       setIsProcessingAiToManual(false);
     }
   };
+  
+  const handleSymbolClick = (symbol: string) => {
+    const target = activeInputRef.current;
+    if (!target) return;
+
+    const fieldName = target.name as keyof QuestionPaperFormValues;
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+    const currentValue = target.value;
+    const newValue = currentValue.substring(0, start) + symbol + currentValue.substring(end);
+
+    form.setValue(fieldName, newValue, { shouldValidate: true });
+
+    setTimeout(() => {
+        target.focus();
+        const newCursorPosition = start + symbol.length;
+        target.setSelectionRange(newCursorPosition, newCursorPosition);
+    }, 0);
+  };
 
 
-  const manualQuestionField = (name: keyof QuestionPaperFormValues, label: string, icon: React.ReactNode) => (
+  const manualQuestionField = (name: keyof QuestionPaperFormValues, label: string, icon: React.ReactNode, isMcqSection = false) => (
     <FormField
       control={form.control}
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="flex items-center text-sm sm:text-base">{icon}{label}</FormLabel>
+          <div className="flex justify-between items-center">
+            <FormLabel className="flex items-center text-sm sm:text-base">{icon}{label}</FormLabel>
+            {isMcqSection && (
+                <Button type="button" variant="outline" size="sm" onClick={() => setShowSymbols(!showSymbols)}>
+                   <Sigma className="mr-2 h-4 w-4"/>
+                   {showSymbols ? "Hide" : "Show"} Symbols
+                </Button>
+            )}
+          </div>
           <FormControl>
             <Textarea
               placeholder="Enter questions here, one per line."
               className="min-h-[80px] sm:min-h-[100px] resize-y text-sm sm:text-base"
               {...field}
-              value={field.value as string || ""} 
+              value={field.value as string || ""}
+              onFocus={(e) => (activeInputRef.current = e.target)}
             />
           </FormControl>
           <FormDescription className="text-xs sm:text-sm">Include marks in brackets, e.g., What is force? (2 marks)</FormDescription>
@@ -550,22 +623,28 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
             )}
 
             {generationMode === 'manual' && (
-              <Card className="bg-secondary/30 border border-primary/20 overflow-hidden">
+              <Card className="bg-secondary/30 border border-primary/20">
                 <CardHeader className="p-3 sm:p-4">
                   <CardTitle className="text-lg sm:text-xl font-headline text-primary">Manual Question Entry</CardTitle>
                   <CardDescription className="text-sm sm:text-base mt-1">
                       Type your questions directly. If you used "AI Draft", questions appear below for editing.
                   </CardDescription>
                 </CardHeader>
-
-                <CardContent className="p-3 sm:p-4 space-y-4 sm:space-y-6">
-                  {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />)}
-                  {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />)}
-                  {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />)}
-                  {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />)}
-                  {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />)}
-                  {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />)}
-                  {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />)}
+                 <CardContent className="p-0">
+                    {showSymbols && (
+                        <div className="sticky top-0 z-10 bg-secondary/95 backdrop-blur-sm shadow-md border-b border-border">
+                            <SymbolPalette onSymbolClick={handleSymbolClick} />
+                        </div>
+                    )}
+                    <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
+                        {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, true)}
+                        {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />)}
+                        {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />)}
+                        {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />)}
+                        {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />)}
+                        {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />)}
+                        {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />)}
+                    </div>
                 </CardContent>
               </Card>
             )}
@@ -587,3 +666,5 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     </Card>
   );
 }
+
+    
