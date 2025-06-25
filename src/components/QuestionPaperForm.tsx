@@ -32,42 +32,6 @@ interface QuestionPaperFormProps {
   initialValues?: QuestionPaperFormValues; 
 }
 
-const SYMBOL_LIST_PROMPT = `You are a smart AI assistant. Give me a complete, well-organized list of all important mathematical, physics, and chemistry symbols that are useful for Class 11, 12, and higher-level students. Include all commonly used Greek letters, logical operators, arithmetic and algebraic symbols, calculus symbols, set theory symbols, vectors and matrices, functions, number systems, statistics, physical constants, chemical notations, reaction symbols, and units.
-
-The symbols must be:
-
-– In clean and categorized list form  
-– Copyable (plain text, not images)  
-– Organized by subject (Math, Physics, Chemistry) and sub-topic  
-– Include both symbols and their meanings wherever necessary  
-– Include special characters, arrows, and units (like Ω, °C, →, ↑, etc.)
-
-Make sure to include:
-
-1. Arithmetic, Algebra, Calculus, Set Theory, and Logic (Math)
-2. Greek letters (used in all subjects)
-3. Vectors, Matrices, and Number Sets
-4. All types of arrows and relations
-5. Physics formulas and constants (like g, G, c, h, F, v, λ, ε₀, etc.)
-6. Chemistry reaction symbols (→, ⇌, ∆), atomic symbols (Z, A, e⁻), thermodynamics, and organic chemistry groups (R-OH, etc.)
-7. Units and quantities used in Science (mol, kg, N, J, etc.)
-8. Any other useful symbol or character in +2 level science/math.
-
-Present everything in well-separated categories with plain text symbols that can be copied easily.
-
-Example:
-Basic Arithmetic Symbols:
-+ − × ÷ = ≠ < > ≤ ≥ ± ∓
-
-Set Theory:
-∈ ∉ ⊂ ⊃ ⊆ ⊇ ∩ ∪ ∅
-
-Greek Letters:
-α β γ δ ε ... and so on
-
-Continue this way until all are covered.`;
-
-
 export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: QuestionPaperFormProps) {
   const [isProcessingAiToManual, setIsProcessingAiToManual] = useState(false);
   const { toast } = useToast();
@@ -210,7 +174,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   };
 
 
-  const manualQuestionField = (name: keyof QuestionPaperFormValues, label: string, icon: React.ReactNode, placeholder: string) => (
+  const manualQuestionField = (name: keyof QuestionPaperFormValues, label: string, icon: React.ReactNode) => (
     <FormField
       control={form.control}
       name={name}
@@ -219,13 +183,13 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
           <FormLabel className="flex items-center text-sm sm:text-base">{icon}{label}</FormLabel>
           <FormControl>
             <Textarea
-              placeholder={placeholder}
+              placeholder="Enter questions here, one per line."
               className="min-h-[80px] sm:min-h-[100px] resize-y text-sm sm:text-base"
               {...field}
               value={field.value as string || ""} 
             />
           </FormControl>
-          <FormDescription className="text-xs sm:text-sm">Enter one question per line. Include marks, e.g., "Question text? (2 marks)".</FormDescription>
+          <FormDescription className="text-xs sm:text-sm">Include marks in brackets, e.g., What is force? (2 marks)</FormDescription>
           <FormMessage />
         </FormItem>
       )}
@@ -595,13 +559,13 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                 </CardHeader>
 
                 <CardContent className="p-3 sm:p-4 space-y-4 sm:space-y-6">
-                  {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT )}
-                  {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
-                  {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
-                  {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
-                  {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
-                  {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
-                  {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
+                  {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />)}
                 </CardContent>
               </Card>
             )}
