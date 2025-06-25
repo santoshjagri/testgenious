@@ -72,6 +72,22 @@ const categorizedSymbols = {
     { symbol: "P(A)", name: "Probability of A" }, { symbol: "E(X)", name: "Expected Value" }, { symbol: "μ", name: "Mean" },
     { symbol: "σ", name: "Standard Deviation" }, { symbol: "σ²", name: "Variance" }
   ],
+  "Physics Symbols": [
+    { symbol: "F", name: "Force" }, { symbol: "E", name: "Energy/Electric Field" }, { symbol: "v", name: "Velocity" },
+    { symbol: "a", name: "Acceleration" }, { symbol: "p", name: "Momentum" }, { symbol: "W", name: "Work/Watt" },
+    { symbol: "λ", name: "Wavelength" }, { symbol: "ω", name: "Angular Velocity" }, { symbol: "ρ", name: "Density" },
+    { symbol: "g", name: "Gravity" }, { symbol: "c", name: "Speed of Light" }, { symbol: "h", name: "Planck's Constant" },
+    { symbol: "ε₀", name: "Permittivity" }, { symbol: "μ₀", name: "Permeability" }, { symbol: "N", name: "Newton" },
+    { symbol: "J", name: "Joule" }, { symbol: "V", name: "Volt" }, { symbol: "Ω", name: "Ohm" },
+  ],
+  "Chemistry Symbols": [
+    { symbol: "→", name: "Yields" }, { symbol: "⇌", name: "Reversible Reaction" }, { symbol: "∆", name: "Heat/Change" },
+    { symbol: "↑", name: "Gas Evolved" }, { symbol: "↓", name: "Precipitate Formed" }, { symbol: "e⁻", name: "Electron" },
+    { symbol: "p⁺", name: "Proton" }, { symbol: "n⁰", name: "Neutron" }, { symbol: "A", name: "Mass Number" },
+    { symbol: "Z", name: "Atomic Number" }, { symbol: "[X]", name: "Concentration of X" }, { symbol: "M", name: "Molarity" },
+    { symbol: "mol", name: "Mole" }, { symbol: "ΔH", name: "Enthalpy Change" }, { symbol: "ΔS", name: "Entropy Change" },
+    { symbol: "Kₐ", name: "Acid Dissociation Constant" }, { symbol: "pH", name: "pH" }, { symbol: "R-", name: "Organic Group" }
+  ],
   "Arrows and Miscellaneous Symbols": [
     { symbol: "→", name: "Right Arrow" }, { symbol: "←", name: "Left Arrow" }, { symbol: "↔", name: "Left-Right Arrow" },
     { symbol: "⇒", name: "Rightwards Double Arrow" }, { symbol: "⇔", name: "Left-Right Double Arrow" }, { symbol: "↑", name: "Up Arrow" },
