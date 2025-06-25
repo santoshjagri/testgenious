@@ -27,47 +27,116 @@ import { generateQuestions, type GenerateQuestionsInput, type GenerateQuestionsO
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-const SYMBOLS = [
-  { symbol: "α", name: "Alpha" }, { symbol: "β", name: "Beta" }, { symbol: "γ", name: "Gamma" }, { symbol: "δ", name: "Delta" },
-  { symbol: "ε", name: "Epsilon" }, { symbol: "θ", name: "Theta" }, { symbol: "λ", name: "Lambda" }, { symbol: "μ", name: "Mu" },
-  { symbol: "π", name: "Pi" }, { symbol: "ρ", name: "Rho" }, { symbol: "σ", name: "Sigma" }, { symbol: "τ", name: "Tau" },
-  { symbol: "ω", name: "Omega" }, { symbol: "Ω", name: "Capital Omega" }, { symbol: "∑", name: "Summation" }, { symbol: "∫", name: "Integral" },
-  { symbol: "√", name: "Square Root" }, { symbol: "∛", name: "Cube Root" }, { symbol: "∞", name: "Infinity" }, { symbol: "≠", name: "Not Equal" },
-  { symbol: "≤", name: "Less Than or Equal" }, { symbol: "≥", name: "Greater Than or Equal" }, { symbol: "≈", name: "Approximately Equal" },
-  { symbol: "°", name: "Degree" }, { symbol: "±", name: "Plus-Minus" }, { symbol: "→", name: "Right Arrow" }, { symbol: "←", name: "Left Arrow" },
-  { symbol: "↔", name: "Left-Right Arrow" }, { symbol: "⇒", name: "Rightwards Double Arrow" }, { symbol: "⇔", name: "Left-Right Double Arrow" },
-  { symbol: "∀", name: "For All" }, { symbol: "∃", name: "There Exists" }, { symbol: "∇", name: "Nabla" }, { symbol: "∂", name: "Partial Derivative" },
-  { symbol: "⊂", name: "Subset of" }, { symbol: "⊃", name: "Superset of" }, { symbol: "∈", name: "Element of" }, { symbol: "∉", name: "Not an Element of" },
-  { symbol: "∩", name: "Intersection" }, { symbol: "∪", name: "Union" }, { symbol: "∅", name: "Empty Set" }
-];
+const categorizedSymbols = {
+  "Arithmetic Symbols": [
+    { symbol: "+", name: "Plus" }, { symbol: "−", name: "Minus" }, { symbol: "×", name: "Multiply" }, 
+    { symbol: "÷", name: "Divide" }, { symbol: "=", name: "Equals" }, { symbol: "≠", name: "Not Equal" },
+    { symbol: "<", name: "Less Than" }, { symbol: ">", name: "Greater Than" }, { symbol: "≤", name: "Less Than or Equal" },
+    { symbol: "≥", name: "Greater Than or Equal" }, { symbol: "±", name: "Plus-Minus" }, { symbol: "∓", name: "Minus-Plus" }
+  ],
+  "Algebraic Symbols": [
+    { symbol: "x", name: "x variable" }, { symbol: "y", name: "y variable" }, { symbol: "z", name: "z variable" },
+    { symbol: "ƒ", name: "Function" }, { symbol: "∝", name: "Proportional to" }, { symbol: "∞", name: "Infinity" }
+  ],
+  "Set Theory Symbols": [
+    { symbol: "∈", name: "Element of" }, { symbol: "∉", name: "Not an Element of" }, { symbol: "⊂", name: "Subset of" },
+    { symbol: "⊃", name: "Superset of" }, { symbol: "⊆", name: "Subset of or equal to" }, { symbol: "⊇", name: "Superset of or equal to" },
+    { symbol: "∩", name: "Intersection" }, { symbol: "∪", name: "Union" }, { symbol: "∅", name: "Empty Set" }
+  ],
+  "Logic and Reasoning Symbols": [
+    { symbol: "∀", name: "For All" }, { symbol: "∃", name: "There Exists" }, { symbol: "∴", name: "Therefore" },
+    { symbol: "∵", name: "Because" }, { symbol: "∧", name: "Logical AND" }, { symbol: "∨", name: "Logical OR" },
+    { symbol: "¬", name: "Logical NOT" }
+  ],
+  "Geometry Symbols": [
+    { symbol: "°", name: "Degree" }, { symbol: "∠", name: "Angle" }, { symbol: "⊥", name: "Perpendicular" },
+    { symbol: "∥", name: "Parallel" }, { symbol: "∆", name: "Triangle" }, { symbol: "π", name: "Pi" }
+  ],
+  "Calculus Symbols": [
+    { symbol: "∫", name: "Integral" }, { symbol: "∂", name: "Partial Derivative" }, { symbol: "∇", name: "Nabla" },
+    { symbol: "∑", name: "Summation" }, { symbol: "d/dx", name: "Derivative" }, { symbol: "lim", name: "Limit" }
+  ],
+  "Vectors and Matrices Symbols": [
+    { symbol: "→", name: "Vector Arrow" }, { symbol: "⟨", name: "Angle bracket left" }, { symbol: "⟩", name: "Angle bracket right" },
+    { symbol: "·", name: "Dot Product" }, { symbol: "×", name: "Cross Product" }
+  ],
+  "Number System Symbols": [
+    { symbol: "ℕ", name: "Natural Numbers" }, { symbol: "ℤ", name: "Integers" }, { symbol: "ℚ", name: "Rational Numbers" },
+    { symbol: "ℝ", name: "Real Numbers" }, { symbol: "ℂ", name: "Complex Numbers" }
+  ],
+  "Function and Operator Symbols": [
+    { symbol: "ƒ(x)", name: "Function of x" }, { symbol: "g(x)", name: "Function of x" }, { symbol: "log", name: "Logarithm" },
+    { symbol: "ln", name: "Natural Logarithm" }, { symbol: "sin", name: "Sine" }, { symbol: "cos", name: "Cosine" }, { symbol: "tan", name: "Tangent" }
+  ],
+  "Probability and Statistics Symbols": [
+    { symbol: "P(A)", name: "Probability of A" }, { symbol: "E(X)", name: "Expected Value" }, { symbol: "μ", name: "Mean" },
+    { symbol: "σ", name: "Standard Deviation" }, { symbol: "σ²", name: "Variance" }
+  ],
+  "Arrows and Miscellaneous Symbols": [
+    { symbol: "→", name: "Right Arrow" }, { symbol: "←", name: "Left Arrow" }, { symbol: "↔", name: "Left-Right Arrow" },
+    { symbol: "⇒", name: "Rightwards Double Arrow" }, { symbol: "⇔", name: "Left-Right Double Arrow" }, { symbol: "↑", name: "Up Arrow" },
+    { symbol: "↓", name: "Down Arrow" }, { symbol: "√", name: "Square Root" }, { symbol: "∛", name: "Cube Root" }
+  ],
+  "Greek Letters": [
+    { symbol: "α", name: "Alpha" }, { symbol: "β", name: "Beta" }, { symbol: "γ", name: "Gamma" }, { symbol: "δ", name: "Delta" },
+    { symbol: "ε", name: "Epsilon" }, { symbol: "ζ", name: "Zeta" }, { symbol: "η", name: "Eta" }, { symbol: "θ", name: "Theta" },
+    { symbol: "ι", name: "Iota" }, { symbol: "κ", name: "Kappa" }, { symbol: "λ", name: "Lambda" }, { symbol: "μ", name: "Mu" },
+    { symbol: "ν", name: "Nu" }, { symbol: "ξ", name: "Xi" }, { symbol: "ο", name: "Omicron" }, { symbol: "π", name: "Pi" },
+    { symbol: "ρ", name: "Rho" }, { symbol: "σ", name: "Sigma" }, { symbol: "τ", name: "Tau" }, { symbol: "υ", name: "Upsilon" },
+    { symbol: "φ", name: "Phi" }, { symbol: "χ", name: "Chi" }, { symbol: "ψ", name: "Psi" }, { symbol: "ω", name: "Omega" },
+    { symbol: "Α", name: "Capital Alpha" }, { symbol: "Β", name: "Capital Beta" }, { symbol: "Γ", name: "Capital Gamma" }, { symbol: "Δ", name: "Capital Delta" },
+    { symbol: "Ε", name: "Capital Epsilon" }, { symbol: "Ζ", name: "Capital Zeta" }, { symbol: "Η", name: "Capital Eta" }, { symbol: "Θ", name: "Capital Theta" },
+    { symbol: "Ι", name: "Capital Iota" }, { symbol: "Κ", name: "Capital Kappa" }, { symbol: "Λ", name: "Capital Lambda" }, { symbol: "Μ", name: "Capital Mu" },
+    { symbol: "Ν", name: "Capital Nu" }, { symbol: "Ξ", name: "Capital Xi" }, { symbol: "Ο", name: "Capital Omicron" }, { symbol: "Π", name: "Capital Pi" },
+    { symbol: "Ρ", name: "Capital Rho" }, { symbol: "Σ", name: "Capital Sigma" }, { symbol: "Τ", name: "Capital Tau" }, { symbol: "Υ", name: "Capital Upsilon" },
+    { symbol: "Φ", name: "Capital Phi" }, { symbol: "Χ", name: "Capital Chi" }, { symbol: "Ψ", name: "Capital Psi" }, { symbol: "Ω", name: "Capital Omega" }
+  ]
+};
 
 const SymbolPalette = ({ onSymbolClick }: { onSymbolClick: (symbol: string) => void }) => {
+  const [selectedCategory, setSelectedCategory] = useState(Object.keys(categorizedSymbols)[0]);
+
   return (
-    <div className="overflow-x-auto">
+    <div className="flex flex-col space-y-2 p-2">
+      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+        <SelectTrigger className="w-full bg-background">
+          <SelectValue placeholder="Select a symbol category" />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.keys(categorizedSymbols).map((category) => (
+            <SelectItem key={category} value={category}>
+              {category}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <div className="overflow-x-auto">
         <div className="flex items-center space-x-1 whitespace-nowrap p-1">
-            {SYMBOLS.map((symbol, index) => (
-                <TooltipProvider key={index} delayDuration={100}>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                className="p-2 h-9 w-9 text-base font-serif"
-                                onClick={() => onSymbolClick(symbol.symbol)}
-                            >
-                                {symbol.symbol}
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{symbol.name}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
-            ))}
+          {categorizedSymbols[selectedCategory as keyof typeof categorizedSymbols].map((symbol, index) => (
+            <TooltipProvider key={index} delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="p-2 h-9 w-9 text-base font-serif"
+                    onClick={() => onSymbolClick(symbol.symbol)}
+                  >
+                    {symbol.symbol}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{symbol.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ))}
         </div>
+      </div>
     </div>
   );
 };
+
 
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
@@ -666,5 +735,3 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     </Card>
   );
 }
-
-    
