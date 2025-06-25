@@ -50,7 +50,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   const { toast } = useToast();
   
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-  const [focusedField, setFocusedField] = useState<keyof QuestionPaperFormValues | null>(null);
+  const focusedFieldRef = useRef<keyof QuestionPaperFormValues | null>(null);
   const textareaRefs = useRef<{ [key: string]: HTMLTextAreaElement | null }>({});
 
   const form = useForm<QuestionPaperFormValues>({
@@ -132,6 +132,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   });
 
   const handleSymbolInsert = (symbol: string) => {
+    const focusedField = focusedFieldRef.current;
     if (!focusedField) {
       toast({
         title: "No text field selected",
@@ -150,12 +151,9 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       form.setValue(focusedField, newValue, { shouldValidate: true });
       
       setTimeout(() => {
-        const updatedTextarea = textareaRefs.current[focusedField];
-        if (updatedTextarea) {
-            updatedTextarea.focus();
-            updatedTextarea.selectionStart = updatedTextarea.selectionEnd = start + symbol.length;
-        }
-      }, 10);
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = start + symbol.length;
+      }, 0);
     }
   };
 
@@ -229,7 +227,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
           <FormControl>
             <Textarea
               ref={(el) => { if(el) textareaRefs.current[name as string] = el; }}
-              onFocus={() => setFocusedField(name)}
+              onFocus={() => focusedFieldRef.current = name}
               placeholder={placeholder}
               className="min-h-[80px] sm:min-h-[100px] resize-y text-sm sm:text-base"
               {...field}
