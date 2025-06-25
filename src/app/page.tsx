@@ -302,15 +302,6 @@ export default function Home() {
           </div>
         )}
 
-        {!isLoading && !generatedPaper && !editingPaperId && (
-           <Alert className="mt-6 sm:mt-8 border-primary/30 bg-primary/5 text-primary no-print">
-            <Terminal className="h-4 w-4 sm:h-5 sm:w-5" />
-            <AlertTitle className="font-headline text-base sm:text-lg">Welcome to ExamGenius AI!</AlertTitle>
-            <AlertDescription className="text-xs sm:text-sm">
-              Fill out the form above to generate or manually create your custom question paper. The AI can craft questions, or you can write your own!
-            </AlertDescription>
-          </Alert>
-        )}
       </div>
       <style jsx global>{`
         @keyframes fadeInUp {
