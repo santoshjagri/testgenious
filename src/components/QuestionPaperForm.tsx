@@ -25,9 +25,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles, CalendarIcon, Sigma } from 'lucide-react';
 import { generateQuestions, type GenerateQuestionsInput, type GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
 
 interface QuestionPaperFormProps {
   onSubmit: (values: QuestionPaperFormValues) => Promise<void>;
@@ -35,24 +32,46 @@ interface QuestionPaperFormProps {
   initialValues?: QuestionPaperFormValues; 
 }
 
-const mathSymbols = [
-  { symbol: 'α', label: 'Alpha' }, { symbol: 'β', label: 'Beta' }, { symbol: 'γ', label: 'Gamma' }, { symbol: 'δ', label: 'Delta' }, { symbol: 'θ', label: 'Theta' }, { symbol: 'π', label: 'Pi' }, { symbol: 'Σ', label: 'Sigma' }, { symbol: 'Ω', label: 'Omega' },
-  { symbol: '√', label: 'Square Root' }, { symbol: '∛', label: 'Cube Root' }, { symbol: '∫', label: 'Integral' }, { symbol: '∂', label: 'Partial Differential' },
-  { symbol: '±', label: 'Plus-Minus' }, { symbol: '×', label: 'Multiply' }, { symbol: '÷', label: 'Divide' },
-  { symbol: '≈', label: 'Approximately Equal' }, { symbol: '≠', label: 'Not Equal' }, { symbol: '≤', label: 'Less Than or Equal' }, { symbol: '≥', label: 'Greater Than or Equal' },
-  { symbol: '²', label: 'Superscript 2' }, { symbol: '³', label: 'Superscript 3' }, { symbol: 'ⁿ', label: 'Superscript n' },
-  { symbol: '₁', label: 'Subscript 1' }, { symbol: '₂', label: 'Subscript 2' }, { symbol: 'ₓ', label: 'Subscript x' },
-  { symbol: '°', label: 'Degree' }, { symbol: '∞', label: 'Infinity' }, { symbol: '→', label: 'Right Arrow' },
-];
+const SYMBOL_LIST_PROMPT = `You are a smart AI assistant. Give me a complete, well-organized list of all important mathematical, physics, and chemistry symbols that are useful for Class 11, 12, and higher-level students. Include all commonly used Greek letters, logical operators, arithmetic and algebraic symbols, calculus symbols, set theory symbols, vectors and matrices, functions, number systems, statistics, physical constants, chemical notations, reaction symbols, and units.
+
+The symbols must be:
+
+– In clean and categorized list form  
+– Copyable (plain text, not images)  
+– Organized by subject (Math, Physics, Chemistry) and sub-topic  
+– Include both symbols and their meanings wherever necessary  
+– Include special characters, arrows, and units (like Ω, °C, →, ↑, etc.)
+
+Make sure to include:
+
+1. Arithmetic, Algebra, Calculus, Set Theory, and Logic (Math)
+2. Greek letters (used in all subjects)
+3. Vectors, Matrices, and Number Sets
+4. All types of arrows and relations
+5. Physics formulas and constants (like g, G, c, h, F, v, λ, ε₀, etc.)
+6. Chemistry reaction symbols (→, ⇌, ∆), atomic symbols (Z, A, e⁻), thermodynamics, and organic chemistry groups (R-OH, etc.)
+7. Units and quantities used in Science (mol, kg, N, J, etc.)
+8. Any other useful symbol or character in +2 level science/math.
+
+Present everything in well-separated categories with plain text symbols that can be copied easily.
+
+Example:
+Basic Arithmetic Symbols:
++ − × ÷ = ≠ < > ≤ ≥ ± ∓
+
+Set Theory:
+∈ ∉ ⊂ ⊃ ⊆ ⊇ ∩ ∪ ∅
+
+Greek Letters:
+α β γ δ ε ... and so on
+
+Continue this way until all are covered.`;
+
 
 export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: QuestionPaperFormProps) {
   const [isProcessingAiToManual, setIsProcessingAiToManual] = useState(false);
   const { toast } = useToast();
   
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-  const focusedFieldRef = useRef<keyof QuestionPaperFormValues | null>(null);
-  const textareaRefs = useRef<{ [key: string]: HTMLTextAreaElement | null }>({});
-
   const form = useForm<QuestionPaperFormValues>({
     resolver: zodResolver(questionPaperFormSchema),
     defaultValues: initialValues || { 
@@ -131,32 +150,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     name: 'generationMode',
   });
 
-  const handleSymbolInsert = (symbol: string) => {
-    const focusedField = focusedFieldRef.current;
-    if (!focusedField) {
-      toast({
-        title: "No text field selected",
-        description: "Please click inside a question box before inserting a symbol.",
-      });
-      return;
-    }
-    
-    const textarea = textareaRefs.current[focusedField];
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const currentValue = form.getValues(focusedField as keyof QuestionPaperFormValues) as string || '';
-      const newValue = currentValue.substring(0, start) + symbol + currentValue.substring(end);
-      
-      form.setValue(focusedField, newValue, { shouldValidate: true });
-      
-      setTimeout(() => {
-        textarea.focus();
-        textarea.selectionStart = textarea.selectionEnd = start + symbol.length;
-      }, 0);
-    }
-  };
-
   const handleProcessAiToManual = async () => {
     setIsProcessingAiToManual(true);
     const values = form.getValues();
@@ -226,8 +219,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
           <FormLabel className="flex items-center text-sm sm:text-base">{icon}{label}</FormLabel>
           <FormControl>
             <Textarea
-              ref={(el) => { if(el) textareaRefs.current[name as string] = el; }}
-              onFocus={() => focusedFieldRef.current = name}
               placeholder={placeholder}
               className="min-h-[80px] sm:min-h-[100px] resize-y text-sm sm:text-base"
               {...field}
@@ -597,55 +588,20 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
             {generationMode === 'manual' && (
               <Card className="bg-secondary/30 border border-primary/20 overflow-hidden">
                 <CardHeader className="p-3 sm:p-4">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                        <div className="flex-grow">
-                            <CardTitle className="text-lg sm:text-xl font-headline text-primary">Manual Question Entry</CardTitle>
-                            <CardDescription className="text-sm sm:text-base mt-1">
-                                Type your questions directly. If you used "AI Draft", questions appear below for editing.
-                            </CardDescription>
-                        </div>
-                        <Button type="button" variant="outline" size="sm" onClick={() => setIsPaletteOpen(!isPaletteOpen)} className="text-sm self-start sm:self-center">
-                            <Sigma className="mr-2 h-4 w-4" />
-                            {isPaletteOpen ? 'Hide' : 'Show'} Symbols
-                        </Button>
-                    </div>
+                  <CardTitle className="text-lg sm:text-xl font-headline text-primary">Manual Question Entry</CardTitle>
+                  <CardDescription className="text-sm sm:text-base mt-1">
+                      Type your questions directly. If you used "AI Draft", questions appear below for editing.
+                  </CardDescription>
                 </CardHeader>
-                
-                {isPaletteOpen && (
-                  <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm p-2 border-y border-border shadow-sm">
-                    <ScrollArea className="w-full whitespace-nowrap rounded-md">
-                        <div className="flex space-x-1">
-                          {mathSymbols.map(({ symbol, label }) => (
-                            <Tooltip key={symbol+label}>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  className="h-8 w-8 text-base font-serif"
-                                  onClick={() => handleSymbolInsert(symbol)}
-                                >
-                                  {symbol}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{label}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          ))}
-                        </div>
-                        <ScrollBar orientation="horizontal" />
-                    </ScrollArea>
-                  </div>
-                )}
 
                 <CardContent className="p-3 sm:p-4 space-y-4 sm:space-y-6">
-                  {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, "E.g., What is the capital of Nepal? (1 mark)\nA. Kathmandu\nB. Pokhara\nC. Biratnagar\nD. Bhaktapur" )}
-                  {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />, "E.g., What is your name? (1 mark)")}
-                  {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />, "E.g., The sun rises in the ____. (1 mark)")}
-                  {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />, "E.g., The Earth is flat. (True/False) (1 mark)")}
-                  {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />, "E.g., Define a noun with an example. (3 marks)")}
-                  {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />, "E.g., Describe the process of photosynthesis in detail. (5 marks)")}
-                  {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />, "E.g., Calculate the area of a rectangle with length 5cm and width 3cm. (2 marks)")}
+                  {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT )}
+                  {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
+                  {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
+                  {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
+                  {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
+                  {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
+                  {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />, SYMBOL_LIST_PROMPT)}
                 </CardContent>
               </Card>
             )}
