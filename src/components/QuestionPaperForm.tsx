@@ -597,8 +597,8 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
             )}
 
             {generationMode === 'manual' && (
-              <Card className="bg-secondary/30 p-3 sm:p-4 border border-primary/20">
-                <CardHeader className="p-1 sm:p-2">
+              <Card className="bg-secondary/30 border border-primary/20 overflow-hidden">
+                <CardHeader className="p-3 sm:p-4">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <div className="flex-grow">
                             <CardTitle className="text-lg sm:text-xl font-headline text-primary">Manual Question Entry</CardTitle>
@@ -614,9 +614,9 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                 </CardHeader>
                 
                 {isPaletteOpen && (
-                  <div className="p-2 border-y my-2">
+                  <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm p-2 border-y border-border shadow-sm">
                     <ScrollArea className="w-full whitespace-nowrap rounded-md">
-                        <div className="flex space-x-1 p-2">
+                        <div className="flex space-x-1">
                           {mathSymbols.map(({ symbol, label }) => (
                             <Tooltip key={symbol+label}>
                               <TooltipTrigger asChild>
@@ -640,7 +640,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                   </div>
                 )}
 
-                <CardContent className="p-1 sm:p-2 space-y-4 sm:space-y-6">
+                <CardContent className="p-3 sm:p-4 space-y-4 sm:space-y-6">
                   {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, "E.g., What is the capital of Nepal? (1 mark)\nA. Kathmandu\nB. Pokhara\nC. Biratnagar\nD. Bhaktapur" )}
                   {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />, "E.g., What is your name? (1 mark)")}
                   {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />, "E.g., The sun rises in the ____. (1 mark)")}
