@@ -150,7 +150,7 @@ export default function IDCardPage() {
 
                 {!isProcessing && generatedCard && (
                   <div className="w-full animate-fadeInUp space-y-4">
-                     <div id="id-card-display-area">
+                     <div id="id-card-display-area" className="inline-block">
                         <IDCardDisplay data={generatedCard} />
                      </div>
                       <div className="flex justify-center gap-2 no-print">
