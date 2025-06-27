@@ -58,7 +58,7 @@ export default function IDCardPage() {
           let existingHistory: StoredIDCard[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
           
           existingHistory = [newHistoryEntry, ...existingHistory];
-          localStorage.setItem(ID_CARD_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 50)));
+          localStorage.setItem(ID_CARD_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 15)));
 
         } catch (storageError) {
           console.error("Error saving ID card to local storage:", storageError);
