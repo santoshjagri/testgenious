@@ -1,7 +1,7 @@
 
 import type {Metadata} from 'next';
 import Link from 'next/link';
-import { LayoutDashboard, PlusSquare, History as HistoryIcon, GraduationCap, ClipboardList, Settings, UserSquare2 } from 'lucide-react';
+import { LayoutDashboard, PlusSquare, History as HistoryIcon, GraduationCap, ClipboardList, Settings, UserSquare2, ClipboardSignature } from 'lucide-react';
 // Removed: import { AuthProvider } from '@/contexts/AuthContext';
 // Removed: import { UserNav } from '@/components/auth/UserNav';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -64,6 +64,14 @@ export default function RootLayout({
                       <Link href="/id-card">
                         <UserSquare2 />
                         <span className="group-data-[collapsible=icon]:hidden">ID Card Studio</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip="ID History">
+                      <Link href="/id-history">
+                        <ClipboardSignature />
+                        <span className="group-data-[collapsible=icon]:hidden">ID History</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

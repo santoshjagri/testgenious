@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { IDCardForm } from "@/components/id-card/IDCardForm";
 import { IDCardDisplay } from "@/components/id-card/IDCardDisplay";
-import type { IDCardFormValues, StoredIDCardData } from "@/lib/types";
+import type { IDCardFormValues, StoredIDCardData, StoredIDCard } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserSquare2, Download, Printer as PrinterIcon, Loader2 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -14,6 +14,8 @@ import { fileToDataUri } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const ID_CARD_LOCAL_STORAGE_KEY = "idCardHistory";
 
 export default function IDCardPage() {
   const [generatedCard, setGeneratedCard] = React.useState<StoredIDCardData | null>(null);
@@ -43,9 +45,26 @@ export default function IDCardPage() {
       };
 
       setGeneratedCard(cardData);
-      toast({ title: "ID Card Generated!", description: "Your ID Card is ready for review." });
+      toast({ title: "ID Card Generated!", description: "Your ID Card is ready and saved to ID History." });
 
-      // Here you would typically save to history in localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          const newHistoryEntry: StoredIDCard = {
+            id: crypto.randomUUID(),
+            dateGenerated: new Date().toISOString(),
+            cardData: cardData,
+          };
+          const existingHistoryString = localStorage.getItem(ID_CARD_LOCAL_STORAGE_KEY);
+          let existingHistory: StoredIDCard[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
+          
+          existingHistory = [newHistoryEntry, ...existingHistory];
+          localStorage.setItem(ID_CARD_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 50)));
+
+        } catch (storageError) {
+          console.error("Error saving ID card to local storage:", storageError);
+          toast({ title: "Warning", description: "ID Card generated, but failed to save to history.", variant: "destructive" });
+        }
+      }
       
     } catch (e) {
       console.error("Error processing ID card:", e);
@@ -154,9 +173,9 @@ export default function IDCardPage() {
                         <IDCardDisplay data={generatedCard} />
                      </div>
                       <div className="flex justify-center gap-2 no-print">
-                         <Button onClick={handlePrint} variant="outline"><PrinterIcon className="mr-2" /> Print</Button>
+                         <Button onClick={handlePrint} variant="outline"><PrinterIcon className="mr-2 h-4 w-4" /> Print</Button>
                          <Button onClick={handleDownloadPdf} disabled={isDownloading}>
-                            {isDownloading ? <Loader2 className="mr-2 animate-spin" /> : <Download className="mr-2" />}
+                            {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
                             Download PDF
                          </Button>
                       </div>

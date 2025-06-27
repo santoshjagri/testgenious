@@ -343,3 +343,9 @@ export type StoredIDCardData = Omit<IDCardFormValues, 'logo' | 'photo' | 'author
   photoDataUri: string;
   authoritySignatureDataUri?: string;
 };
+
+export interface StoredIDCard {
+  id: string;
+  dateGenerated: string; // ISO string
+  cardData: StoredIDCardData;
+}
