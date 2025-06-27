@@ -302,7 +302,7 @@ body {
  @apply text-xs font-bold leading-tight;
 }
 .id-card-school .photo {
-  @apply w-24 h-24 border-4 border-white rounded-md shadow-md object-cover;
+  @apply w-24 h-28 border-4 border-white rounded-md shadow-md object-cover;
 }
 .id-card-school .name {
   @apply text-lg font-extrabold text-blue-600 mt-1;
@@ -449,5 +449,7 @@ body {
     border: 1px solid #ccc;
   }
 }
+
+    
 
     

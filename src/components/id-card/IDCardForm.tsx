@@ -48,7 +48,7 @@ export function IDCardForm({ onSubmit, isLoading, level }: IDCardFormProps) {
     University: "Department / Major"
   };
 
-  const fileInput = (name: keyof IDCardFormValues, label: string) => (
+  const fileInput = (name: keyof IDCardFormValues, label: string, description: string) => (
     <FormField
       control={form.control}
       name={name}
@@ -58,12 +58,13 @@ export function IDCardForm({ onSubmit, isLoading, level }: IDCardFormProps) {
           <FormControl>
             <Input 
               type="file" 
-              accept="image/*" 
+              accept="image/png, image/jpeg"
               onChange={(e) => onChange(e.target.files?.[0])}
               {...rest}
               className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
             />
           </FormControl>
+          <FormDescription>{description}</FormDescription>
           <FormMessage />
         </FormItem>
       )}
@@ -81,7 +82,7 @@ export function IDCardForm({ onSubmit, isLoading, level }: IDCardFormProps) {
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField name="institutionName" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Institution Name</FormLabel><FormControl><Input placeholder="e.g., Genesis International" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField name="institutionAddress" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address / Motto</FormLabel><FormControl><Input placeholder="e.g., Knowledge is Power" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                {fileInput("logo", "Institution Logo")}
+                {fileInput("logo", "Institution Logo", "PNG or JPG file. Recommended: square aspect ratio.")}
             </CardContent>
         </Card>
 
@@ -91,7 +92,7 @@ export function IDCardForm({ onSubmit, isLoading, level }: IDCardFormProps) {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField name="fullName" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Alex Doe" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                {fileInput("photo", "Holder's Photo")}
+                {fileInput("photo", "Holder's Photo", "PNG or JPG file. A clear, passport-style headshot is best.")}
                 <FormField name="idNumber" control={form.control} render={({ field }) => ( <FormItem><FormLabel>ID Number</FormLabel><FormControl><Input placeholder="e.g., 2024-001" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField name="classOrCourse" control={form.control} render={({ field }) => ( <FormItem><FormLabel>{classOrCourseLabel[level]}</FormLabel><FormControl><Input placeholder={level === 'School' ? 'e.g., Grade 10, Section A' : 'e.g., B.Sc. Computer Science'} {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField name="dateOfBirth" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
@@ -109,7 +110,7 @@ export function IDCardForm({ onSubmit, isLoading, level }: IDCardFormProps) {
                  <FormField name="issueDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Issue Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
                  <FormField name="expiryDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Expiry Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
                  <FormField name="authorityName" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Authorizing Person's Name</FormLabel><FormControl><Input placeholder="e.g., Dr. Evelyn Reed, Principal" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                {fileInput("authoritySignature", "Authority's Signature")}
+                {fileInput("authoritySignature", "Authority's Signature", "PNG or JPG file with a transparent background if possible.")}
             </CardContent>
         </Card>
 
@@ -122,3 +123,5 @@ export function IDCardForm({ onSubmit, isLoading, level }: IDCardFormProps) {
     </Form>
   );
 }
+
+    
