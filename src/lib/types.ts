@@ -299,3 +299,47 @@ export const bulkGradeSheetFormSchema = z.object({
 });
 
 export type BulkGradeSheetFormValues = z.infer<typeof bulkGradeSheetFormSchema>;
+
+
+// --- ID Card Types ---
+
+export const IDCardLevel = ["School", "College", "University"] as const;
+
+export const idCardFormSchema = z.object({
+  level: z.enum(IDCardLevel).default("School"),
+  
+  // Institution Details
+  institutionName: z.string().min(1, "Institution name is required."),
+  institutionAddress: z.string().optional(),
+  logo: z.instanceof(File).optional(),
+  
+  // Card Holder Details
+  photo: z.instanceof(File).refine(file => file, "A photo is required."),
+  fullName: z.string().min(1, "Full name is required."),
+  idNumber: z.string().min(1, "ID Number is required."),
+  classOrCourse: z.string().min(1, "This field is required."), // Label will be dynamic
+  dateOfBirth: z.string().min(1, "Date of birth is required."),
+  bloodGroup: z.string().optional(),
+  
+  // Validity & Contact
+  issueDate: z.string().min(1, "Issue date is required."),
+  expiryDate: z.string().min(1, "Expiry date is required."),
+  contactNumber: z.string().optional(),
+  holderAddress: z.string().min(1, "Address is required."),
+  
+  // Authority
+  authoritySignature: z.instanceof(File).optional(),
+  authorityName: z.string().optional(),
+
+}).refine(data => new Date(data.expiryDate) > new Date(data.issueDate), {
+    message: "Expiry date must be after the issue date.",
+    path: ["expiryDate"],
+});
+
+export type IDCardFormValues = z.infer<typeof idCardFormSchema>;
+
+export type StoredIDCardData = Omit<IDCardFormValues, 'logo' | 'photo' | 'authoritySignature'> & {
+  logoDataUri?: string;
+  photoDataUri: string;
+  authoritySignatureDataUri?: string;
+};

@@ -283,6 +283,99 @@ body {
 }
 
 
+/* --- ID Card Template Styles --- */
+/* Base styles for all cards */
+.id-card-base {
+  @apply font-sans w-[3.375in] h-[2.125in] p-4 text-black shadow-lg rounded-lg overflow-hidden relative flex flex-col;
+  width: 324px; /* 3.375 inches at 96 DPI */
+  height: 204px; /* 2.125 inches at 96 DPI */
+}
+
+/* School Template */
+.id-card-school {
+  @apply bg-white;
+}
+.id-card-school .header {
+  @apply bg-blue-500 text-white flex items-center p-2 -m-4 mb-2;
+}
+.id-card-school .header-title {
+ @apply text-xs font-bold leading-tight;
+}
+.id-card-school .photo {
+  @apply w-24 h-24 border-4 border-white rounded-md shadow-md object-cover;
+}
+.id-card-school .name {
+  @apply text-lg font-extrabold text-blue-600 mt-1;
+}
+.id-card-school .class {
+  @apply text-sm font-semibold text-gray-700;
+}
+.id-card-school .details-grid {
+  @apply grid grid-cols-2 gap-x-2 text-xs mt-2;
+}
+
+/* College Template */
+.id-card-college {
+  @apply bg-gray-50;
+}
+.id-card-college .header-strip {
+  @apply h-6 bg-indigo-700 absolute top-0 left-0 right-0;
+}
+.id-card-college .content-area {
+  @apply flex items-center gap-4 z-10 pt-4;
+}
+.id-card-college .photo {
+  @apply w-20 h-24 border-2 border-indigo-200 object-cover rounded;
+}
+.id-card-college .name {
+  @apply text-xl font-bold text-indigo-800 tracking-wide;
+}
+.id-card-college .course {
+  @apply text-xs font-medium text-gray-600 uppercase;
+}
+.id-card-college .details-table {
+  @apply text-xs mt-3 w-full;
+}
+.id-card-college .details-table td:first-child {
+  @apply font-semibold text-gray-500 pr-2;
+}
+
+/* University Template */
+.id-card-university {
+  @apply bg-gradient-to-br from-gray-50 to-gray-200 border border-gray-300;
+  font-family: 'Times New Roman', Times, serif;
+}
+.id-card-university .header {
+  @apply flex items-center justify-between pb-1 border-b-2 border-gray-400;
+}
+.id-card-university .header .logo {
+  @apply w-12 h-12;
+}
+.id-card-university .header-title {
+  @apply text-center;
+}
+.id-card-university .inst-name {
+  @apply text-sm font-bold text-gray-800;
+}
+.id-card-university .inst-motto {
+  @apply text-[9px] text-gray-600;
+}
+.id-card-university .main-content {
+  @apply flex gap-3 mt-2;
+}
+.id-card-university .photo {
+  @apply w-20 h-24 border border-gray-400 p-0.5 bg-white;
+}
+.id-card-university .name {
+  @apply text-base font-bold text-gray-900;
+}
+.id-card-university .details-list {
+ @apply text-[10px] space-y-0.5 mt-1;
+}
+.id-card-university .barcode {
+  @apply h-8 w-full object-cover mt-1;
+}
+
 @media print {
   body * {
     visibility: hidden;
@@ -292,7 +385,10 @@ body {
   .printable-area, .printable-area * {
     visibility: visible;
   }
-  .printable-area {
+  .id-card-wrapper, .id-card-wrapper * {
+    visibility: visible;
+  }
+  .printable-area, .id-card-wrapper {
     position: absolute;
     left: 0;
     top: 0;
@@ -339,5 +435,17 @@ body {
   .printable-area[data-template="best"] .gs-header strong,
   .printable-area[data-template="best"] .gs-table thead {
     color: black !important;
+  }
+  /* Ensure ID card is sized correctly for printing */
+  .id-card-wrapper {
+    width: 3.375in;
+    height: 2.125in;
+    page-break-inside: avoid;
+  }
+  .id-card-base {
+    width: 100%;
+    height: 100%;
+    box-shadow: none;
+    border: 1px solid #ccc;
   }
 }
