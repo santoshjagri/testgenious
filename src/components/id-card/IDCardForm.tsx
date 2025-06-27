@@ -93,11 +93,17 @@ export function IDCardForm({ onSubmit, isLoading, level }: IDCardFormProps) {
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField name="fullName" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Alex Doe" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 {fileInput("photo", "Holder's Photo", "PNG or JPG file. A clear, passport-style headshot is best.")}
-                <FormField name="idNumber" control={form.control} render={({ field }) => ( <FormItem><FormLabel>ID Number</FormLabel><FormControl><Input placeholder="e.g., 2024-001" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                {level !== 'School' && (
+                  <FormField name="idNumber" control={form.control} render={({ field }) => ( <FormItem><FormLabel>ID Number</FormLabel><FormControl><Input placeholder="e.g., 2024-001" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                )}
                 <FormField name="classOrCourse" control={form.control} render={({ field }) => ( <FormItem><FormLabel>{classOrCourseLabel[level]}</FormLabel><FormControl><Input placeholder={level === 'School' ? 'e.g., Grade 10, Section A' : 'e.g., B.Sc. Computer Science'} {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField name="dateOfBirth" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                <FormField name="bloodGroup" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Blood Group (Optional)</FormLabel><FormControl><Input placeholder="e.g., O+" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                 <FormField name="contactNumber" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Guardian's Contact (Optional)</FormLabel><FormControl><Input placeholder="e.g., +1 234 567 890" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                {level !== 'School' && (
+                  <FormField name="bloodGroup" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Blood Group (Optional)</FormLabel><FormControl><Input placeholder="e.g., O+" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                )}
+                {level !== 'School' && (
+                  <FormField name="contactNumber" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Guardian's Contact (Optional)</FormLabel><FormControl><Input placeholder="e.g., +1 234 567 890" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                )}
                 <FormField name="holderAddress" control={form.control} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Holder's Full Address</FormLabel><FormControl><Input placeholder="e.g., 123 Future Lane, Innovation City" {...field} /></FormControl><FormMessage /></FormItem> )} />
             </CardContent>
         </Card>
@@ -123,5 +129,3 @@ export function IDCardForm({ onSubmit, isLoading, level }: IDCardFormProps) {
     </Form>
   );
 }
-
-    

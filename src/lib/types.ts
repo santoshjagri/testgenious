@@ -316,7 +316,7 @@ export const idCardFormSchema = z.object({
   // Card Holder Details
   photo: z.instanceof(File).refine(file => file, "A photo is required."),
   fullName: z.string().min(1, "Full name is required."),
-  idNumber: z.string().min(1, "ID Number is required."),
+  idNumber: z.string().optional(),
   classOrCourse: z.string().min(1, "This field is required."), // Label will be dynamic
   dateOfBirth: z.string().min(1, "Date of birth is required."),
   bloodGroup: z.string().optional(),
@@ -331,9 +331,21 @@ export const idCardFormSchema = z.object({
   authoritySignature: z.instanceof(File).optional(),
   authorityName: z.string().optional(),
 
-}).refine(data => new Date(data.expiryDate) > new Date(data.issueDate), {
-    message: "Expiry date must be after the issue date.",
-    path: ["expiryDate"],
+}).superRefine((data, ctx) => {
+    if (data.level !== 'School' && (!data.idNumber || data.idNumber.trim() === '')) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "ID Number is required.",
+            path: ["idNumber"],
+        });
+    }
+    if (new Date(data.expiryDate) <= new Date(data.issueDate)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Expiry date must be after the issue date.",
+            path: ["expiryDate"],
+        });
+    }
 });
 
 export type IDCardFormValues = z.infer<typeof idCardFormSchema>;

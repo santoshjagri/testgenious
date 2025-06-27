@@ -28,9 +28,7 @@ const SchoolCard: React.FC<IDCardDisplayProps> = ({ data }) => (
         <p className="name">{data.fullName}</p>
         <p className="class">{data.classOrCourse}</p>
         <div className="details-grid">
-          <p><strong>ID:</strong> {data.idNumber}</p>
           <p><strong>DOB:</strong> {data.dateOfBirth}</p>
-          <p><strong>Blood:</strong> {data.bloodGroup || 'N/A'}</p>
           <p><strong>Expires:</strong> {data.expiryDate}</p>
         </div>
       </div>
@@ -126,5 +124,3 @@ export function IDCardDisplay({ data }: IDCardDisplayProps) {
     </div>
   );
 }
-
-    
