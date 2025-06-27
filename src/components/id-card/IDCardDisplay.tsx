@@ -13,7 +13,7 @@ const SchoolCard: React.FC<IDCardDisplayProps> = ({ data }) => (
   <div className="id-card-base id-card-school">
     <div className="header">
       {data.logoDataUri ? (
-        <Image src={data.logoDataUri} alt="Logo" width={32} height={32} className="w-8 h-8 mr-2" unoptimized />
+        <Image src={data.logoDataUri} alt="Logo" width={32} height={32} className="w-8 h-8 mr-2" data-ai-hint="school emblem" unoptimized />
       ) : (
         <div className="w-8 h-8 mr-2 bg-white rounded-full"></div>
       )}
@@ -46,7 +46,7 @@ const CollegeCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       <Image src={data.photoDataUri} alt="Student Photo" width={80} height={96} className="photo" data-ai-hint="student portrait" unoptimized />
       <div className="flex-grow">
         {data.logoDataUri && (
-          <Image src={data.logoDataUri} alt="Logo" width={40} height={40} className="w-10 h-10 mb-1" unoptimized />
+          <Image src={data.logoDataUri} alt="Logo" width={40} height={40} className="w-10 h-10 mb-1" data-ai-hint="college emblem" unoptimized />
         )}
         <p className="course">{data.classOrCourse}</p>
         <p className="name">{data.fullName}</p>
@@ -74,7 +74,7 @@ const UniversityCard: React.FC<IDCardDisplayProps> = ({ data }) => (
   <div className="id-card-base id-card-university">
     <div className="header">
       {data.logoDataUri ? (
-        <Image src={data.logoDataUri} alt="Logo" width={48} height={48} className="logo" unoptimized />
+        <Image src={data.logoDataUri} alt="Logo" width={48} height={48} className="logo" data-ai-hint="university crest" unoptimized />
       ) : (
          <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
       )}
@@ -100,7 +100,7 @@ const UniversityCard: React.FC<IDCardDisplayProps> = ({ data }) => (
         {data.authoritySignatureDataUri && (
             <Image src={data.authoritySignatureDataUri} alt="Signature" width={60} height={15} className="float-right" data-ai-hint="signature" unoptimized />
         )}
-        <Image src="https://placehold.co/150x30.png" data-ai-hint="barcode" alt="Barcode" width={150} height={30} className="barcode" />
+        <Image src="https://placehold.co/150x30.png" data-ai-hint="barcode" alt="Barcode" width={150} height={30} className="barcode" unoptimized />
     </div>
   </div>
 );
@@ -126,3 +126,5 @@ export function IDCardDisplay({ data }: IDCardDisplayProps) {
     </div>
   );
 }
+
+    
