@@ -119,9 +119,9 @@ export default function IDCardPage() {
   
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 gap-8">
         
-        <div className="lg:col-span-1">
+        <div>
           <Card className="shadow-xl">
             <CardHeader>
               <CardTitle className="text-3xl font-headline text-primary flex items-center gap-3">
@@ -152,8 +152,8 @@ export default function IDCardPage() {
           </Card>
         </div>
 
-        <div className="lg:col-span-1">
-           <Card className="sticky top-6">
+        <div>
+           <Card>
              <CardHeader>
                 <CardTitle>ID Card Preview</CardTitle>
                 <CardDescription>Your generated ID card will appear here. Review it before printing or downloading.</CardDescription>
