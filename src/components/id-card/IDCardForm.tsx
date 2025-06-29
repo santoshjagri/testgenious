@@ -109,7 +109,7 @@ export function IDCardForm({ onSubmit, isLoading, level }: IDCardFormProps) {
                 {(level === 'College' || level === 'University' || level === 'Vertical') && (
                   <FormField name="contactNumber" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Guardian's Contact (Optional)</FormLabel><FormControl><Input placeholder="e.g., +1 234 567 890" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 )}
-                <FormField name="holderAddress" control={form.control} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Holder's Full Address</FormLabel><FormControl><Input placeholder="e.g., 123 Future Lane, Innovation City" {...field} /></FormControl><FormMessage /></FormMessage> )} />
+                <FormField name="holderAddress" control={form.control} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Holder's Full Address</FormLabel><FormControl><Input placeholder="e.g., 123 Future Lane, Innovation City" {...field} /></FormControl><FormMessage /></FormItem> )} />
             </CardContent>
         </Card>
 
