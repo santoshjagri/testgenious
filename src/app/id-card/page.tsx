@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { IDCardForm } from "@/components/id-card/IDCardForm";
 import { IDCardDisplay } from "@/components/id-card/IDCardDisplay";
-import type { IDCardFormValues, StoredIDCardData, StoredIDCard } from "@/lib/types";
+import type { IDCardFormValues, StoredIDCardData, StoredIDCard, IDCardLevel } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserSquare2, Download, Printer as PrinterIcon, Loader2 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -23,7 +23,7 @@ export default function IDCardPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [isDownloading, setIsDownloading] = React.useState(false);
   const { toast } = useToast();
-  const [level, setLevel] = React.useState<'School' | 'College' | 'University'>('School');
+  const [level, setLevel] = React.useState<IDCardLevel>('School');
 
   const handleFormSubmit = async (values: IDCardFormValues) => {
     setIsProcessing(true);
@@ -98,14 +98,25 @@ export default function IDCardPage() {
         const canvas = await html2canvas(cardElement, { scale: 3, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
         
-        // Standard ID card size: 85.6mm x 53.98mm
-        const pdf = new jsPDF({
-          orientation: 'landscape',
-          unit: 'mm',
-          format: [85.6, 53.98]
-        });
+        let pdf;
+        if (generatedCard.level === 'Vertical') {
+            // Standard vertical ID card size: 53.98mm x 85.6mm
+            pdf = new jsPDF({
+              orientation: 'portrait',
+              unit: 'mm',
+              format: [53.98, 85.6]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, 53.98, 85.6);
+        } else {
+            // Standard horizontal ID card size: 85.6mm x 53.98mm
+            pdf = new jsPDF({
+              orientation: 'landscape',
+              unit: 'mm',
+              format: [85.6, 53.98]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, 85.6, 53.98);
+        }
 
-        pdf.addImage(imgData, 'PNG', 0, 0, 85.6, 53.98);
         const safeName = generatedCard.fullName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
         pdf.save(`id_card_${safeName}.pdf`);
 
@@ -119,7 +130,7 @@ export default function IDCardPage() {
   
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         <div>
           <Card className="shadow-xl">
@@ -134,10 +145,11 @@ export default function IDCardPage() {
             </CardHeader>
             <CardContent>
               <Tabs value={level} onValueChange={(value) => setLevel(value as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="School">School</TabsTrigger>
                   <TabsTrigger value="College">College</TabsTrigger>
                   <TabsTrigger value="University">University</TabsTrigger>
+                  <TabsTrigger value="Vertical">Vertical</TabsTrigger>
                 </TabsList>
                 <div className="mt-6">
                     <IDCardForm

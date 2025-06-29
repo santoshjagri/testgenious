@@ -23,7 +23,7 @@ const SchoolCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       </div>
     </div>
     <div className="flex-grow flex items-center gap-4">
-      <Image src={data.photoDataUri} alt="Student Photo" width={96} height={96} className="photo" data-ai-hint="student portrait" unoptimized />
+      <Image src={data.photoDataUri} alt="Student Photo" width={96} height={112} className="photo" data-ai-hint="student portrait" unoptimized />
       <div className="flex-grow text-left">
         <p className="name">{data.fullName}</p>
         <p className="class">{data.classOrCourse}</p>
@@ -103,6 +103,34 @@ const UniversityCard: React.FC<IDCardDisplayProps> = ({ data }) => (
   </div>
 );
 
+const VerticalCard: React.FC<IDCardDisplayProps> = ({ data }) => (
+    <div className="id-card-base id-card-vertical">
+      <div className="vertical-header">
+        {data.logoDataUri && (
+          <Image src={data.logoDataUri} alt="Logo" width={40} height={40} className="logo" data-ai-hint="school emblem" unoptimized />
+        )}
+        <p className="inst-name">{data.institutionName}</p>
+      </div>
+      <div className="vertical-photo-container">
+        <Image src={data.photoDataUri} alt="Student Photo" width={100} height={100} className="photo" data-ai-hint="student portrait" unoptimized />
+      </div>
+      <div className="vertical-details">
+          <p className="name">{data.fullName}</p>
+          <div className="info-grid">
+              <p><strong>Class:</strong> {data.classOrCourse}</p>
+              {data.rollNo && <p><strong>Roll No:</strong> {data.rollNo}</p>}
+              {data.contactNumber && <p><strong>Contact:</strong> {data.contactNumber}</p>}
+          </div>
+      </div>
+      <div className="vertical-footer">
+          {data.authoritySignatureDataUri ? (
+              <Image src={data.authoritySignatureDataUri} alt="Signature" width={80} height={20} className="signature" data-ai-hint="signature" unoptimized />
+          ) : <div className="signature-placeholder"></div>}
+          <p className="authority-name">{data.authorityName || 'Principal'}</p>
+          <p className="address">{data.institutionAddress}</p>
+      </div>
+    </div>
+  );
 
 export function IDCardDisplay({ data }: IDCardDisplayProps) {
   const renderCard = () => {
@@ -113,6 +141,8 @@ export function IDCardDisplay({ data }: IDCardDisplayProps) {
         return <CollegeCard data={data} />;
       case 'University':
         return <UniversityCard data={data} />;
+      case 'Vertical':
+        return <VerticalCard data={data} />;
       default:
         return <SchoolCard data={data} />;
     }

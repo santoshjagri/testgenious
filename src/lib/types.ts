@@ -303,10 +303,12 @@ export type BulkGradeSheetFormValues = z.infer<typeof bulkGradeSheetFormSchema>;
 
 // --- ID Card Types ---
 
-export const IDCardLevel = ["School", "College", "University"] as const;
+export const IDCardLevelArray = ["School", "College", "University", "Vertical"] as const;
+export type IDCardLevel = (typeof IDCardLevelArray)[number];
+
 
 export const idCardFormSchema = z.object({
-  level: z.enum(IDCardLevel).default("School"),
+  level: z.enum(IDCardLevelArray).default("School"),
   
   // Institution Details
   institutionName: z.string().min(1, "Institution name is required."),
@@ -317,6 +319,7 @@ export const idCardFormSchema = z.object({
   photo: z.instanceof(File).refine(file => file, "A photo is required."),
   fullName: z.string().min(1, "Full name is required."),
   idNumber: z.string().optional(),
+  rollNo: z.string().optional(),
   classOrCourse: z.string().min(1, "This field is required."), // Label will be dynamic
   dateOfBirth: z.string().min(1, "Date of birth is required."),
   bloodGroup: z.string().optional(),
@@ -332,7 +335,7 @@ export const idCardFormSchema = z.object({
   authorityName: z.string().optional(),
 
 }).superRefine((data, ctx) => {
-    if (data.level !== 'School' && (!data.idNumber || data.idNumber.trim() === '')) {
+    if ((data.level === 'College' || data.level === 'University') && (!data.idNumber || data.idNumber.trim() === '')) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "ID Number is required.",
