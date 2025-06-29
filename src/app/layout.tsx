@@ -8,6 +8,7 @@ import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, Side
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Separator } from "@/components/ui/separator";
+import { ThemeToggle } from '@/components/theme-toggle';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -109,7 +110,7 @@ export default function RootLayout({
                   <SidebarTrigger />
                   {/* Future: Page title could go here */}
                 </div>
-                {/* Removed UserNav component */}
+                <ThemeToggle />
               </header>
               <div className="flex-1 overflow-y-auto">
                 {children}

@@ -1,9 +1,8 @@
 
 "use client";
 
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Shield, User, Palette, Trash2, DatabaseZap } from "lucide-react";
+import { Shield, Trash2, DatabaseZap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -48,29 +47,11 @@ export default function SettingsPage() {
         <header>
           <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
           <p className="text-muted-foreground mt-1">
-            Manage your application settings, appearance, and data.
+            Manage your application settings and data.
           </p>
         </header>
 
         <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
-                Appearance
-              </CardTitle>
-              <CardDescription>
-                Customize the look and feel of the application. Change the theme to your preference.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Theme</span>
-                <ThemeToggle />
-              </div>
-            </CardContent>
-          </Card>
-
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
