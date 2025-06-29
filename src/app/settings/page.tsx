@@ -42,12 +42,12 @@ export default function SettingsPage() {
                 Account
               </CardTitle>
               <CardDescription>
-                Account management features are not available in this version.
+                This application operates without user accounts for maximum privacy.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                This application operates without user accounts. All data is stored locally on your device.
+                You do not need to create an account or log in to use ExamGenius AI. All of your generated papers, gradesheets, and ID cards are stored directly and securely on your own device in your browser's local storage, not on our servers.
               </p>
             </CardContent>
           </Card>
@@ -56,15 +56,15 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Security
+                Security & Data Privacy
               </CardTitle>
               <CardDescription>
-                Security settings and options.
+                Your data is private and stored locally on your computer.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                There are no security settings to configure as the application runs entirely on your local machine.
+                Because this application runs entirely in your browser, your data's security is in your hands. The app itself has no server to be hacked or database to be breached. When you use AI features, only the non-personal data from the form fields (like subject and topic) is sent to Google's AI service to generate content.
               </p>
             </CardContent>
           </Card>
