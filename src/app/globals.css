@@ -287,8 +287,6 @@ body {
 /* Base styles for all cards */
 .id-card-base {
   @apply font-sans w-[4.22in] h-[2.65in] p-4 text-black shadow-lg rounded-lg overflow-hidden relative flex flex-col;
-  width: 1012px; /* User-specified size for larger preview */
-  height: 638px; /* User-specified size for larger preview */
 }
 
 /* School Template */
@@ -453,3 +451,4 @@ body {
     
 
     
+

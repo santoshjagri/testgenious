@@ -119,7 +119,7 @@ export default function IDCardPage() {
   
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 gap-8">
+      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
         
         <div>
           <Card className="shadow-xl">
