@@ -289,6 +289,8 @@ body {
   @apply font-sans shadow-lg rounded-lg overflow-hidden relative flex flex-col;
   color: var(--id-font-color);
   background-color: var(--id-bg-color);
+  width: 3.375in;
+  height: 2.125in;
 }
 .id-card-base strong {
   opacity: 0.8;
@@ -296,7 +298,7 @@ body {
 
 /* Classic Template */
 .id-card-classic {
-  @apply w-[3.375in] h-[2.125in] text-center p-3;
+  @apply p-3 text-center;
 }
 .id-card-classic .header-bar {
   background-color: var(--id-header-color);
@@ -305,12 +307,12 @@ body {
 .id-card-classic .content {
   @apply relative z-10 flex flex-col items-center;
 }
+.id-card-classic .logo {
+  @apply w-10 h-10 object-contain absolute top-1 left-2;
+}
 .id-card-classic .photo {
   @apply w-24 h-24 rounded-full border-4 object-cover shadow-md;
   border-color: var(--id-bg-color);
-}
-.id-card-classic .logo {
-  @apply w-10 h-10 object-contain absolute top-1 left-2;
 }
 .id-card-classic .inst-name {
   @apply text-lg font-bold mt-2;
@@ -325,10 +327,14 @@ body {
 .id-card-classic .details-grid {
   @apply grid grid-cols-2 gap-x-4 text-xs mt-2;
 }
+.id-card-classic .footer-info {
+  @apply text-xs mt-auto pt-2 border-t;
+  border-color: var(--id-header-color);
+}
 
 /* Modern Template */
 .id-card-modern {
-  @apply w-[3.375in] h-[2.125in] p-0;
+  @apply p-0 flex flex-row;
 }
 .id-card-modern .accent-strip {
   background-color: var(--id-header-color);
@@ -363,7 +369,7 @@ body {
 
 /* Vibrant Template */
 .id-card-vibrant {
-  @apply w-[3.375in] h-[2.125in] p-4;
+  @apply p-4;
   background-image: linear-gradient(45deg, var(--id-header-color), var(--id-bg-color));
 }
 .id-card-vibrant .header {
@@ -391,13 +397,15 @@ body {
   @apply text-base font-medium;
 }
 .id-card-vibrant .footer {
-  @apply flex justify-between items-center mt-auto text-xs;
+  @apply flex justify-between items-center mt-auto text-xs pt-2;
+}
+.id-card-vibrant .footer .signature {
+  @apply h-8 w-auto object-contain;
 }
 
 /* Elegant Template (Vertical) */
 .id-card-elegant {
-  @apply w-[2.125in] h-[3.37in] p-4 border;
-  font-family: 'Times New Roman', Times, serif;
+  @apply w-[2.125in] h-[3.375in] p-4 border font-serif;
 }
 .id-card-elegant .header {
   @apply text-center border-b-2 pb-2;
@@ -515,18 +523,23 @@ body {
   }
   .id-card-base.id-card-elegant {
      width: 2.125in;
-     height: 3.37in;
+     height: 3.375in;
   }
 
   .id-card-base, .id-card-base * {
     color: black !important;
+  }
+  
+  .id-card-base * {
     border-color: black !important;
   }
   .id-card-classic .header-bar,
-  .id-card-modern .accent-strip,
-  .id-card-vibrant {
+  .id-card-modern .accent-strip {
     background: #eee !important;
+  }
+  .id-card-vibrant {
     background-image: none !important;
+    background: #eee !important;
   }
 
 }
@@ -539,3 +552,4 @@ body {
 
 
     
+

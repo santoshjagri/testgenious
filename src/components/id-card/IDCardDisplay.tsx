@@ -26,12 +26,15 @@ const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
         <p><strong>DOB:</strong> {data.dateOfBirth}</p>
         <p><strong>Expires:</strong> {data.expiryDate}</p>
       </div>
+       <div className="footer-info">
+        {data.holderAddress}
+      </div>
     </div>
   </div>
 );
 
 const ModernCard: React.FC<IDCardDisplayProps> = ({ data }) => (
-  <div className="id-card-base id-card-modern flex flex-row">
+  <div className="id-card-base id-card-modern">
     <div className="accent-strip">
        <Image src={data.photoDataUri} alt="Holder Photo" width={96} height={96} className="photo" data-ai-hint="student portrait" unoptimized />
        {data.logoDataUri && (
@@ -71,12 +74,14 @@ const VibrantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       <div className="details">
         <p className="name">{data.fullName}</p>
         <p className="role">{data.classOrCourse}</p>
+        <p className="text-xs mt-2"><strong>ID:</strong> {data.idNumber || 'N/A'}</p>
+        <p className="text-xs"><strong>Valid Thru:</strong> {data.expiryDate}</p>
       </div>
     </div>
      <div className="footer">
-        <p><strong>ID:</strong> {data.idNumber || 'N/A'}</p>
+        <div>{data.authorityName}</div>
         {data.authoritySignatureDataUri && (
-           <Image src={data.authoritySignatureDataUri} alt="Signature" width={80} height={20} className="h-5 w-auto" data-ai-hint="signature" unoptimized />
+           <Image src={data.authoritySignatureDataUri} alt="Signature" width={80} height={20} className="signature" data-ai-hint="signature" unoptimized />
         )}
      </div>
   </div>
@@ -136,3 +141,4 @@ export function IDCardDisplay({ data }: IDCardDisplayProps) {
 }
 
     
+
