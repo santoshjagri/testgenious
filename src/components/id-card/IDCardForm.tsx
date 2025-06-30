@@ -75,9 +75,30 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
       render={({ field }) => (
         <FormItem>
           <FormLabel>{label}</FormLabel>
-          <FormControl>
-             <Input type="color" {...field} className="p-1 h-10"/>
-          </FormControl>
+          <div className="flex h-10 items-center gap-2 rounded-md border border-input px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+             <Input
+              type="text"
+              {...field}
+              placeholder="#RRGGBB"
+              className="flex-1 border-0 p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+             <FormControl>
+               <div className="relative h-6 w-6 shrink-0">
+                 <Input
+                  type="color"
+                  value={field.value || '#ffffff'}
+                  onChange={field.onChange}
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  aria-label={`Select ${label}`}
+                />
+                 <div
+                  className="h-full w-full rounded-md border"
+                  style={{ backgroundColor: field.value || '#ffffff' }}
+                  aria-hidden="true"
+                />
+              </div>
+            </FormControl>
+          </div>
           <FormMessage />
         </FormItem>
       )}
@@ -147,5 +168,3 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
     </Form>
   );
 }
-
-    
