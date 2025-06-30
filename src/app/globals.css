@@ -428,42 +428,39 @@ body {
 
 /* Elegant Template (Vertical) */
 .id-card-elegant {
-  @apply p-4 font-serif flex flex-col;
+  @apply p-4 font-serif flex flex-col text-center;
   border-width: 1px;
   border-color: var(--id-header-color);
 }
 .id-card-elegant .header {
-  @apply text-center border-b-2 pb-2 mb-2;
+  @apply border-b pb-2 mb-3;
   border-color: var(--id-header-color);
 }
 .id-card-elegant .header .logo {
-  @apply w-12 h-12 mx-auto object-contain;
+  @apply w-10 h-10 mx-auto object-contain mb-1;
 }
 .id-card-elegant .header .inst-name {
-  @apply text-base font-bold mt-1;
-}
-.id-card-elegant .main-content {
-    @apply flex flex-col flex-grow;
+  @apply text-base font-bold;
 }
 .id-card-elegant .photo-container {
-  @apply my-2 flex justify-center;
+  @apply my-3 flex justify-center;
 }
-.id-card-elegant .photo-container .photo {
-  @apply w-32 h-40 object-cover p-1 border;
+.id-card-elegant .photo {
+  @apply w-32 h-32 rounded-full object-cover border-4 shadow-md;
   border-color: var(--id-header-color);
 }
-.id-card-elegant .text-content {
-    @apply text-center;
-}
 .id-card-elegant .name {
-  @apply text-2xl;
+  @apply text-2xl font-medium;
   color: var(--id-header-color);
 }
 .id-card-elegant .role {
-  @apply text-sm tracking-widest uppercase;
+  @apply text-sm tracking-widest uppercase -mt-1;
 }
-.id-card-elegant .details-list {
-  @apply text-xs space-y-1 mt-3 text-left mx-auto max-w-fit;
+.id-card-elegant .details-grid {
+  @apply grid grid-cols-2 gap-x-2 gap-y-1 text-xs mt-4 text-left w-full max-w-[90%] mx-auto;
+}
+.id-card-elegant .details-grid strong {
+  opacity: 0.8;
 }
 .id-card-elegant .footer {
   @apply mt-auto pt-2 text-xs text-center border-t;

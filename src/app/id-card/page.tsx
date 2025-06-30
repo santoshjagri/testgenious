@@ -183,7 +183,7 @@ export default function IDCardPage() {
                   <div className="w-full animate-fadeInUp space-y-4 text-center">
                      <div 
                         id="id-card-display-area"
-                        className="mx-auto" 
+                        className="inline-block" 
                         style={{
                           '--id-bg-color': generatedCard.backgroundColor, 
                           '--id-header-color': generatedCard.headerColor, 

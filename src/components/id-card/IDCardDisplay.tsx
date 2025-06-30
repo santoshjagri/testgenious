@@ -86,26 +86,22 @@ const ElegantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
   <div className="id-card-base id-card-elegant">
     <div className="header">
       {data.logoDataUri && (
-        <Image src={data.logoDataUri} alt="Logo" width={48} height={48} className="logo" data-ai-hint="school emblem" unoptimized />
+        <Image src={data.logoDataUri} alt="Logo" width={40} height={40} className="logo" data-ai-hint="school emblem" unoptimized />
       )}
       <p className="inst-name">{data.institutionName}</p>
     </div>
-    <div className="main-content">
-        <div className="photo-container">
-          <Image src={data.photoDataUri} alt="Holder Photo" width={128} height={160} className="photo" data-ai-hint="student portrait" unoptimized />
-        </div>
-        <div className="text-content">
-            <p className="name">{data.fullName}</p>
-            <p className="role">{data.classOrCourse}</p>
-            <div className="details-list">
-                <p><strong>DOB:</strong> {data.dateOfBirth}</p>
-                <p><strong>Issued:</strong> {data.issueDate}</p>
-                <p><strong>Expires:</strong> {data.expiryDate}</p>
-            </div>
-        </div>
-        <div className="footer">
-            <p>{data.holderAddress}</p>
-        </div>
+    <div className="photo-container">
+      <Image src={data.photoDataUri} alt="Holder Photo" width={128} height={128} className="photo" data-ai-hint="student portrait" unoptimized />
+    </div>
+    <p className="name">{data.fullName}</p>
+    <p className="role">{data.classOrCourse}</p>
+    <div className="details-grid">
+        <p><strong>DOB:</strong></p><p>{data.dateOfBirth}</p>
+        <p><strong>Issued:</strong></p><p>{data.issueDate}</p>
+        <p><strong>Expires:</strong></p><p>{data.expiryDate}</p>
+    </div>
+    <div className="footer">
+        <p>{data.holderAddress}</p>
     </div>
   </div>
 );
