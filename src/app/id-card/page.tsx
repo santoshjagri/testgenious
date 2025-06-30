@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { IDCardForm } from "@/components/id-card/IDCardForm";
 import { IDCardDisplay } from "@/components/id-card/IDCardDisplay";
-import type { IDCardFormValues, StoredIDCardData, StoredIDCard, IDCardLevel } from "@/lib/types";
+import type { IDCardFormValues, StoredIDCardData, StoredIDCard, IDCardTemplate } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserSquare2, Download, Printer as PrinterIcon, Loader2 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -14,6 +14,7 @@ import { fileToDataUri } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { IDCardTemplateArray } from '@/lib/types';
 
 const ID_CARD_LOCAL_STORAGE_KEY = "idCardHistory";
 
@@ -23,7 +24,7 @@ export default function IDCardPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [isDownloading, setIsDownloading] = React.useState(false);
   const { toast } = useToast();
-  const [level, setLevel] = React.useState<IDCardLevel>('School');
+  const [template, setTemplate] = React.useState<IDCardTemplate>('Classic');
 
   const handleFormSubmit = async (values: IDCardFormValues) => {
     setIsProcessing(true);
@@ -39,6 +40,7 @@ export default function IDCardPage() {
       
       const cardData: StoredIDCardData = {
         ...otherFormValues,
+        template: template,
         photoDataUri,
         logoDataUri,
         authoritySignatureDataUri,
@@ -62,7 +64,11 @@ export default function IDCardPage() {
 
         } catch (storageError) {
           console.error("Error saving ID card to local storage:", storageError);
-          toast({ title: "Warning", description: "ID Card generated, but failed to save to history.", variant: "destructive" });
+          if (storageError instanceof DOMException && storageError.name === 'QuotaExceededError') {
+             toast({ title: "Storage Full", description: "Could not save to history. Browser storage is full. Please clear some history.", variant: "destructive" });
+          } else {
+             toast({ title: "Warning", description: "ID Card generated, but failed to save to history.", variant: "destructive" });
+          }
         }
       }
       
@@ -95,12 +101,11 @@ export default function IDCardPage() {
 
     if (cardElement) {
       try {
-        const canvas = await html2canvas(cardElement, { scale: 3, useCORS: true });
+        const canvas = await html2canvas(cardElement, { scale: 3, useCORS: true, backgroundColor: null });
         const imgData = canvas.toDataURL('image/png');
         
         let pdf;
-        if (generatedCard.level === 'Vertical') {
-            // Standard vertical ID card size: 53.98mm x 85.6mm
+        if (generatedCard.template === 'Elegant') {
             pdf = new jsPDF({
               orientation: 'portrait',
               unit: 'mm',
@@ -108,7 +113,6 @@ export default function IDCardPage() {
             });
             pdf.addImage(imgData, 'PNG', 0, 0, 53.98, 85.6);
         } else {
-            // Standard horizontal ID card size: 85.6mm x 53.98mm
             pdf = new jsPDF({
               orientation: 'landscape',
               unit: 'mm',
@@ -130,7 +134,7 @@ export default function IDCardPage() {
   
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-1 gap-8">
         
         <div>
           <Card className="shadow-xl">
@@ -140,23 +144,20 @@ export default function IDCardPage() {
                 ID Card Studio
               </CardTitle>
               <CardDescription>
-                Create professional ID cards for your institution. Select a level and fill in the details.
+                Create professional ID cards. Select a template, fill the details, and customize the colors.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs value={level} onValueChange={(value) => setLevel(value as any)} className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="School">School</TabsTrigger>
-                  <TabsTrigger value="College">College</TabsTrigger>
-                  <TabsTrigger value="University">University</TabsTrigger>
-                  <TabsTrigger value="Vertical">Vertical</TabsTrigger>
+              <Tabs value={template} onValueChange={(value) => setTemplate(value as any)} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+                  {IDCardTemplateArray.map(t => <TabsTrigger key={t} value={t}>{t}</TabsTrigger>)}
                 </TabsList>
                 <div className="mt-6">
                     <IDCardForm
-                        key={level} // Re-mounts the form with defaults when level changes
+                        key={template}
                         onSubmit={handleFormSubmit}
                         isLoading={isProcessing}
-                        level={level}
+                        template={template}
                     />
                 </div>
               </Tabs>
@@ -170,7 +171,7 @@ export default function IDCardPage() {
                 <CardTitle>ID Card Preview</CardTitle>
                 <CardDescription>Your generated ID card will appear here. Review it before printing or downloading.</CardDescription>
              </CardHeader>
-             <CardContent className="flex flex-col items-center justify-center min-h-[300px] bg-muted/50 rounded-lg p-4">
+             <CardContent className="flex flex-col items-center justify-center min-h-[350px] bg-muted/50 rounded-lg p-4">
                 {isProcessing && (
                   <div className="flex flex-col items-center gap-2 text-primary">
                     <Loader2 className="h-10 w-10 animate-spin" />
@@ -180,8 +181,8 @@ export default function IDCardPage() {
                 {error && <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
 
                 {!isProcessing && generatedCard && (
-                  <div className="w-full animate-fadeInUp space-y-4">
-                     <div id="id-card-display-area" className="inline-block">
+                  <div className="w-full animate-fadeInUp space-y-4 text-center">
+                     <div id="id-card-display-area" className="inline-block" style={{'--id-bg-color': generatedCard.backgroundColor, '--id-header-color': generatedCard.headerColor, '--id-font-color': generatedCard.fontColor} as React.CSSProperties}>
                         <IDCardDisplay data={generatedCard} />
                      </div>
                       <div className="flex justify-center gap-2 no-print">
@@ -211,3 +212,5 @@ export default function IDCardPage() {
     </main>
   );
 }
+
+    

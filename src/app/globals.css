@@ -286,138 +286,159 @@ body {
 /* --- ID Card Template Styles --- */
 /* Base styles for all cards */
 .id-card-base {
-  @apply font-sans w-[3.375in] h-[2.125in] p-4 text-black shadow-lg rounded-lg overflow-hidden relative flex flex-col;
+  @apply font-sans shadow-lg rounded-lg overflow-hidden relative flex flex-col;
+  color: var(--id-font-color);
+  background-color: var(--id-bg-color);
+}
+.id-card-base strong {
+  opacity: 0.8;
 }
 
-/* School Template */
-.id-card-school {
-  @apply bg-white;
+/* Classic Template */
+.id-card-classic {
+  @apply w-[3.375in] h-[2.125in] text-center p-3;
 }
-.id-card-school .header {
-  @apply bg-blue-500 text-white flex items-center p-2 -m-4 mb-2;
+.id-card-classic .header-bar {
+  background-color: var(--id-header-color);
+  @apply h-12 w-full absolute top-0 left-0 right-0;
 }
-.id-card-school .header-title {
- @apply text-xs font-bold leading-tight;
+.id-card-classic .content {
+  @apply relative z-10 flex flex-col items-center;
 }
-.id-card-school .photo {
-  @apply w-24 h-[112px] border-4 border-white rounded-md shadow-md object-cover;
+.id-card-classic .photo {
+  @apply w-24 h-24 rounded-full border-4 object-cover shadow-md;
+  border-color: var(--id-bg-color);
 }
-.id-card-school .name {
-  @apply text-lg font-extrabold text-blue-600 mt-1;
+.id-card-classic .logo {
+  @apply w-10 h-10 object-contain absolute top-1 left-2;
 }
-.id-card-school .class {
-  @apply text-sm font-semibold text-gray-700;
+.id-card-classic .inst-name {
+  @apply text-lg font-bold mt-2;
+  color: var(--id-font-color);
 }
-.id-card-school .details-grid {
-  @apply grid grid-cols-2 gap-x-2 text-xs mt-2;
+.id-card-classic .name {
+  @apply text-xl font-extrabold mt-1;
 }
-
-/* College Template */
-.id-card-college {
-  @apply bg-gray-50;
+.id-card-classic .role {
+  @apply font-medium -mt-1;
 }
-.id-card-college .header-strip {
-  @apply h-6 bg-indigo-700 absolute top-0 left-0 right-0;
-}
-.id-card-college .content-area {
-  @apply flex items-center gap-4 z-10 pt-4;
-}
-.id-card-college .photo {
-  @apply w-20 h-24 border-2 border-indigo-200 object-cover rounded;
-}
-.id-card-college .name {
-  @apply text-xl font-bold text-indigo-800 tracking-wide;
-}
-.id-card-college .course {
-  @apply text-xs font-medium text-gray-600 uppercase;
-}
-.id-card-college .details-table {
-  @apply text-xs mt-3 w-full;
-}
-.id-card-college .details-table td:first-child {
-  @apply font-semibold text-gray-500 pr-2;
+.id-card-classic .details-grid {
+  @apply grid grid-cols-2 gap-x-4 text-xs mt-2;
 }
 
-/* University Template */
-.id-card-university {
-  @apply bg-gradient-to-br from-gray-50 to-gray-200 border border-gray-300;
-  font-family: 'Times New Roman', Times, serif;
+/* Modern Template */
+.id-card-modern {
+  @apply w-[3.375in] h-[2.125in] p-0;
 }
-.id-card-university .header {
-  @apply flex items-center justify-between pb-1 border-b-2 border-gray-400;
+.id-card-modern .accent-strip {
+  background-color: var(--id-header-color);
+  @apply w-1/3 h-full flex flex-col items-center justify-center p-2 text-white;
 }
-.id-card-university .header .logo {
-  @apply w-12 h-12;
+.id-card-modern .accent-strip .photo {
+  @apply w-24 h-24 rounded-full border-4 border-white object-cover shadow-lg;
 }
-.id-card-university .header-title {
-  @apply text-center;
+.id-card-modern .accent-strip .logo {
+  @apply w-12 h-12 object-contain mt-auto;
 }
-.id-card-university .inst-name {
-  @apply text-sm font-bold text-gray-800;
+.id-card-modern .main-content {
+  @apply w-2/3 p-4 flex flex-col;
 }
-.id-card-university .inst-motto {
-  @apply text-[9px] text-gray-600;
+.id-card-modern .main-content .inst-name {
+  @apply text-xl font-bold;
+  color: var(--id-header-color);
 }
-.id-card-university .main-content {
-  @apply flex gap-3 mt-2;
+.id-card-modern .main-content .name {
+  @apply text-2xl font-light mt-2;
 }
-.id-card-university .photo {
-  @apply w-20 h-24 border border-gray-400 p-0.5 bg-white;
+.id-card-modern .main-content .role {
+  @apply text-lg font-semibold;
+  color: var(--id-header-color);
 }
-.id-card-university .name {
-  @apply text-base font-bold text-gray-900;
+.id-card-modern .main-content .details-table {
+  @apply text-xs mt-auto w-full;
 }
-.id-card-university .details-list {
- @apply text-[10px] space-y-0.5 mt-1;
-}
-.id-card-university .barcode {
-  @apply h-8 w-full object-cover mt-1;
+.id-card-modern .main-content .details-table td:first-child {
+  @apply font-semibold pr-2 opacity-80;
 }
 
-/* Vertical Template */
-.id-card-vertical {
-  @apply w-[2.125in] h-[3.37in] flex-col text-center p-3 bg-white border border-gray-200;
+/* Vibrant Template */
+.id-card-vibrant {
+  @apply w-[3.375in] h-[2.125in] p-4;
+  background-image: linear-gradient(45deg, var(--id-header-color), var(--id-bg-color));
 }
-.id-card-vertical .vertical-header {
-  @apply flex items-center justify-center gap-2 pb-2 border-b-2 border-blue-500;
+.id-card-vibrant .header {
+  @apply flex items-start justify-between;
 }
-.id-card-vertical .vertical-header .logo {
+.id-card-vibrant .header .logo {
   @apply w-10 h-10 object-contain;
 }
-.id-card-vertical .vertical-header .inst-name {
-  @apply text-sm font-bold text-blue-700;
+.id-card-vibrant .header .inst-name {
+  @apply text-right text-lg font-semibold leading-tight;
 }
-.id-card-vertical .vertical-photo-container {
-  @apply my-3;
+.id-card-vibrant .main-content {
+  @apply flex items-end gap-4 mt-2;
 }
-.id-card-vertical .vertical-photo-container .photo {
-  @apply w-28 h-28 rounded-full border-4 border-blue-200 object-cover mx-auto shadow-md;
+.id-card-vibrant .main-content .photo {
+  @apply w-28 h-28 object-cover rounded-md border-4 border-white/50 shadow-xl;
 }
-.id-card-vertical .vertical-details {
+.id-card-vibrant .main-content .details {
   @apply flex-grow;
 }
-.id-card-vertical .vertical-details .name {
-  @apply text-xl font-extrabold text-gray-800;
+.id-card-vibrant .main-content .name {
+  @apply text-2xl font-bold;
 }
-.id-card-vertical .vertical-details .info-grid {
-  @apply mt-2 text-sm text-gray-600 space-y-1;
+.id-card-vibrant .main-content .role {
+  @apply text-base font-medium;
 }
-.id-card-vertical .vertical-footer {
-  @apply mt-auto pt-2 border-t border-gray-200;
-}
-.id-card-vertical .vertical-footer .signature {
-  @apply h-8 w-24 mx-auto object-contain;
-}
-.id-card-vertical .vertical-footer .signature-placeholder {
-  @apply h-8 w-24;
-}
-.id-card-vertical .vertical-footer .authority-name {
-  @apply text-xs font-semibold -mt-1;
-}
-.id-card-vertical .vertical-footer .address {
-  @apply text-[9px] text-gray-500 mt-1;
+.id-card-vibrant .footer {
+  @apply flex justify-between items-center mt-auto text-xs;
 }
 
+/* Elegant Template (Vertical) */
+.id-card-elegant {
+  @apply w-[2.125in] h-[3.37in] p-4 border;
+  font-family: 'Times New Roman', Times, serif;
+}
+.id-card-elegant .header {
+  @apply text-center border-b-2 pb-2;
+  border-color: var(--id-header-color);
+}
+.id-card-elegant .header .logo {
+  @apply w-12 h-12 mx-auto object-contain;
+}
+.id-card-elegant .header .inst-name {
+  @apply text-base font-bold mt-1;
+}
+.id-card-elegant .photo-container {
+  @apply my-4 flex justify-center;
+}
+.id-card-elegant .photo-container .photo {
+  @apply w-32 h-40 object-cover p-1 border;
+  border-color: var(--id-header-color);
+}
+.id-card-elegant .main-content {
+  @apply text-center;
+}
+.id-card-elegant .name {
+  @apply text-2xl;
+  color: var(--id-header-color);
+}
+.id-card-elegant .role {
+  @apply text-sm tracking-widest uppercase;
+}
+.id-card-elegant .details-list {
+  @apply text-xs space-y-1 mt-3 text-left;
+}
+.id-card-elegant .footer {
+  @apply mt-auto pt-2 text-center text-xs;
+}
+.id-card-elegant .footer .signature {
+  @apply h-8 w-24 mx-auto object-contain;
+}
+.id-card-elegant .footer .authority-name {
+  @apply mt-0 border-t pt-1;
+  border-color: var(--id-header-color);
+}
 
 @media print {
   body * {
@@ -490,7 +511,24 @@ body {
     height: 100%;
     box-shadow: none;
     border: 1px solid #ccc;
+    background: white !important;
   }
+  .id-card-base.id-card-elegant {
+     width: 2.125in;
+     height: 3.37in;
+  }
+
+  .id-card-base, .id-card-base * {
+    color: black !important;
+    border-color: black !important;
+  }
+  .id-card-classic .header-bar,
+  .id-card-modern .accent-strip,
+  .id-card-vibrant {
+    background: #eee !important;
+    background-image: none !important;
+  }
+
 }
 
     
@@ -498,3 +536,6 @@ body {
     
 
 
+
+
+    

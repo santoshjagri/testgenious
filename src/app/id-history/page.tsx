@@ -129,16 +129,26 @@ export default function IDCardHistoryPage() {
 
     if (cardElement) {
       try {
-        const canvas = await html2canvas(cardElement, { scale: 3, useCORS: true });
+        const canvas = await html2canvas(cardElement, { scale: 3, useCORS: true, backgroundColor: null });
         const imgData = canvas.toDataURL('image/png');
         
-        const pdf = new jsPDF({
-          orientation: 'landscape',
-          unit: 'mm',
-          format: [85.6, 53.98]
-        });
+        let pdf;
+        if (selectedCardForView.cardData.template === 'Elegant') {
+             pdf = new jsPDF({
+              orientation: 'portrait',
+              unit: 'mm',
+              format: [53.98, 85.6]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, 53.98, 85.6);
+        } else {
+            pdf = new jsPDF({
+              orientation: 'landscape',
+              unit: 'mm',
+              format: [85.6, 53.98]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, 85.6, 53.98);
+        }
 
-        pdf.addImage(imgData, 'PNG', 0, 0, 85.6, 53.98);
         const safeName = selectedCardForView.cardData.fullName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
         pdf.save(`id_card_${safeName}.pdf`);
 
@@ -152,6 +162,7 @@ export default function IDCardHistoryPage() {
 
 
   if (selectedCardForView) {
+    const { cardData } = selectedCardForView;
     return (
       <div className="flex-1 flex flex-col items-center p-2 sm:p-4 md:p-6 lg:p-8">
         <div className="w-full max-w-lg mb-6 flex flex-col sm:flex-row flex-wrap gap-2 no-print">
@@ -165,8 +176,8 @@ export default function IDCardHistoryPage() {
                {isDownloadingPdf ? ( <> <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Downloading... </> ) : ( <> <Download className="mr-2 h-4 w-4" /> Download PDF </> )}
             </Button>
         </div>
-        <div id="id-card-display-area-history" className="inline-block">
-            <IDCardDisplay data={selectedCardForView.cardData} />
+        <div id="id-card-display-area-history" className="inline-block" style={{'--id-bg-color': cardData.backgroundColor, '--id-header-color': cardData.headerColor, '--id-font-color': cardData.fontColor} as React.CSSProperties}>
+            <IDCardDisplay data={cardData} />
         </div>
       </div>
     );
@@ -292,3 +303,5 @@ export default function IDCardHistoryPage() {
     </div>
   );
 }
+
+    

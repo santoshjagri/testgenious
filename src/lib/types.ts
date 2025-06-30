@@ -303,12 +303,12 @@ export type BulkGradeSheetFormValues = z.infer<typeof bulkGradeSheetFormSchema>;
 
 // --- ID Card Types ---
 
-export const IDCardLevelArray = ["School", "College", "University", "Vertical"] as const;
-export type IDCardLevel = (typeof IDCardLevelArray)[number];
+export const IDCardTemplateArray = ["Classic", "Modern", "Vibrant", "Elegant"] as const;
+export type IDCardTemplate = (typeof IDCardTemplateArray)[number];
 
 
 export const idCardFormSchema = z.object({
-  level: z.enum(IDCardLevelArray).default("School"),
+  template: z.enum(IDCardTemplateArray).default("Classic"),
   
   // Institution Details
   institutionName: z.string().min(1, "Institution name is required."),
@@ -322,7 +322,6 @@ export const idCardFormSchema = z.object({
   rollNo: z.string().optional(),
   classOrCourse: z.string().min(1, "This field is required."), // Label will be dynamic
   dateOfBirth: z.string().min(1, "Date of birth is required."),
-  bloodGroup: z.string().optional(),
   
   // Validity & Contact
   issueDate: z.string().min(1, "Issue date is required."),
@@ -334,14 +333,12 @@ export const idCardFormSchema = z.object({
   authoritySignature: z.instanceof(File).optional(),
   authorityName: z.string().optional(),
 
+  // Customization
+  headerColor: z.string().optional(),
+  backgroundColor: z.string().optional(),
+  fontColor: z.string().optional(),
+
 }).superRefine((data, ctx) => {
-    if ((data.level === 'College' || data.level === 'University') && (!data.idNumber || data.idNumber.trim() === '')) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "ID Number is required.",
-            path: ["idNumber"],
-        });
-    }
     if (new Date(data.expiryDate) <= new Date(data.issueDate)) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -364,3 +361,5 @@ export interface StoredIDCard {
   dateGenerated: string; // ISO string
   cardData: StoredIDCardData;
 }
+
+    
