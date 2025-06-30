@@ -21,8 +21,6 @@ const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       <p className="name">{data.fullName}</p>
       <p className="role">{data.classOrCourse}</p>
       <div className="details-grid">
-        <p><strong>ID:</strong> {data.idNumber || 'N/A'}</p>
-        <p><strong>Roll:</strong> {data.rollNo || 'N/A'}</p>
         <p><strong>DOB:</strong> {data.dateOfBirth}</p>
         <p><strong>Expires:</strong> {data.expiryDate}</p>
       </div>
@@ -47,7 +45,6 @@ const ModernCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       <p className="role">{data.classOrCourse}</p>
       <table className="details-table">
         <tbody>
-          <tr><td>ID No.</td><td>: {data.idNumber || 'N/A'}</td></tr>
           <tr><td>DOB</td><td>: {data.dateOfBirth}</td></tr>
           <tr><td>Issued</td><td>: {data.issueDate}</td></tr>
           <tr><td>Expires</td><td>: {data.expiryDate}</td></tr>
@@ -66,7 +63,6 @@ const VibrantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       )}
       <div className="inst-name">
         <p>{data.institutionName}</p>
-        <p className="text-xs font-light">{data.institutionAddress}</p>
       </div>
     </div>
     <div className="main-content">
@@ -74,8 +70,7 @@ const VibrantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       <div className="details">
         <p className="name">{data.fullName}</p>
         <p className="role">{data.classOrCourse}</p>
-        <p className="text-xs mt-2"><strong>ID:</strong> {data.idNumber || 'N/A'}</p>
-        <p className="text-xs"><strong>Valid Thru:</strong> {data.expiryDate}</p>
+        <p className="text-xs mt-2"><strong>Valid Thru:</strong> {data.expiryDate}</p>
       </div>
     </div>
      <div className="footer">
@@ -103,8 +98,6 @@ const ElegantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
         <p className="name">{data.fullName}</p>
         <p className="role">{data.classOrCourse}</p>
         <div className="details-list">
-            <p><strong>ID No:</strong> {data.idNumber || 'N/A'}</p>
-            <p><strong>Contact:</strong> {data.contactNumber || 'N/A'}</p>
             <p><strong>Valid Thru:</strong> {data.expiryDate}</p>
         </div>
     </div>
@@ -139,6 +132,3 @@ export function IDCardDisplay({ data }: IDCardDisplayProps) {
     </div>
   );
 }
-
-    
-

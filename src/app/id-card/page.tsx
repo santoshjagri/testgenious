@@ -32,16 +32,15 @@ export default function IDCardPage() {
     setGeneratedCard(null);
 
     try {
-      const { logo, photo, authoritySignature, photoQuality, ...otherFormValues } = values;
+      const { logo, photo, authoritySignature, ...otherFormValues } = values;
 
-      const photoDataUri = await compressImageAndToDataUri(photo, photoQuality);
+      const photoDataUri = await compressImageAndToDataUri(photo, 0.7);
       const logoDataUri = logo ? await fileToDataUri(logo) : undefined;
       const authoritySignatureDataUri = authoritySignature ? await fileToDataUri(authoritySignature) : undefined;
       
       const cardData: StoredIDCardData = {
         ...otherFormValues,
         template: template,
-        photoQuality: photoQuality,
         photoDataUri,
         logoDataUri,
         authoritySignatureDataUri,

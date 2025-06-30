@@ -9,9 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, School, User, Calendar, PenSquare, Palette, Image as ImageIcon } from 'lucide-react';
+import { Loader2, School, User, Calendar, PenSquare, Palette } from 'lucide-react';
 import { format } from 'date-fns';
-import { Slider } from '@/components/ui/slider';
 
 interface IDCardFormProps {
   onSubmit: (values: IDCardFormValues) => Promise<void>;
@@ -25,21 +24,16 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
     defaultValues: {
       template: template,
       institutionName: 'Genesis International School',
-      institutionAddress: 'Knowledge is Power',
       fullName: 'Alex Doe',
-      idNumber: `GEN-${Math.floor(1000 + Math.random() * 9000)}`,
-      rollNo: `${Math.floor(10 + Math.random() * 40)}`,
       classOrCourse: 'Grade 10, Section A',
       dateOfBirth: '2008-05-12',
       issueDate: format(new Date(), "yyyy-MM-dd"),
       expiryDate: format(new Date(new Date().setFullYear(new Date().getFullYear() + 1)), "yyyy-MM-dd"),
-      contactNumber: '+1-202-555-0186',
       holderAddress: '123 Future Lane, Innovation City',
       authorityName: 'Dr. Evelyn Reed, Principal',
       headerColor: '#0c4a6e',
       backgroundColor: '#f1f5f9',
       fontColor: '#0f172a',
-      photoQuality: 0.7,
     },
   });
 
@@ -117,7 +111,6 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField name="institutionName" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Institution Name</FormLabel><FormControl><Input placeholder="e.g., Genesis International" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                <FormField name="institutionAddress" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address / Motto</FormLabel><FormControl><Input placeholder="e.g., Knowledge is Power" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 {fileInput("logo", "Institution Logo (Optional)", "PNG or JPG. Recommended: square.")}
             </CardContent>
         </Card>
@@ -131,10 +124,7 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
                 {fileInput("photo", "Holder's Photo", "PNG or JPG. A clear headshot is best.")}
                 <FormField name="classOrCourse" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Role / Class / Dept.</FormLabel><FormControl><Input placeholder="e.g., Grade 10 / B.Sc. CS" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField name="dateOfBirth" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                <FormField name="idNumber" control={form.control} render={({ field }) => ( <FormItem><FormLabel>ID Number (Optional)</FormLabel><FormControl><Input placeholder="e.g., 2024-001" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                <FormField name="rollNo" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Roll No. (Optional)</FormLabel><FormControl><Input placeholder="e.g., 25" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                <FormField name="contactNumber" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Guardian's Contact (Optional)</FormLabel><FormControl><Input placeholder="e.g., +1 234 567 890" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                <FormField name="holderAddress" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Holder's Full Address</FormLabel><FormControl><Input placeholder="e.g., 123 Future Lane" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                <FormField name="holderAddress" control={form.control} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Holder's Full Address</FormLabel><FormControl><Input placeholder="e.g., 123 Future Lane" {...field} /></FormControl><FormMessage /></FormItem> )} />
             </CardContent>
         </Card>
 
@@ -158,34 +148,6 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
               {colorInput("headerColor", "Header / Accent Color")}
               {colorInput("backgroundColor", "Background Color")}
               {colorInput("fontColor", "Font Color")}
-              <FormField
-                control={form.control}
-                name="photoQuality"
-                render={({ field }) => (
-                  <FormItem className="col-span-1 md:col-span-3">
-                    <FormLabel className="flex items-center gap-2"><ImageIcon className="h-5 w-5" />Photo Compression Quality</FormLabel>
-                    <FormControl>
-                      <div className="flex items-center gap-4 pt-2">
-                        <Slider
-                          min={0.1}
-                          max={1}
-                          step={0.1}
-                          value={[field.value ?? 0.7]}
-                          onValueChange={(value) => field.onChange(value[0])}
-                          className="w-full"
-                        />
-                        <span className="text-sm font-medium tabular-nums text-muted-foreground">
-                          {((field.value ?? 0.7) * 100).toFixed(0)}%
-                        </span>
-                      </div>
-                    </FormControl>
-                    <FormDescription>
-                      Lower quality reduces file size but may look blurry. 70% is a good balance.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </CardContent>
         </Card>
 

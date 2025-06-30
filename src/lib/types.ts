@@ -312,21 +312,17 @@ export const idCardFormSchema = z.object({
   
   // Institution Details
   institutionName: z.string().min(1, "Institution name is required."),
-  institutionAddress: z.string().optional(),
   logo: z.instanceof(File).optional(),
   
   // Card Holder Details
   photo: z.instanceof(File).refine(file => file, "A photo is required."),
   fullName: z.string().min(1, "Full name is required."),
-  idNumber: z.string().optional(),
-  rollNo: z.string().optional(),
-  classOrCourse: z.string().min(1, "This field is required."), // Label will be dynamic
+  classOrCourse: z.string().min(1, "This field is required."),
   dateOfBirth: z.string().min(1, "Date of birth is required."),
   
   // Validity & Contact
   issueDate: z.string().min(1, "Issue date is required."),
   expiryDate: z.string().min(1, "Expiry date is required."),
-  contactNumber: z.string().optional(),
   holderAddress: z.string().min(1, "Address is required."),
   
   // Authority
@@ -337,7 +333,6 @@ export const idCardFormSchema = z.object({
   headerColor: z.string().optional(),
   backgroundColor: z.string().optional(),
   fontColor: z.string().optional(),
-  photoQuality: z.number().min(0.1).max(1).default(0.7),
 
 }).superRefine((data, ctx) => {
     if (new Date(data.expiryDate) <= new Date(data.issueDate)) {
