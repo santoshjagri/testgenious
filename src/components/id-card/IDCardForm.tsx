@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, School, User, Calendar, PenSquare, Palette } from 'lucide-react';
+import { Loader2, School, User, Calendar, Palette } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface IDCardFormProps {
@@ -30,7 +30,6 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
       issueDate: format(new Date(), "yyyy-MM-dd"),
       expiryDate: format(new Date(new Date().setFullYear(new Date().getFullYear() + 1)), "yyyy-MM-dd"),
       holderAddress: '123 Future Lane, Innovation City',
-      authorityName: 'Dr. Evelyn Reed, Principal',
       headerColor: '#0c4a6e',
       backgroundColor: '#f1f5f9',
       fontColor: '#0f172a',
@@ -130,13 +129,11 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
 
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Calendar className="h-5 w-5" />Validity & Authorization</CardTitle>
+                <CardTitle className="flex items-center gap-2"><Calendar className="h-5 w-5" />Validity</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <FormField name="issueDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Issue Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
                  <FormField name="expiryDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Expiry Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                 <FormField name="authorityName" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Authorizing Person's Name</FormLabel><FormControl><Input placeholder="e.g., Dr. Evelyn Reed, Principal" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                {fileInput("authoritySignature", "Authority's Signature (Optional)", "PNG with transparent background if possible.")}
             </CardContent>
         </Card>
         

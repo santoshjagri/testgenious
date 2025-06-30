@@ -325,10 +325,6 @@ export const idCardFormSchema = z.object({
   expiryDate: z.string().min(1, "Expiry date is required."),
   holderAddress: z.string().min(1, "Address is required."),
   
-  // Authority
-  authoritySignature: z.instanceof(File).optional(),
-  authorityName: z.string().optional(),
-
   // Customization
   headerColor: z.string().optional(),
   backgroundColor: z.string().optional(),
@@ -346,10 +342,9 @@ export const idCardFormSchema = z.object({
 
 export type IDCardFormValues = z.infer<typeof idCardFormSchema>;
 
-export type StoredIDCardData = Omit<IDCardFormValues, 'logo' | 'photo' | 'authoritySignature'> & {
+export type StoredIDCardData = Omit<IDCardFormValues, 'logo' | 'photo'> & {
   logoDataUri?: string;
   photoDataUri: string;
-  authoritySignatureDataUri?: string;
 };
 
 export interface StoredIDCard {

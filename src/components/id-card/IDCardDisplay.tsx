@@ -22,7 +22,8 @@ const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       <p className="role">{data.classOrCourse}</p>
       <div className="details-grid">
         <p><strong>DOB:</strong> {data.dateOfBirth}</p>
-        <p><strong>Expires:</strong> {data.expiryDate}</p>
+        <p><strong>Issued:</strong> {data.issueDate}</p>
+        <p className="col-span-2"><strong>Expires:</strong> {data.expiryDate}</p>
       </div>
        <div className="footer-info">
         {data.holderAddress}
@@ -45,9 +46,10 @@ const ModernCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       <p className="role">{data.classOrCourse}</p>
       <table className="details-table">
         <tbody>
-          <tr><td>DOB</td><td>: {data.dateOfBirth}</td></tr>
-          <tr><td>Issued</td><td>: {data.issueDate}</td></tr>
-          <tr><td>Expires</td><td>: {data.expiryDate}</td></tr>
+          <tr><td><strong>DOB</strong></td><td>: {data.dateOfBirth}</td></tr>
+          <tr><td><strong>Issued</strong></td><td>: {data.issueDate}</td></tr>
+          <tr><td><strong>Expires</strong></td><td>: {data.expiryDate}</td></tr>
+          <tr><td><strong>Address</strong></td><td>: {data.holderAddress}</td></tr>
         </tbody>
       </table>
     </div>
@@ -70,14 +72,13 @@ const VibrantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       <div className="details">
         <p className="name">{data.fullName}</p>
         <p className="role">{data.classOrCourse}</p>
-        <p className="text-xs mt-2"><strong>Valid Thru:</strong> {data.expiryDate}</p>
+        <p className="text-xs mt-2"><strong>DOB:</strong> {data.dateOfBirth}</p>
+        <p className="text-xs"><strong>Issued:</strong> {data.issueDate}</p>
+        <p className="text-xs"><strong>Expires:</strong> {data.expiryDate}</p>
       </div>
     </div>
      <div className="footer">
-        <div>{data.authorityName}</div>
-        {data.authoritySignatureDataUri && (
-           <Image src={data.authoritySignatureDataUri} alt="Signature" width={80} height={20} className="signature" data-ai-hint="signature" unoptimized />
-        )}
+        <p className="text-xs">{data.holderAddress}</p>
      </div>
   </div>
 );
@@ -98,14 +99,13 @@ const ElegantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
         <p className="name">{data.fullName}</p>
         <p className="role">{data.classOrCourse}</p>
         <div className="details-list">
-            <p><strong>Valid Thru:</strong> {data.expiryDate}</p>
+            <p><strong>DOB:</strong> {data.dateOfBirth}</p>
+            <p><strong>Issued:</strong> {data.issueDate}</p>
+            <p><strong>Expires:</strong> {data.expiryDate}</p>
         </div>
     </div>
     <div className="footer">
-        {data.authoritySignatureDataUri ? (
-            <Image src={data.authoritySignatureDataUri} alt="Signature" width={80} height={20} className="signature" data-ai-hint="signature" unoptimized />
-        ) : <div className="h-8"></div>}
-        <p className="authority-name">{data.authorityName || 'Issuing Authority'}</p>
+        <p>{data.holderAddress}</p>
     </div>
   </div>
 );
