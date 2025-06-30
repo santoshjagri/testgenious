@@ -286,11 +286,9 @@ body {
 /* --- ID Card Template Styles --- */
 /* Base styles for all cards */
 .id-card-base {
-  @apply font-sans shadow-lg rounded-lg overflow-hidden relative flex flex-col;
+  @apply font-sans shadow-lg rounded-lg overflow-hidden relative flex flex-col w-full h-full;
   color: var(--id-font-color);
   background-color: var(--id-bg-color);
-  width: 3.375in;
-  height: 2.125in;
 }
 .id-card-base strong {
   opacity: 0.8;
@@ -405,7 +403,7 @@ body {
 
 /* Elegant Template (Vertical) */
 .id-card-elegant {
-  @apply w-[2.125in] h-[3.375in] p-4 border font-serif;
+  @apply p-4 border font-serif;
 }
 .id-card-elegant .header {
   @apply text-center border-b-2 pb-2;
@@ -552,4 +550,5 @@ body {
 
 
     
+
 

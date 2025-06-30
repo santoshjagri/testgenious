@@ -32,18 +32,16 @@ export default function IDCardPage() {
     setGeneratedCard(null);
 
     try {
-      const { logo, photo, authoritySignature, ...otherFormValues } = values;
+      const { logo, photo, ...otherFormValues } = values;
 
       const photoDataUri = await compressImageAndToDataUri(photo, 0.7);
       const logoDataUri = logo ? await fileToDataUri(logo) : undefined;
-      const authoritySignatureDataUri = authoritySignature ? await fileToDataUri(authoritySignature) : undefined;
       
       const cardData: StoredIDCardData = {
         ...otherFormValues,
         template: template,
         photoDataUri,
         logoDataUri,
-        authoritySignatureDataUri,
       };
 
       setGeneratedCard(cardData);
@@ -132,6 +130,12 @@ export default function IDCardPage() {
     setIsDownloading(false);
   };
   
+  const isElegant = generatedCard?.template === 'Elegant';
+  const cardStyle = {
+    width: isElegant ? '341px' : '540px',
+    height: isElegant ? '540px' : '341px',
+  };
+  
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
       <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -182,7 +186,15 @@ export default function IDCardPage() {
 
                 {!isProcessing && generatedCard && (
                   <div className="w-full animate-fadeInUp space-y-4 text-center">
-                     <div id="id-card-display-area" className="inline-block" style={{'--id-bg-color': generatedCard.backgroundColor, '--id-header-color': generatedCard.headerColor, '--id-font-color': generatedCard.fontColor} as React.CSSProperties}>
+                     <div 
+                        id="id-card-display-area" 
+                        className="inline-block" 
+                        style={{
+                          ...cardStyle,
+                          '--id-bg-color': generatedCard.backgroundColor, 
+                          '--id-header-color': generatedCard.headerColor, 
+                          '--id-font-color': generatedCard.fontColor
+                        } as React.CSSProperties}>
                         <IDCardDisplay data={generatedCard} />
                      </div>
                       <div className="flex justify-center gap-2 no-print">
