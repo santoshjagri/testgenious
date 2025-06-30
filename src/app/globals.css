@@ -316,7 +316,7 @@ body {
 
 /* Classic Template */
 .id-card-classic {
-  @apply p-3 text-center;
+  @apply p-3 text-center flex flex-col;
 }
 .id-card-classic .header-bar {
   background-color: var(--id-header-color);
@@ -344,6 +344,9 @@ body {
 }
 .id-card-classic .details-grid {
   @apply grid grid-cols-2 gap-x-4 text-xs mt-3;
+}
+.id-card-classic .address {
+    @apply text-xs mt-auto pt-2;
 }
 
 
@@ -376,15 +379,20 @@ body {
   color: var(--id-header-color);
 }
 .id-card-modern .main-content .details-table {
-  @apply text-xs mt-auto w-full;
+  @apply text-xs mt-4 w-full;
 }
 .id-card-modern .main-content .details-table td:first-child {
   @apply font-semibold pr-2 opacity-80;
 }
+.id-card-modern .main-content .address {
+  @apply text-[10px] mt-auto pt-2 border-t text-right;
+  border-color: var(--id-header-color, #ccc);
+  opacity: 0.7;
+}
 
 /* Vibrant Template */
 .id-card-vibrant {
-  @apply p-4 text-white;
+  @apply p-4 text-white flex flex-col;
   background-image: linear-gradient(45deg, var(--id-header-color), var(--id-bg-color));
 }
 .id-card-vibrant .header {
@@ -412,16 +420,20 @@ body {
   @apply text-base font-medium;
 }
 .id-card-vibrant .footer {
-  @apply flex justify-between items-center mt-auto text-xs pt-2;
+  @apply mt-auto pt-2 text-xs border-t border-white/30;
 }
-
+.id-card-vibrant .footer .address {
+    @apply truncate;
+}
 
 /* Elegant Template (Vertical) */
 .id-card-elegant {
-  @apply p-4 border font-serif;
+  @apply p-4 font-serif flex flex-col;
+  border-width: 1px;
+  border-color: var(--id-header-color);
 }
 .id-card-elegant .header {
-  @apply text-center border-b-2 pb-2;
+  @apply text-center border-b-2 pb-2 mb-2;
   border-color: var(--id-header-color);
 }
 .id-card-elegant .header .logo {
@@ -430,15 +442,18 @@ body {
 .id-card-elegant .header .inst-name {
   @apply text-base font-bold mt-1;
 }
+.id-card-elegant .main-content {
+    @apply flex flex-col flex-grow;
+}
 .id-card-elegant .photo-container {
-  @apply my-4 flex justify-center;
+  @apply my-2 flex justify-center;
 }
 .id-card-elegant .photo-container .photo {
   @apply w-32 h-40 object-cover p-1 border;
   border-color: var(--id-header-color);
 }
-.id-card-elegant .main-content {
-  @apply text-center;
+.id-card-elegant .text-content {
+    @apply text-center;
 }
 .id-card-elegant .name {
   @apply text-2xl;
@@ -449,6 +464,10 @@ body {
 }
 .id-card-elegant .details-list {
   @apply text-xs space-y-1 mt-3 text-left mx-auto max-w-fit;
+}
+.id-card-elegant .footer {
+  @apply mt-auto pt-2 text-xs text-center border-t;
+  border-color: var(--id-header-color);
 }
 
 

@@ -25,6 +25,7 @@ const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
         <p><strong>Issued:</strong> {data.issueDate}</p>
         <p className="col-span-2"><strong>Expires:</strong> {data.expiryDate}</p>
       </div>
+      <p className="address">{data.holderAddress}</p>
     </div>
   </div>
 );
@@ -48,6 +49,7 @@ const ModernCard: React.FC<IDCardDisplayProps> = ({ data }) => (
           <tr><td><strong>Expires</strong></td><td>: {data.expiryDate}</td></tr>
         </tbody>
       </table>
+      <p className="address">{data.holderAddress}</p>
     </div>
   </div>
 );
@@ -73,6 +75,9 @@ const VibrantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
         <p className="text-xs"><strong>Expires:</strong> {data.expiryDate}</p>
       </div>
     </div>
+    <div className="footer">
+      <p className="address">{data.holderAddress}</p>
+    </div>
   </div>
 );
 
@@ -85,16 +90,21 @@ const ElegantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       )}
       <p className="inst-name">{data.institutionName}</p>
     </div>
-    <div className="photo-container">
-      <Image src={data.photoDataUri} alt="Holder Photo" width={128} height={160} className="photo" data-ai-hint="student portrait" unoptimized />
-    </div>
     <div className="main-content">
-        <p className="name">{data.fullName}</p>
-        <p className="role">{data.classOrCourse}</p>
-        <div className="details-list">
-            <p><strong>DOB:</strong> {data.dateOfBirth}</p>
-            <p><strong>Issued:</strong> {data.issueDate}</p>
-            <p><strong>Expires:</strong> {data.expiryDate}</p>
+        <div className="photo-container">
+          <Image src={data.photoDataUri} alt="Holder Photo" width={128} height={160} className="photo" data-ai-hint="student portrait" unoptimized />
+        </div>
+        <div className="text-content">
+            <p className="name">{data.fullName}</p>
+            <p className="role">{data.classOrCourse}</p>
+            <div className="details-list">
+                <p><strong>DOB:</strong> {data.dateOfBirth}</p>
+                <p><strong>Issued:</strong> {data.issueDate}</p>
+                <p><strong>Expires:</strong> {data.expiryDate}</p>
+            </div>
+        </div>
+        <div className="footer">
+            <p>{data.holderAddress}</p>
         </div>
     </div>
   </div>
@@ -117,7 +127,7 @@ export function IDCardDisplay({ data }: IDCardDisplayProps) {
   };
 
   return (
-    <div className="id-card-wrapper">
+    <div className={`id-card-wrapper ${data.template === 'Elegant' ? 'elegant-wrapper' : ''}`.trim()}>
       {renderCard()}
     </div>
   );
