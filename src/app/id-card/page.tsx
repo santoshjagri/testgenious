@@ -10,7 +10,7 @@ import { UserSquare2, Download, Printer as PrinterIcon, Loader2 } from "lucide-r
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { fileToDataUri, compressImageAndToDataUri } from '@/lib/utils';
+import { compressImageAndToDataUri } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,9 +33,9 @@ export default function IDCardPage() {
 
     try {
       const { logo, photo, ...otherFormValues } = values;
-
-      const photoDataUri = await compressImageAndToDataUri(photo, 0.7);
-      const logoDataUri = logo ? await fileToDataUri(logo) : undefined;
+      
+      const photoDataUri = await compressImageAndToDataUri(photo, 0.8, 400);
+      const logoDataUri = logo ? await compressImageAndToDataUri(logo, 0.8, 100) : undefined;
       
       const cardData: StoredIDCardData = {
         ...otherFormValues,
@@ -58,7 +58,7 @@ export default function IDCardPage() {
           let existingHistory: StoredIDCard[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
           
           existingHistory = [newHistoryEntry, ...existingHistory];
-          localStorage.setItem(ID_CARD_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 15)));
+          localStorage.setItem(ID_CARD_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 50)));
 
         } catch (storageError) {
           console.error("Error saving ID card to local storage:", storageError);
@@ -103,14 +103,15 @@ export default function IDCardPage() {
         const imgData = canvas.toDataURL('image/png');
         
         let pdf;
-        if (generatedCard.template === 'Elegant') {
+        // Standard ID Card size: 85.6mm x 53.98mm
+        if (generatedCard.template === 'Elegant') { // Portrait
             pdf = new jsPDF({
               orientation: 'portrait',
               unit: 'mm',
               format: [53.98, 85.6]
             });
             pdf.addImage(imgData, 'PNG', 0, 0, 53.98, 85.6);
-        } else {
+        } else { // Landscape
             pdf = new jsPDF({
               orientation: 'landscape',
               unit: 'mm',
@@ -128,12 +129,6 @@ export default function IDCardPage() {
       }
     }
     setIsDownloading(false);
-  };
-  
-  const isElegant = generatedCard?.template === 'Elegant';
-  const cardStyle = {
-    width: isElegant ? '341px' : '540px',
-    height: isElegant ? '540px' : '341px',
   };
   
   return (
@@ -175,7 +170,7 @@ export default function IDCardPage() {
                 <CardTitle>ID Card Preview</CardTitle>
                 <CardDescription>Your generated ID card will appear here. Review it before printing or downloading.</CardDescription>
              </CardHeader>
-             <CardContent className="flex flex-col items-center justify-center min-h-[350px] bg-muted/50 rounded-lg p-4">
+             <CardContent className="flex flex-col items-center justify-center min-h-[400px] bg-muted/50 rounded-lg p-4">
                 {isProcessing && (
                   <div className="flex flex-col items-center gap-2 text-primary">
                     <Loader2 className="h-10 w-10 animate-spin" />
@@ -187,10 +182,9 @@ export default function IDCardPage() {
                 {!isProcessing && generatedCard && (
                   <div className="w-full animate-fadeInUp space-y-4 text-center">
                      <div 
-                        id="id-card-display-area" 
-                        className="inline-block" 
+                        id="id-card-display-area"
+                        className="mx-auto" 
                         style={{
-                          ...cardStyle,
                           '--id-bg-color': generatedCard.backgroundColor, 
                           '--id-header-color': generatedCard.headerColor, 
                           '--id-font-color': generatedCard.fontColor

@@ -284,11 +284,31 @@ body {
 
 
 /* --- ID Card Template Styles --- */
-/* Base styles for all cards */
+/* This wrapper controls the display size on the screen */
+.id-card-wrapper {
+  width: 337px; /* 3.375 inches at 100 DPI */
+  height: 212px; /* 2.125 inches at 100 DPI */
+  transform-origin: top left;
+}
+/* The Elegant (vertical) template swaps dimensions */
+.id-card-wrapper.elegant-wrapper {
+  width: 212px;
+  height: 337px;
+}
+/* This is the element that gets captured by html2canvas */
 .id-card-base {
-  @apply font-sans shadow-lg rounded-lg overflow-hidden relative flex flex-col w-full h-full;
+  @apply font-sans shadow-lg rounded-lg overflow-hidden relative flex flex-col;
+  width: 540px; /* High-res for capture */
+  height: 341px; /* High-res for capture */
+  transform: scale(calc(337 / 540)); /* Scale down to display size */
+  transform-origin: top left;
   color: var(--id-font-color);
   background-color: var(--id-bg-color);
+}
+.id-card-base.id-card-elegant {
+    width: 341px;
+    height: 540px;
+    transform: scale(calc(212 / 341));
 }
 .id-card-base strong {
   opacity: 0.8;
@@ -323,12 +343,9 @@ body {
   @apply font-medium -mt-1;
 }
 .id-card-classic .details-grid {
-  @apply grid grid-cols-2 gap-x-4 text-xs mt-2;
+  @apply grid grid-cols-2 gap-x-4 text-xs mt-3;
 }
-.id-card-classic .footer-info {
-  @apply text-xs mt-auto pt-2 border-t;
-  border-color: var(--id-header-color);
-}
+
 
 /* Modern Template */
 .id-card-modern {
@@ -367,7 +384,7 @@ body {
 
 /* Vibrant Template */
 .id-card-vibrant {
-  @apply p-4;
+  @apply p-4 text-white;
   background-image: linear-gradient(45deg, var(--id-header-color), var(--id-bg-color));
 }
 .id-card-vibrant .header {
@@ -397,9 +414,7 @@ body {
 .id-card-vibrant .footer {
   @apply flex justify-between items-center mt-auto text-xs pt-2;
 }
-.id-card-vibrant .footer .signature {
-  @apply h-8 w-auto object-contain;
-}
+
 
 /* Elegant Template (Vertical) */
 .id-card-elegant {
@@ -433,18 +448,9 @@ body {
   @apply text-sm tracking-widest uppercase;
 }
 .id-card-elegant .details-list {
-  @apply text-xs space-y-1 mt-3 text-left;
+  @apply text-xs space-y-1 mt-3 text-left mx-auto max-w-fit;
 }
-.id-card-elegant .footer {
-  @apply mt-auto pt-2 text-center text-xs;
-}
-.id-card-elegant .footer .signature {
-  @apply h-8 w-24 mx-auto object-contain;
-}
-.id-card-elegant .footer .authority-name {
-  @apply mt-0 border-t pt-1;
-  border-color: var(--id-header-color);
-}
+
 
 @media print {
   body * {
@@ -458,7 +464,7 @@ body {
   .id-card-wrapper, .id-card-wrapper * {
     visibility: visible;
   }
-  .printable-area, .id-card-wrapper {
+  .printable-area {
     position: absolute;
     left: 0;
     top: 0;
@@ -485,49 +491,56 @@ body {
   }
    .printable-area h1, .printable-area h2, .printable-area h3, .printable-area h4, .printable-area p, .printable-area li, .printable-area div, .printable-area span {
     color: black !important;
-    /* Explicitly inherit font-family for children if needed, though .printable-area should cover it */
     font-family: inherit !important; 
   }
   .printable-area hr {
     border-top-color: #ccc !important;
   }
-  /* Ensure section headers and other colored elements become black */
   .printable-area .text-gray-700, .printable-area .text-gray-800, .printable-area .text-gray-600, .printable-area .text-gray-500 {
     color: black !important;
   }
   .printable-area .bg-gray-50, .printable-area .bg-gray-100 {
-    background-color: white !important; /* Or a very light gray if preferred for sections, e.g., #f9f9f9 */
+    background-color: white !important;
   }
-
-  /* Override for "best" template to ensure text is visible on print */
   .printable-area[data-template="best"] .gs-title,
   .printable-area[data-template="best"] .gs-header .text-muted-foreground,
   .printable-area[data-template="best"] .gs-header strong,
   .printable-area[data-template="best"] .gs-table thead {
     color: black !important;
   }
-  /* Ensure ID card is sized correctly for printing */
+
+  /* --- ID Card Print Styles --- */
+  @page {
+    size: 3.375in 2.125in;
+    margin: 0;
+  }
   .id-card-wrapper {
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 3.375in;
     height: 2.125in;
     page-break-inside: avoid;
+    transform: none !important; /* Reset display transform for printing */
+  }
+  .id-card-wrapper.elegant-wrapper {
+    @page {
+      size: 2.125in 3.375in;
+    }
+    width: 2.125in;
+    height: 3.375in;
   }
   .id-card-base {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
     box-shadow: none;
     border: 1px solid #ccc;
     background: white !important;
+    transform: none !important; /* Reset display transform for printing */
   }
-  .id-card-base.id-card-elegant {
-     width: 2.125in;
-     height: 3.375in;
-  }
-
   .id-card-base, .id-card-base * {
     color: black !important;
   }
-  
   .id-card-base * {
     border-color: black !important;
   }
@@ -539,16 +552,4 @@ body {
     background-image: none !important;
     background: #eee !important;
   }
-
 }
-
-    
-
-    
-
-
-
-
-    
-
-

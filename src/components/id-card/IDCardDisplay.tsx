@@ -25,9 +25,6 @@ const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
         <p><strong>Issued:</strong> {data.issueDate}</p>
         <p className="col-span-2"><strong>Expires:</strong> {data.expiryDate}</p>
       </div>
-       <div className="footer-info">
-        {data.holderAddress}
-      </div>
     </div>
   </div>
 );
@@ -49,7 +46,6 @@ const ModernCard: React.FC<IDCardDisplayProps> = ({ data }) => (
           <tr><td><strong>DOB</strong></td><td>: {data.dateOfBirth}</td></tr>
           <tr><td><strong>Issued</strong></td><td>: {data.issueDate}</td></tr>
           <tr><td><strong>Expires</strong></td><td>: {data.expiryDate}</td></tr>
-          <tr><td><strong>Address</strong></td><td>: {data.holderAddress}</td></tr>
         </tbody>
       </table>
     </div>
@@ -77,9 +73,6 @@ const VibrantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
         <p className="text-xs"><strong>Expires:</strong> {data.expiryDate}</p>
       </div>
     </div>
-     <div className="footer">
-        <p className="text-xs">{data.holderAddress}</p>
-     </div>
   </div>
 );
 
@@ -103,9 +96,6 @@ const ElegantCard: React.FC<IDCardDisplayProps> = ({ data }) => (
             <p><strong>Issued:</strong> {data.issueDate}</p>
             <p><strong>Expires:</strong> {data.expiryDate}</p>
         </div>
-    </div>
-    <div className="footer">
-        <p>{data.holderAddress}</p>
     </div>
   </div>
 );
