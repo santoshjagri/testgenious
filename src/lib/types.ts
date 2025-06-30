@@ -337,6 +337,7 @@ export const idCardFormSchema = z.object({
   headerColor: z.string().optional(),
   backgroundColor: z.string().optional(),
   fontColor: z.string().optional(),
+  photoQuality: z.number().min(0.1).max(1).default(0.7),
 
 }).superRefine((data, ctx) => {
     if (new Date(data.expiryDate) <= new Date(data.issueDate)) {
@@ -361,5 +362,3 @@ export interface StoredIDCard {
   dateGenerated: string; // ISO string
   cardData: StoredIDCardData;
 }
-
-    

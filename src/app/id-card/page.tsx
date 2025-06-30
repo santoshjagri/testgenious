@@ -10,7 +10,7 @@ import { UserSquare2, Download, Printer as PrinterIcon, Loader2 } from "lucide-r
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { fileToDataUri } from '@/lib/utils';
+import { fileToDataUri, compressImageAndToDataUri } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,15 +32,16 @@ export default function IDCardPage() {
     setGeneratedCard(null);
 
     try {
-      const { logo, photo, authoritySignature, ...otherFormValues } = values;
+      const { logo, photo, authoritySignature, photoQuality, ...otherFormValues } = values;
 
-      const photoDataUri = await fileToDataUri(photo);
+      const photoDataUri = await compressImageAndToDataUri(photo, photoQuality);
       const logoDataUri = logo ? await fileToDataUri(logo) : undefined;
       const authoritySignatureDataUri = authoritySignature ? await fileToDataUri(authoritySignature) : undefined;
       
       const cardData: StoredIDCardData = {
         ...otherFormValues,
         template: template,
+        photoQuality: photoQuality,
         photoDataUri,
         logoDataUri,
         authoritySignatureDataUri,
@@ -134,7 +135,7 @@ export default function IDCardPage() {
   
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-2 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-br from-background to-blue-50/50">
-      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-1 gap-8">
+      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         <div>
           <Card className="shadow-xl">
@@ -212,5 +213,3 @@ export default function IDCardPage() {
     </main>
   );
 }
-
-    

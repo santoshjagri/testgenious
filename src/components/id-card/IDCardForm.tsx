@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, School, User, Calendar, PenSquare, Palette } from 'lucide-react';
+import { Loader2, School, User, Calendar, PenSquare, Palette, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { Slider } from '@/components/ui/slider';
 
 interface IDCardFormProps {
   onSubmit: (values: IDCardFormValues) => Promise<void>;
@@ -38,6 +39,7 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
       headerColor: '#0c4a6e',
       backgroundColor: '#f1f5f9',
       fontColor: '#0f172a',
+      photoQuality: 0.7,
     },
   });
 
@@ -152,10 +154,38 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Palette className="h-5 w-5" />Customization</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {colorInput("headerColor", "Header / Accent Color")}
               {colorInput("backgroundColor", "Background Color")}
               {colorInput("fontColor", "Font Color")}
+              <FormField
+                control={form.control}
+                name="photoQuality"
+                render={({ field }) => (
+                  <FormItem className="col-span-1 md:col-span-3">
+                    <FormLabel className="flex items-center gap-2"><ImageIcon className="h-5 w-5" />Photo Compression Quality</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center gap-4 pt-2">
+                        <Slider
+                          min={0.1}
+                          max={1}
+                          step={0.1}
+                          value={[field.value ?? 0.7]}
+                          onValueChange={(value) => field.onChange(value[0])}
+                          className="w-full"
+                        />
+                        <span className="text-sm font-medium tabular-nums text-muted-foreground">
+                          {((field.value ?? 0.7) * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Lower quality reduces file size but may look blurry. 70% is a good balance.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </CardContent>
         </Card>
 
