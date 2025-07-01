@@ -293,13 +293,13 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     
     const langValue = form.getValues('language');
     recognition.lang = languageToCodeMap[langValue] || 'en-US';
-    recognition.continuous = true;
+    recognition.continuous = false;
     recognition.interimResults = false;
 
     recognition.onstart = () => {
         setIsListening(true);
         setActiveSpeechField(fieldName);
-        toast({ title: `Recording for "${fieldLabel.replace('Questions', '')}"...`, description: "Speak your questions. The text will be appended below. Click mic to stop." });
+        toast({ title: `Listening for "${fieldLabel.replace('Questions', '')}"...`, description: "Speak your question. It will stop automatically when you pause." });
     };
 
     recognition.onresult = (event) => {
