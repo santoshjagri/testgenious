@@ -100,7 +100,15 @@ export default function IDCardPage() {
 
     if (cardElement) {
       try {
-        const canvas = await html2canvas(cardElement, { scale: 3, useCORS: true, backgroundColor: null });
+        const canvas = await html2canvas(cardElement, { 
+            scale: 3, 
+            useCORS: true, 
+            backgroundColor: null,
+            scrollX: -window.scrollX,
+            scrollY: -window.scrollY,
+            windowWidth: cardElement.scrollWidth,
+            windowHeight: cardElement.scrollHeight
+        });
         const imgData = canvas.toDataURL('image/png');
         
         let pdf;

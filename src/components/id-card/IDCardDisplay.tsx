@@ -25,11 +25,11 @@ const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       <div className="main-details">
         <p className="name">{data.fullName}</p>
         <p className="role">{data.classOrCourse}</p>
-        <div className="details-list">
+      </div>
+      <div className="footer-details">
           <p><strong>DOB:</strong> {data.dateOfBirth}</p>
           <p><strong>Issued:</strong> {data.issueDate}</p>
           <p><strong>Expires:</strong> {data.expiryDate}</p>
-        </div>
       </div>
     </div>
   </div>
@@ -133,5 +133,3 @@ export function IDCardDisplay({ data }: IDCardDisplayProps) {
     </div>
   );
 }
-
-    

@@ -316,20 +316,19 @@ body {
 
 /* Classic Template */
 .id-card-classic {
-  @apply p-0 flex flex-row;
+  @apply p-0 flex-row;
 }
 .id-card-classic .photo-section {
-  @apply w-[170px] bg-muted shrink-0 flex items-center justify-center p-4;
+  @apply w-[170px] bg-muted shrink-0 flex items-center justify-center p-4 border-r;
 }
 .id-card-classic .photo {
   @apply w-36 h-36 object-cover rounded-lg shadow-md;
 }
 .id-card-classic .details-section {
-  @apply p-4 flex flex-col flex-grow items-center text-center;
+  @apply p-4 flex flex-col flex-grow justify-between items-center text-center;
 }
 .id-card-classic .header {
-  @apply flex flex-col items-center gap-2 border-b pb-3 mb-4 w-full;
-  border-color: var(--id-header-color);
+  @apply flex flex-col items-center gap-1 w-full;
 }
 .id-card-classic .header .logo {
   @apply w-12 h-12 object-contain;
@@ -338,8 +337,11 @@ body {
   @apply text-lg font-bold;
   color: var(--id-header-color);
 }
+.id-card-classic .address {
+  @apply text-xs text-muted-foreground mt-1;
+}
 .id-card-classic .main-details {
-  @apply flex-grow flex flex-col justify-center;
+  @apply flex flex-col items-center;
 }
 .id-card-classic .name {
   @apply text-2xl font-bold;
@@ -347,11 +349,8 @@ body {
 .id-card-classic .role {
   @apply text-base font-medium text-muted-foreground -mt-1;
 }
-.id-card-classic .details-list {
-  @apply space-y-1 text-sm mt-4;
-}
-.id-card-classic .address {
-  @apply text-xs text-muted-foreground;
+.id-card-classic .footer-details {
+  @apply space-y-1 text-sm;
 }
 
 
@@ -479,10 +478,7 @@ body {
     transition: none !important;
     animation: none !important;
   }
-  .printable-area, .printable-area * {
-    visibility: visible;
-  }
-  .id-card-wrapper, .id-card-wrapper * {
+  .printable-area, .printable-area *, .id-card-wrapper, .id-card-wrapper * {
     visibility: visible;
   }
   .printable-area {
@@ -535,29 +531,31 @@ body {
     size: 3.375in 2.125in;
     margin: 0;
   }
-  .id-card-wrapper {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 3.375in;
-    height: 2.125in;
-    page-break-inside: avoid;
-    transform: none !important; /* Reset display transform for printing */
-  }
   .id-card-wrapper.elegant-wrapper {
     @page {
       size: 2.125in 3.375in;
     }
-    width: 2.125in;
-    height: 3.375in;
+  }
+
+  .id-card-wrapper {
+    width: 3.375in !important;
+    height: 2.125in !important;
+    page-break-inside: avoid;
+    transform: none !important;
+    overflow: hidden;
+  }
+  .id-card-wrapper.elegant-wrapper {
+    width: 2.125in !important;
+    height: 3.375in !important;
   }
   .id-card-base {
     width: 100% !important;
     height: 100% !important;
-    box-shadow: none;
-    border: 1px solid #ccc;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    transform: none !important;
+    display: flex !important;
     background: white !important;
-    transform: none !important; /* Reset display transform for printing */
   }
   .id-card-base, .id-card-base * {
     color: black !important;
