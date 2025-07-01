@@ -11,13 +11,14 @@ interface IDCardDisplayProps {
 
 const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
   <div className="id-card-base id-card-classic">
-    <div className="header-bar"></div>
-    <div className="content">
+    <div className="header">
       {data.logoDataUri && (
-        <Image src={data.logoDataUri} alt="Logo" width={40} height={40} className="logo" data-ai-hint="school emblem" unoptimized />
+        <Image src={data.logoDataUri} alt="Logo" width={48} height={48} className="logo" data-ai-hint="school emblem" unoptimized />
       )}
-      <Image src={data.photoDataUri} alt="Holder Photo" width={96} height={96} className="photo" data-ai-hint="student portrait" unoptimized />
       <p className="inst-name">{data.institutionName}</p>
+    </div>
+    <div className="content">
+      <Image src={data.photoDataUri} alt="Holder Photo" width={112} height={112} className="photo" data-ai-hint="student portrait" unoptimized />
       <p className="name">{data.fullName}</p>
       <p className="role">{data.classOrCourse}</p>
       <div className="details-grid">
