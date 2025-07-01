@@ -21,9 +21,9 @@ const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
       <p className="name">{data.fullName}</p>
       <p className="role">{data.classOrCourse}</p>
       <div className="details-grid">
-        <p><strong>DOB:</strong> {data.dateOfBirth}</p>
-        <p><strong>Issued:</strong> {data.issueDate}</p>
-        <p className="col-span-2"><strong>Expires:</strong> {data.expiryDate}</p>
+        <strong>DOB:</strong><p>{data.dateOfBirth}</p>
+        <strong>Issued:</strong><p>{data.issueDate}</p>
+        <strong>Expires:</strong><p>{data.expiryDate}</p>
       </div>
       <p className="address">{data.holderAddress}</p>
     </div>
