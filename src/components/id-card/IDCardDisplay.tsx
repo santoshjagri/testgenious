@@ -20,6 +20,7 @@ const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
           <Image src={data.logoDataUri} alt="Logo" width={48} height={48} className="logo" data-ai-hint="school emblem" unoptimized />
         )}
         <p className="inst-name">{data.institutionName}</p>
+        <p className="address">{data.holderAddress}</p>
       </div>
       <div className="main-details">
         <p className="name">{data.fullName}</p>
@@ -30,7 +31,6 @@ const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
           <p><strong>Expires:</strong> {data.expiryDate}</p>
         </div>
       </div>
-      <p className="address">{data.holderAddress}</p>
     </div>
   </div>
 );

@@ -351,8 +351,7 @@ body {
   @apply space-y-1 text-sm mt-4;
 }
 .id-card-classic .address {
-  @apply text-xs text-muted-foreground mt-auto pt-2 border-t w-full;
-  border-color: var(--id-header-color);
+  @apply text-xs text-muted-foreground;
 }
 
 
