@@ -9,7 +9,6 @@ import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguag
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -22,10 +21,11 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles, CalendarIcon, Sigma } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles, CalendarIcon, Sigma, Mic, MicOff } from 'lucide-react';
 import { generateQuestions, type GenerateQuestionsInput, type GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 const categorizedSymbols = {
   "Arithmetic Symbols": [
@@ -160,11 +160,37 @@ interface QuestionPaperFormProps {
   initialValues?: QuestionPaperFormValues; 
 }
 
+// Add this type declaration for the SpeechRecognition API
+declare global {
+  interface Window {
+    SpeechRecognition: typeof SpeechRecognition;
+    webkitSpeechRecognition: typeof SpeechRecognition;
+  }
+}
+
+const languageToCodeMap: { [key: string]: string } = {
+  "English": "en-US", "Nepali": "ne-NP", "Hindi": "hi-IN", "Spanish": "es-ES", 
+  "French": "fr-FR", "German": "de-DE", "Chinese": "zh-CN", "Japanese": "ja-JP", 
+  "Russian": "ru-RU", "Arabic": "ar-SA",
+};
+
+
 export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: QuestionPaperFormProps) {
   const [isProcessingAiToManual, setIsProcessingAiToManual] = useState(false);
   const [showSymbols, setShowSymbols] = useState(false);
   const activeInputRef = useRef<HTMLTextAreaElement | null>(null);
   const { toast } = useToast();
+  
+  const [isListening, setIsListening] = useState(false);
+  const [activeSpeechField, setActiveSpeechField] = useState<keyof QuestionPaperFormValues | null>(null);
+  const [isSpeechSupported, setIsSpeechSupported] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    // This check needs to be in useEffect to avoid server-side rendering errors.
+    setIsSpeechSupported('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+  }, []);
+
   
   const form = useForm<QuestionPaperFormValues>({
     resolver: zodResolver(questionPaperFormSchema),
@@ -243,6 +269,63 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     control: form.control,
     name: 'generationMode',
   });
+  
+  const handleToggleSpeech = (fieldName: keyof QuestionPaperFormValues, fieldLabel: string) => {
+    if (!isSpeechSupported) {
+        toast({ title: "Unsupported Browser", description: "Voice input is not supported by your browser.", variant: "destructive" });
+        return;
+    }
+    
+    // If listening and it's the current field's button clicked, stop it.
+    if (isListening && activeSpeechField === fieldName) {
+        recognitionRef.current?.stop();
+        return;
+    }
+
+    // Stop any other field that might be listening before starting a new one.
+    if (isListening) {
+        recognitionRef.current?.stop();
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    
+    const langValue = form.getValues('language');
+    recognition.lang = languageToCodeMap[langValue] || 'en-US';
+    recognition.continuous = false; // Stop after a pause
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+        setIsListening(true);
+        setActiveSpeechField(fieldName);
+        toast({ title: `Listening for "${fieldLabel.replace('Questions', '')}"...`, description: "Start speaking now. Click mic to stop." });
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const currentVal = form.getValues(fieldName) as string || '';
+        const newVal = currentVal ? `${currentVal}\n${transcript}` : transcript;
+        form.setValue(fieldName, newVal, { shouldValidate: true });
+    };
+
+    recognition.onerror = (event) => {
+        let message = `An error occurred: ${event.error}`;
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            message = "Microphone access was denied. Please enable it in your browser settings.";
+        }
+        toast({ title: "Voice Input Error", description: message, variant: "destructive" });
+    };
+    
+    recognition.onend = () => {
+        setIsListening(false);
+        setActiveSpeechField(null);
+        recognitionRef.current = null;
+    };
+
+    recognition.start();
+  };
+
 
   const handleProcessAiToManual = async () => {
     setIsProcessingAiToManual(true);
@@ -308,8 +391,8 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     if (!target) return;
 
     const fieldName = target.name as keyof QuestionPaperFormValues;
-    const start = target.selectionStart;
-    const end = target.selectionEnd;
+    const start = target.selectionStart ?? 0;
+    const end = target.selectionEnd ?? 0;
     const currentValue = target.value;
     const newValue = currentValue.substring(0, start) + symbol + currentValue.substring(end);
 
@@ -331,16 +414,39 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
         <FormItem>
           <div className="flex justify-between items-center">
             <FormLabel className="flex items-center text-sm sm:text-base">{icon}{label}</FormLabel>
-            {showSymbolToggle && (
-                <Button type="button" variant="outline" size="sm" onClick={() => setShowSymbols(!showSymbols)}>
-                   <Sigma className="mr-2 h-4 w-4"/>
-                   {showSymbols ? "Hide" : "Show"} Symbols
-                </Button>
-            )}
+             <div className="flex items-center gap-2">
+                {showSymbolToggle && (
+                    <Button type="button" variant="outline" size="sm" onClick={() => setShowSymbols(!showSymbols)}>
+                       <Sigma className="mr-2 h-4 w-4"/>
+                       {showSymbols ? "Hide" : "Show"} Symbols
+                    </Button>
+                )}
+                {isSpeechSupported && (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className={cn("h-8 w-8", isListening && activeSpeechField === name && "bg-destructive text-destructive-foreground hover:bg-destructive/90")}
+                                    onClick={() => handleToggleSpeech(name, label)}
+                                    disabled={isListening && activeSpeechField !== name && activeSpeechField !== null}
+                                >
+                                    {isListening && activeSpeechField === name ? <MicOff className="h-4 w-4"/> : <Mic className="h-4 w-4"/>}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{isListening && activeSpeechField === name ? "Stop Recording" : "Record from Mic"}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                )}
+             </div>
           </div>
           <FormControl>
             <Textarea
-              placeholder="Enter questions here, one per line."
+              placeholder="Enter questions here, one per line. Or click the mic to speak."
               className="min-h-[80px] sm:min-h-[100px] resize-y text-sm sm:text-base"
               {...field}
               value={field.value as string || ""}
@@ -526,7 +632,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormDescription className="text-xs sm:text-sm">AI will generate questions in this language. For manual entry, type in your chosen language.</FormDescription>
+                      <FormDescription className="text-xs sm:text-sm">AI and Voice Input will use this language.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -713,7 +819,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                   <div className="p-3 sm:p-4">
                     <CardTitle className="text-lg sm:text-xl font-headline text-primary">Manual Question Entry</CardTitle>
                     <CardDescription className="text-sm sm:text-base mt-1">
-                        Type your questions directly. If you used "AI Draft", questions appear below for editing.
+                        Type your questions directly, or click the microphone to use voice input.
                     </CardDescription>
                   </div>
                     {showSymbols && (
@@ -751,3 +857,5 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     </Card>
   );
 }
+
+    
