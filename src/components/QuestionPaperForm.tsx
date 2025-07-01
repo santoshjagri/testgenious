@@ -293,20 +293,28 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     
     const langValue = form.getValues('language');
     recognition.lang = languageToCodeMap[langValue] || 'en-US';
-    recognition.continuous = false; // Stop after a pause
+    recognition.continuous = true;
     recognition.interimResults = false;
 
     recognition.onstart = () => {
         setIsListening(true);
         setActiveSpeechField(fieldName);
-        toast({ title: `Listening for "${fieldLabel.replace('Questions', '')}"...`, description: "Start speaking now. Click mic to stop." });
+        toast({ title: `Recording for "${fieldLabel.replace('Questions', '')}"...`, description: "Speak your questions. The text will be appended below. Click mic to stop." });
     };
 
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        const currentVal = form.getValues(fieldName) as string || '';
-        const newVal = currentVal ? `${currentVal}\n${transcript}` : transcript;
-        form.setValue(fieldName, newVal, { shouldValidate: true });
+        let newTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                newTranscript += event.results[i][0].transcript + '\n';
+            }
+        }
+        
+        if (newTranscript) {
+            const currentVal = form.getValues(fieldName) as string || '';
+            const newVal = currentVal ? `${currentVal}${newTranscript}` : newTranscript;
+            form.setValue(fieldName, newVal, { shouldValidate: true });
+        }
     };
 
     recognition.onerror = (event) => {
@@ -857,5 +865,3 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     </Card>
   );
 }
-
-    
