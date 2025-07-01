@@ -95,7 +95,8 @@ export default function IDCardPage() {
     }
 
     setIsDownloading(true);
-    const cardElement = document.getElementById('id-card-display-area');
+    // Capture the inner 'id-card-base' element which is the actual, unscaled card content.
+    const cardElement = document.querySelector<HTMLElement>('#id-card-display-area .id-card-base');
 
     if (cardElement) {
       try {
