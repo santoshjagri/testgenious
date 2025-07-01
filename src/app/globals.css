@@ -565,7 +565,9 @@ body {
   .id-card-base * {
     border-color: black !important;
   }
-  .id-card-classic .header-bar,
+  .id-card-classic .photo-section {
+    background-color: #eee !important;
+  }
   .id-card-modern .accent-strip {
     background: #eee !important;
   }
@@ -574,3 +576,5 @@ body {
     background: #eee !important;
   }
 }
+
+    
