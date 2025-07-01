@@ -12,22 +12,22 @@ interface IDCardDisplayProps {
 const ClassicCard: React.FC<IDCardDisplayProps> = ({ data }) => (
   <div className="id-card-base id-card-classic">
     <div className="photo-section">
-      <Image src={data.photoDataUri} alt="Holder Photo" width={170} height={341} className="photo" data-ai-hint="student portrait" unoptimized />
+      <Image src={data.photoDataUri} alt="Holder Photo" width={144} height={144} className="photo" data-ai-hint="student portrait" unoptimized />
     </div>
     <div className="details-section">
       <div className="header">
         {data.logoDataUri && (
-          <Image src={data.logoDataUri} alt="Logo" width={40} height={40} className="logo" data-ai-hint="school emblem" unoptimized />
+          <Image src={data.logoDataUri} alt="Logo" width={48} height={48} className="logo" data-ai-hint="school emblem" unoptimized />
         )}
         <p className="inst-name">{data.institutionName}</p>
       </div>
       <div className="main-details">
         <p className="name">{data.fullName}</p>
         <p className="role">{data.classOrCourse}</p>
-        <div className="details-grid">
-          <strong>DOB:</strong><p>{data.dateOfBirth}</p>
-          <strong>Issued:</strong><p>{data.issueDate}</p>
-          <strong>Expires:</strong><p>{data.expiryDate}</p>
+        <div className="details-list">
+          <p><strong>DOB:</strong> {data.dateOfBirth}</p>
+          <p><strong>Issued:</strong> {data.issueDate}</p>
+          <p><strong>Expires:</strong> {data.expiryDate}</p>
         </div>
       </div>
       <p className="address">{data.holderAddress}</p>

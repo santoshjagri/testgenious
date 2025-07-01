@@ -316,30 +316,30 @@ body {
 
 /* Classic Template */
 .id-card-classic {
-  @apply p-0 flex flex-row; /* Changed to row layout */
+  @apply p-0 flex flex-row;
 }
 .id-card-classic .photo-section {
-  @apply w-[170px] bg-muted shrink-0; /* Left container for photo */
+  @apply w-[170px] bg-muted shrink-0 flex items-center justify-center p-4;
 }
 .id-card-classic .photo {
-  @apply w-full h-full object-cover; /* Photo fills its container */
+  @apply w-36 h-36 object-cover rounded-lg shadow-md;
 }
 .id-card-classic .details-section {
-  @apply p-4 flex flex-col flex-grow; /* Right container for details */
+  @apply p-4 flex flex-col flex-grow items-center text-center;
 }
 .id-card-classic .header {
-  @apply flex items-center gap-3 border-b pb-2 mb-4;
+  @apply flex flex-col items-center gap-2 border-b pb-3 mb-4 w-full;
   border-color: var(--id-header-color);
 }
 .id-card-classic .header .logo {
-  @apply w-10 h-10 object-contain;
+  @apply w-12 h-12 object-contain;
 }
 .id-card-classic .header .inst-name {
   @apply text-lg font-bold;
   color: var(--id-header-color);
 }
 .id-card-classic .main-details {
-  @apply flex-grow;
+  @apply flex-grow flex flex-col justify-center;
 }
 .id-card-classic .name {
   @apply text-2xl font-bold;
@@ -347,11 +347,11 @@ body {
 .id-card-classic .role {
   @apply text-base font-medium text-muted-foreground -mt-1;
 }
-.id-card-classic .details-grid {
-  @apply grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm mt-4 text-left;
+.id-card-classic .details-list {
+  @apply space-y-1 text-sm mt-4;
 }
 .id-card-classic .address {
-  @apply text-xs text-muted-foreground mt-auto pt-2 border-t;
+  @apply text-xs text-muted-foreground mt-auto pt-2 border-t w-full;
   border-color: var(--id-header-color);
 }
 
