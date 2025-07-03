@@ -54,14 +54,6 @@ export default function RootLayout({
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip="Paper History">
-                      <Link href="/history">
-                        <HistoryIcon />
-                        <span className="group-data-[collapsible=icon]:hidden">Paper History</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                   <SidebarMenuItem>
                     <SidebarMenuButton asChild tooltip="ID Card Studio">
                       <Link href="/id-card">
                         <UserSquare2 />
@@ -70,26 +62,10 @@ export default function RootLayout({
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip="ID History">
-                      <Link href="/id-history">
-                        <ClipboardSignature />
-                        <span className="group-data-[collapsible=icon]:hidden">ID History</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
                     <SidebarMenuButton asChild tooltip="Gradesheet">
                       <Link href="/gradesheet">
                         <GraduationCap />
                         <span className="group-data-[collapsible=icon]:hidden">Gradesheet</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip="GS History">
-                      <Link href="/gs-history">
-                        <ClipboardList />
-                        <span className="group-data-[collapsible=icon]:hidden">GS History</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

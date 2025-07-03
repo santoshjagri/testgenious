@@ -4,6 +4,7 @@
 import type * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguages, ExamTypes } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles, CalendarIcon, Sigma, Mic, MicOff } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles, CalendarIcon, Sigma, Mic, MicOff, History as HistoryIcon } from 'lucide-react';
 import { generateQuestions, type GenerateQuestionsInput, type GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -180,6 +181,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   const [showSymbols, setShowSymbols] = useState(false);
   const activeInputRef = useRef<HTMLTextAreaElement | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
   
   const [isListening, setIsListening] = useState(false);
   const [activeSpeechField, setActiveSpeechField] = useState<keyof QuestionPaperFormValues | null>(null);
@@ -489,13 +491,21 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   return (
     <Card className="w-full max-w-3xl mx-auto shadow-xl no-print">
       <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="text-2xl sm:text-3xl font-headline text-primary flex items-center">
-          <FileText className="mr-2 sm:mr-3 h-6 w-6 sm:h-8 sm:w-8" />
-          ExamGenius AI
-        </CardTitle>
-        <CardDescription className="font-body text-sm sm:text-base">
-          {initialValues ? "Edit the details below to update your question paper." : "Fill in the details below to generate your comprehensive question paper."}
-        </CardDescription>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div className="flex-grow">
+                <CardTitle className="text-2xl sm:text-3xl font-headline text-primary flex items-center">
+                  <FileText className="mr-2 sm:mr-3 h-6 w-6 sm:h-8 sm:w-8" />
+                  ExamGenius AI
+                </CardTitle>
+                <CardDescription className="font-body text-sm sm:text-base">
+                  {initialValues ? "Edit the details below to update your question paper." : "Fill in the details below to generate your comprehensive question paper."}
+                </CardDescription>
+            </div>
+            <Button variant="outline" onClick={() => router.push('/history')}>
+                <HistoryIcon className="mr-2 h-4 w-4" />
+                Paper History
+            </Button>
+        </div>
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
         <Form {...form}>

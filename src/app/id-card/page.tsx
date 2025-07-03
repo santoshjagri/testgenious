@@ -2,11 +2,12 @@
 "use client";
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { IDCardForm } from "@/components/id-card/IDCardForm";
 import { IDCardDisplay } from "@/components/id-card/IDCardDisplay";
 import type { IDCardFormValues, StoredIDCardData, StoredIDCard, IDCardTemplate } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserSquare2, Download, Printer as PrinterIcon, Loader2 } from "lucide-react";
+import { UserSquare2, Download, Printer as PrinterIcon, Loader2, ClipboardSignature } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +26,7 @@ export default function IDCardPage() {
   const [isDownloading, setIsDownloading] = React.useState(false);
   const { toast } = useToast();
   const [template, setTemplate] = React.useState<IDCardTemplate>('Classic');
+  const router = useRouter();
 
   const handleFormSubmit = async (values: IDCardFormValues) => {
     setIsProcessing(true);
@@ -147,13 +149,21 @@ export default function IDCardPage() {
         <div>
           <Card className="shadow-xl">
             <CardHeader>
-              <CardTitle className="text-3xl font-headline text-primary flex items-center gap-3">
-                <UserSquare2 className="h-8 w-8" />
-                ID Card Studio
-              </CardTitle>
-              <CardDescription>
-                Create professional ID cards. Select a template, fill the details, and customize the colors.
-              </CardDescription>
+               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <div className="flex-grow">
+                      <CardTitle className="text-3xl font-headline text-primary flex items-center gap-3">
+                          <UserSquare2 className="h-8 w-8" />
+                          ID Card Studio
+                      </CardTitle>
+                      <CardDescription>
+                          Create professional ID cards. Select a template, fill the details, and customize the colors.
+                      </CardDescription>
+                  </div>
+                  <Button variant="outline" onClick={() => router.push('/id-history')}>
+                      <ClipboardSignature className="mr-2 h-4 w-4" />
+                      ID History
+                  </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <Tabs value={template} onValueChange={(value) => setTemplate(value as any)} className="w-full">

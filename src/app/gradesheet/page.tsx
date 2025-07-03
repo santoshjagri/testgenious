@@ -2,12 +2,13 @@
 "use client";
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { GradeSheetForm } from "@/components/gradesheet/GradeSheetForm";
 import { GradeSheetDisplay } from "@/components/gradesheet/GradeSheetDisplay";
 import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet, GradeSheetCalculationOutput, SubjectMarkInput, BulkGradeSheetFormValues } from "@/lib/types";
 import { calculateGradeSheet } from "@/lib/gradesheet-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, FileText, AlertCircle, Download, Printer as PrinterIcon, Loader2, Edit3, RotateCcw, Users, User, Palette } from "lucide-react";
+import { GraduationCap, FileText, AlertCircle, Download, Printer as PrinterIcon, Loader2, Edit3, RotateCcw, Users, User, Palette, ClipboardList } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -50,6 +51,7 @@ export default function GradesheetPage() {
   const [initialFormValues, setInitialFormValues] = React.useState<GradeSheetFormValues | undefined>(undefined);
   const [editingGradeSheetId, setEditingGradeSheetId] = React.useState<string | null>(null);
   const [entryMode, setEntryMode] = React.useState<'single' | 'bulk'>('single');
+  const router = useRouter();
   
   const [template, setTemplate] = React.useState('normal');
   const [showGradeGpa, setShowGradeGpa] = React.useState(true);
@@ -447,12 +449,16 @@ export default function GradesheetPage() {
         )}
         <Card className="shadow-xl">
           <CardHeader className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-2">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-2">
+              <div className="flex items-center gap-2 flex-grow">
                   <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
                   <CardTitle className="text-2xl sm:text-3xl font-headline text-primary">Exam GradeSheet Tool</CardTitle>
               </div>
-              <div className="flex items-center space-x-3 ml-auto">
+              <div className="flex items-center space-x-3">
+                <Button variant="outline" size="sm" onClick={() => router.push('/gs-history')}>
+                  <ClipboardList className="mr-2 h-4 w-4" />
+                  GS History
+                </Button>
                 <User className="h-4 w-4" />
                 <Label htmlFor="entry-mode-switch">Single</Label>
                 <Switch
