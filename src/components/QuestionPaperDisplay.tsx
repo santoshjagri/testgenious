@@ -121,9 +121,9 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
     if (!questionArray || questionArray.length === 0) return null;
     const ListComponent = listType;
     return (
-      <ListComponent className={`space-y-3 list-none pl-0 text-sm sm:text-base`}>
+      <ListComponent className={`space-y-1.5 list-none pl-0 text-sm sm:text-base`}>
         {questionArray.map((questionText, index) => (
-          <li key={`q-${index}`} className="pb-1 flex">
+          <li key={`q-${index}`} className="flex">
             <span className="mr-2">{listType === 'ol' ? `${index + 1}.` : '•'}</span>
             <span>{questionText}</span>
           </li>
@@ -219,11 +219,9 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
                 <ListOrdered className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
                 <h2 id="mcq-section-title" className="text-sm sm:text-base md:text-lg font-semibold">Section {getSectionLetter()}: Multiple Choice Questions</h2>
               </div>
-              <div className="space-y-3 sm:space-y-4 text-sm sm:text-base">
+              <div className="space-y-2 text-sm sm:text-base">
                 {questions.mcqs.map((questionText, index) => (
-                  <div key={`mcq-${index}`} className="pb-1 sm:pb-2">
-                    <p className="mb-1 sm:mb-2 text-sm sm:text-base">{questionText}</p>
-                  </div>
+                  <p key={`mcq-${index}`}>{questionText}</p>
                 ))}
               </div>
             </section>
