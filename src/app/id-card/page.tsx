@@ -7,7 +7,7 @@ import { IDCardForm } from "@/components/id-card/IDCardForm";
 import { IDCardDisplay } from "@/components/id-card/IDCardDisplay";
 import type { IDCardFormValues, StoredIDCardData, StoredIDCard, IDCardTemplate } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { UserSquare2, Download, Printer as PrinterIcon, Loader2, ClipboardSignature, Trash2, Eye, ArrowLeft, CalendarDays, School, Search, PlusCircle } from "lucide-react";
+import { UserSquare2, User, Download, Printer as PrinterIcon, Loader2, ClipboardSignature, Trash2, Eye, ArrowLeft, CalendarDays, School, Search, PlusCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
