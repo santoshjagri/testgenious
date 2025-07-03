@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -11,7 +10,7 @@ export default function HomePage() {
     {
       icon: <FileText className="h-8 w-8 text-primary" />,
       title: 'AI Paper Generator',
-      description: 'Effortlessly create comprehensive and well-structured question papers for any subject and class level.',
+      description: 'Effortlessly create comprehensive question papers using AI. Papers can also be created manually, making it great for mobile users.',
       link: '/create-paper',
       linkText: 'Create a Paper',
     },
