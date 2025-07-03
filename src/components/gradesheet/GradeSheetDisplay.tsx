@@ -27,8 +27,8 @@ export function GradeSheetDisplay({
 
   return (
     <Card className="shadow-2xl printable-area" id={printableId} data-template={template}>
-      <CardHeader className="bg-primary/5 p-4 sm:p-6 border-b-2 border-primary/20 gs-header">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start w-full gap-2 sm:gap-4 mb-3 sm:mb-4">
+      <CardHeader className="bg-primary/5 p-3 sm:p-4 border-b-2 border-primary/20 gs-header">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start w-full gap-2 sm:gap-4 mb-2 sm:mb-3">
             <div className="flex-shrink-0 order-1 sm:order-none">
               {isValidLogoDataUri ? (
                 <Image
@@ -61,9 +61,9 @@ export function GradeSheetDisplay({
             <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 order-3 hidden sm:block"></div>
         </div>
         
-        <Separator className="my-2 sm:my-3 bg-primary/15" />
+        <Separator className="my-1 sm:my-2 bg-primary/15" />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-2 text-xs sm:text-sm text-foreground/80">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-x-2 sm:gap-x-4 gap-y-1 text-xs sm:text-sm text-foreground/80">
           <div className="flex items-center"><User className="w-3 h-3 mr-1.5"/><strong>Student:</strong> {result.studentName}</div>
           <div className="flex items-center"><School className="w-3 h-3 mr-1.5"/><strong>Class:</strong> {result.studentClass}</div>
           <div className="flex items-center"><Hash className="w-3 h-3 mr-1.5"/><strong>Roll No:</strong> {result.rollNo}</div>
@@ -74,39 +74,39 @@ export function GradeSheetDisplay({
         </div>
       </CardHeader>
 
-      <CardContent className="p-4 sm:p-6">
-        <div className="mb-4 sm:mb-6">
-            <div className="flex items-center mb-2 sm:mb-3">
-                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-primary/80" />
-                <h3 className="text-lg sm:text-xl font-semibold text-primary/90">Subject Performance</h3>
+      <CardContent className="p-3 sm:p-4">
+        <div className="mb-3">
+            <div className="flex items-center mb-2">
+                <BookOpen className="h-5 w-5 mr-2 text-primary/80" />
+                <h3 className="text-base sm:text-lg font-semibold text-primary/90">Subject Performance</h3>
             </div>
           <div className="overflow-x-auto">
             <Table className="gs-table">
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/60 text-xs sm:text-sm">
-                  <TableHead className="w-[30%] sm:w-[40%] whitespace-nowrap">Subject Name</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">Theory Marks</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">Practical Marks</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">Total Obtained</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">Status</TableHead>
+                  <TableHead className="w-[30%] sm:w-[40%] whitespace-nowrap py-2 px-3">Subject Name</TableHead>
+                  <TableHead className="text-center whitespace-nowrap py-2 px-3">Theory Marks</TableHead>
+                  <TableHead className="text-center whitespace-nowrap py-2 px-3">Practical Marks</TableHead>
+                  <TableHead className="text-center whitespace-nowrap py-2 px-3">Total Obtained</TableHead>
+                  <TableHead className="text-center whitespace-nowrap py-2 px-3">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="text-xs sm:text-sm">
                 {result.subjects.map((subject, index) => (
-                  <TableRow key={subject.id || `subject-${index}`}>
-                    <TableCell className="font-medium">{subject.subjectName}</TableCell>
-                    <TableCell className="text-center">{`${subject.theoryObtainedMarks} / ${subject.theoryFullMarks}`}</TableCell>
-                    <TableCell className="text-center">
+                  <TableRow key={subject.id || `subject-${index}`} className="h-auto">
+                    <TableCell className="font-medium py-1.5 px-3">{subject.subjectName}</TableCell>
+                    <TableCell className="text-center py-1.5 px-3">{`${subject.theoryObtainedMarks} / ${subject.theoryFullMarks}`}</TableCell>
+                    <TableCell className="text-center py-1.5 px-3">
                       {subject.practicalFullMarks ? `${subject.practicalObtainedMarks || 0} / ${subject.practicalFullMarks}` : 'N/A'}
                     </TableCell>
-                    <TableCell className="text-center font-semibold">
+                    <TableCell className="text-center font-semibold py-1.5 px-3">
                       {(subject.theoryObtainedMarks || 0) + (subject.practicalObtainedMarks || 0)}
                     </TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="text-center py-1.5 px-3">
                       {result.individualSubjectStatus.find(s => s.subjectName === subject.subjectName)?.status === "Pass" ? (
-                        <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 inline" />
+                        <CheckCircle className="h-4 w-4 text-green-600 inline" />
                       ) : (
-                        <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 inline" />
+                        <XCircle className="h-4 w-4 text-red-600 inline" />
                       )}
                     </TableCell>
                   </TableRow>
@@ -116,52 +116,52 @@ export function GradeSheetDisplay({
           </div>
         </div>
 
-        <Separator className="my-4 sm:my-6 bg-primary/15" />
+        <Separator className="my-3 bg-primary/15" />
 
         <div className="gs-summary">
-            <div className="flex items-center mb-3 sm:mb-4">
-                <Star className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-primary/80" />
-                <h3 className="text-lg sm:text-xl font-semibold text-primary/90">Overall Summary</h3>
+            <div className="flex items-center mb-2">
+                <Star className="h-5 w-5 mr-2 text-primary/80" />
+                <h3 className="text-base sm:text-lg font-semibold text-primary/90">Overall Summary</h3>
             </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-3 sm:gap-y-4 p-3 sm:p-4 border rounded-lg bg-secondary/30 shadow gs-summary-box">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 p-2 sm:p-3 border rounded-lg bg-secondary/30 shadow gs-summary-box">
             <div className="flex flex-col">
-              <span className="text-xs sm:text-sm text-muted-foreground">Total Obtained Marks</span>
-              <span className="text-md sm:text-lg font-bold text-primary">{result.totalObtainedMarks} / {result.totalFullMarks}</span>
+              <span className="text-xs text-muted-foreground">Total Obtained Marks</span>
+              <span className="text-sm sm:text-base font-bold text-primary">{result.totalObtainedMarks} / {result.totalFullMarks}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xs sm:text-sm text-muted-foreground">Percentage</span>
-              <span className="text-md sm:text-lg font-bold text-primary">{result.percentage.toFixed(2)}%</span>
+              <span className="text-xs text-muted-foreground">Percentage</span>
+              <span className="text-sm sm:text-base font-bold text-primary">{result.percentage.toFixed(2)}%</span>
             </div>
             
             {showGradeGpa && (
               <>
                 <div className="flex flex-col">
-                  <span className="text-xs sm:text-sm text-muted-foreground">Grade</span>
-                  <span className="text-md sm:text-lg font-bold text-primary">{result.grade}</span>
+                  <span className="text-xs text-muted-foreground">Grade</span>
+                  <span className="text-sm sm:text-base font-bold text-primary">{result.grade}</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs sm:text-sm text-muted-foreground">GPA</span>
-                  <span className="text-md sm:text-lg font-bold text-primary">{result.gpa.toFixed(1)}</span>
+                  <span className="text-xs text-muted-foreground">GPA</span>
+                  <span className="text-sm sm:text-base font-bold text-primary">{result.gpa.toFixed(1)}</span>
                 </div>
               </>
             )}
 
             <div className="flex flex-col">
-              <span className="text-xs sm:text-sm text-muted-foreground">Result Status</span>
-              <span className={`text-md sm:text-lg font-bold ${result.resultStatus === "Pass" ? "text-green-600" : "text-red-600"}`}>
+              <span className="text-xs text-muted-foreground">Result Status</span>
+              <span className={`text-sm sm:text-base font-bold ${result.resultStatus === "Pass" ? "text-green-600" : "text-red-600"}`}>
                 {result.resultStatus}
               </span>
             </div>
             {result.remarks && (
                  <div className="flex flex-col col-span-2 md:col-span-3">
-                    <span className="text-xs sm:text-sm text-muted-foreground">Remarks</span>
-                    <span className="text-sm sm:text-md font-medium text-foreground/90">{result.remarks}</span>
+                    <span className="text-xs text-muted-foreground">Remarks</span>
+                    <span className="text-xs sm:text-sm font-medium text-foreground/90">{result.remarks}</span>
                 </div>
             )}
           </div>
         </div>
       </CardContent>
-      <CardFooter className="p-4 sm:p-6 border-t border-primary/10 flex-col items-center text-center space-y-1 sm:space-y-2 gs-footer">
+      <CardFooter className="p-2 sm:p-3 border-t border-primary/10 flex-col items-center text-center space-y-1 gs-footer">
       </CardFooter>
     </Card>
   );
