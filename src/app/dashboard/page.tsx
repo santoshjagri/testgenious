@@ -48,7 +48,7 @@ export default function DashboardPage() {
               Dashboard
             </h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground animate-fadeInUp" style={{ animationDelay: '200ms', opacity: 0 }}>
-              Select one of the ExamGenius AI tools below to get started.
+              Select one of the EduGenius Suite tools below to get started.
             </p>
           </section>
 
