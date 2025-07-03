@@ -2,7 +2,6 @@
 "use client";
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { FileText, UserSquare2, GraduationCap, ArrowRight } from 'lucide-react';
@@ -15,11 +14,6 @@ export default function HomePage() {
       description: 'Effortlessly create comprehensive and well-structured question papers. Customize subjects, topics, and question types with our powerful AI.',
       link: '/create-paper',
       linkText: 'Create a Paper',
-      image: {
-        src: 'https://placehold.co/600x400.png',
-        alt: 'AI generating a test paper in a futuristic interface.',
-        hint: 'blue AI'
-      }
     },
     {
       icon: <UserSquare2 className="h-10 w-10 text-primary" />,
@@ -27,11 +21,6 @@ export default function HomePage() {
       description: 'Design and print professional ID cards for your students and staff. Choose from multiple templates and customize them to fit your institution\'s brand.',
       link: '/id-card',
       linkText: 'Design ID Cards',
-      image: {
-        src: 'https://placehold.co/600x400.png',
-        alt: 'A modern, professional ID card with blue accents in a clear holder, rendered in 3D.',
-        hint: 'corporate id'
-      }
     },
     {
       icon: <GraduationCap className="h-10 w-10 text-primary" />,
@@ -39,11 +28,6 @@ export default function HomePage() {
       description: 'Generate detailed, accurate gradesheets with automatic calculations for percentages, grades, and GPA. Supports both single and bulk student entry.',
       link: '/gradesheet',
       linkText: 'Generate Gradesheets',
-      image: {
-        src: 'https://placehold.co/600x400.png',
-        alt: 'A digital gradesheet with charts and data visualization in blue tones.',
-        hint: 'blue data'
-      }
     },
   ];
 
@@ -80,14 +64,6 @@ export default function HomePage() {
                   <CardTitle className="text-2xl">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-grow text-center">
-                   <Image 
-                      src={feature.image.src}
-                      alt={feature.image.alt}
-                      width={600}
-                      height={400}
-                      className="rounded-md object-cover mb-4 aspect-video"
-                      data-ai-hint={feature.image.hint}
-                    />
                   <CardDescription className="text-base">
                     {feature.description}
                   </CardDescription>
