@@ -23,10 +23,14 @@ interface GradeSheetFormProps {
 
 const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
   subjectName: '',
-  fullMarks: 100,
-  passMarks: 40,
-  obtainedMarks: 0,
+  theoryFullMarks: 100,
+  theoryPassMarks: 40,
+  theoryObtainedMarks: 0,
+  practicalFullMarks: undefined,
+  practicalPassMarks: undefined,
+  practicalObtainedMarks: undefined,
 };
+
 
 export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeSheetFormProps) {
   const form = useForm<GradeSheetFormValues>({
@@ -220,58 +224,59 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
         <Card className="border-primary/20">
           <CardHeader className="p-3 sm:p-4">
             <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><BookOpen className="mr-2 h-5 w-5" />Subject-wise Marks</CardTitle>
-             <CardDescription className="text-sm sm:text-base">Add each subject and its corresponding marks. Obtained marks cannot be greater than Full Marks.</CardDescription>
+             <CardDescription className="text-sm sm:text-base">For each subject, enter theory and practical marks. Leave practical fields blank if not applicable.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-4">
             {fields.map((field, index) => (
-              <div key={field.id} className="p-3 sm:p-4 border rounded-md shadow-sm bg-background/50 space-y-2 sm:space-y-3 relative">
-                <FormLabel className="text-md font-medium text-primary/80">Subject {index + 1}</FormLabel>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 items-end">
+              <div key={field.id} className="p-3 sm:p-4 border rounded-md shadow-sm bg-background/50 space-y-3 relative">
+                <div className="flex justify-between items-start">
                   <FormField
-                    control={form.control}
-                    name={`subjects.${index}.subjectName`}
-                    render={({ field: subjectField }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs sm:text-sm">Subject Name</FormLabel>
-                        <FormControl><Input placeholder="e.g., Mathematics" {...subjectField} className="text-xs sm:text-sm"/></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`subjects.${index}.fullMarks`}
-                    render={({ field: subjectField }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs sm:text-sm">Full Marks</FormLabel>
-                        <FormControl><Input type="number" placeholder="e.g., 100" {...subjectField} onChange={e => subjectField.onChange(parseFloat(e.target.value) || 0)} className="text-xs sm:text-sm"/></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`subjects.${index}.passMarks`}
-                    render={({ field: subjectField }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs sm:text-sm">Pass Marks</FormLabel>
-                        <FormControl><Input type="number" placeholder="e.g., 40" {...subjectField} onChange={e => subjectField.onChange(parseFloat(e.target.value) || 0)} className="text-xs sm:text-sm"/></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`subjects.${index}.obtainedMarks`}
-                    render={({ field: subjectField }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs sm:text-sm">Obtained Marks</FormLabel>
-                        <FormControl><Input type="number" placeholder="e.g., 75" {...subjectField} onChange={e => subjectField.onChange(parseFloat(e.target.value) || 0)} className="text-xs sm:text-sm"/></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      control={form.control}
+                      name={`subjects.${index}.subjectName`}
+                      render={({ field: subjectField }) => (
+                        <FormItem className="flex-grow">
+                          <FormLabel className="text-md font-medium text-primary/80">Subject {index + 1}: Name</FormLabel>
+                          <FormControl><Input placeholder="e.g., Mathematics" {...subjectField} className="text-sm sm:text-base"/></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  {fields.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => remove(index)}
+                      className="ml-2 mt-1 text-destructive hover:bg-destructive/10 p-1 h-auto"
+                      aria-label="Remove subject"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+                  {/* Theory Marks Section */}
+                  <div className="space-y-2 border-r-0 md:border-r md:pr-4 border-dashed">
+                      <Label className="text-sm font-semibold">Theory Marks</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        <FormField control={form.control} name={`subjects.${index}.theoryFullMarks`} render={({ field: f }) => ( <FormItem><FormLabel className="text-xs">Full</FormLabel><FormControl><Input type="number" {...f} onChange={e => f.onChange(parseFloat(e.target.value) || 0)} className="text-xs"/></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name={`subjects.${index}.theoryPassMarks`} render={({ field: f }) => ( <FormItem><FormLabel className="text-xs">Pass</FormLabel><FormControl><Input type="number" {...f} onChange={e => f.onChange(parseFloat(e.target.value) || 0)} className="text-xs"/></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name={`subjects.${index}.theoryObtainedMarks`} render={({ field: f }) => ( <FormItem><FormLabel className="text-xs">Obtained</FormLabel><FormControl><Input type="number" {...f} onChange={e => f.onChange(parseFloat(e.target.value) || 0)} className="text-xs"/></FormControl><FormMessage /></FormItem> )} />
+                      </div>
+                  </div>
+
+                  {/* Practical Marks Section */}
+                  <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Practical Marks (Optional)</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                          <FormField control={form.control} name={`subjects.${index}.practicalFullMarks`} render={({ field: f }) => ( <FormItem><FormLabel className="text-xs">Full</FormLabel><FormControl><Input type="number" {...f} onChange={e => f.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)} placeholder="Opt." className="text-xs"/></FormControl><FormMessage /></FormItem> )} />
+                          <FormField control={form.control} name={`subjects.${index}.practicalPassMarks`} render={({ field: f }) => ( <FormItem><FormLabel className="text-xs">Pass</FormLabel><FormControl><Input type="number" {...f} onChange={e => f.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)} placeholder="Opt." className="text-xs"/></FormControl><FormMessage /></FormItem> )} />
+                          <FormField control={form.control} name={`subjects.${index}.practicalObtainedMarks`} render={({ field: f }) => ( <FormItem><FormLabel className="text-xs">Obtained</FormLabel><FormControl><Input type="number" {...f} onChange={e => f.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)} placeholder="Opt." className="text-xs"/></FormControl><FormMessage /></FormItem> )} />
+                      </div>
+                  </div>
+                </div>
+
                 <FormField
                     control={form.control}
                     name={`subjects.${index}.id`}
@@ -281,18 +286,6 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                       </FormItem>
                     )}
                   />
-                {fields.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => remove(index)}
-                    className="absolute top-1 right-1 sm:top-2 sm:right-2 text-destructive hover:bg-destructive/10 p-1 h-auto"
-                    aria-label="Remove subject"
-                  >
-                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </Button>
-                )}
               </div>
             ))}
             <Button

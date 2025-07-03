@@ -34,7 +34,7 @@ const getNewFormDefaults = (): GradeSheetFormValues => ({
     academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
     examDate: '', // Set dynamically in effect
     subjects: [
-        { subjectName: 'Sample Subject', fullMarks: 100, passMarks: 40, obtainedMarks: 0, id: crypto.randomUUID() }
+        { subjectName: 'Sample Subject', theoryFullMarks: 100, theoryPassMarks: 40, theoryObtainedMarks: 0, id: crypto.randomUUID() }
     ],
 });
 
@@ -183,9 +183,9 @@ export default function GradesheetPage() {
             const singleStudentSubjects: SubjectMarkInput[] = subjects.map(s => ({
                 id: s.id,
                 subjectName: s.subjectName,
-                fullMarks: s.fullMarks,
-                passMarks: s.passMarks,
-                obtainedMarks: student.obtainedMarks[s.id] || 0,
+                theoryFullMarks: s.fullMarks, // Assuming bulk form uses `fullMarks` for theory
+                theoryPassMarks: s.passMarks, // Assuming bulk form uses `passMarks` for theory
+                theoryObtainedMarks: student.obtainedMarks[s.id] || 0,
             }));
 
             const singleStudentFormValues: GradeSheetFormValues = {

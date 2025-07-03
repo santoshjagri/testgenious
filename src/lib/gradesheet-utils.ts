@@ -28,9 +28,22 @@ export function calculateGradeSheet(formData: GradeSheetFormValues): GradeSheetC
   let allSubjectsPassed = true;
 
   formData.subjects.forEach(subject => {
-    totalObtainedMarks += subject.obtainedMarks;
-    totalFullMarks += subject.fullMarks;
-    const subjectPassed = subject.obtainedMarks >= subject.passMarks;
+    const theoryMarks = subject.theoryObtainedMarks;
+    const practicalMarks = subject.practicalObtainedMarks || 0;
+    const subjectTotalObtained = theoryMarks + practicalMarks;
+    
+    const theoryFull = subject.theoryFullMarks;
+    const practicalFull = subject.practicalFullMarks || 0;
+    const subjectFullTotal = theoryFull + practicalFull;
+
+    totalObtainedMarks += subjectTotalObtained;
+    totalFullMarks += subjectFullTotal;
+
+    const theoryPassed = theoryMarks >= subject.theoryPassMarks;
+    // Practical is passed if not applicable (full marks is 0 or undefined), or if marks are sufficient
+    const practicalPassed = !practicalFull || practicalMarks >= (subject.practicalPassMarks || 0);
+    
+    const subjectPassed = theoryPassed && practicalPassed;
     individualSubjectStatus.push({ subjectName: subject.subjectName, status: subjectPassed ? "Pass" : "Fail" });
     if (!subjectPassed) {
       allSubjectsPassed = false;
@@ -97,4 +110,3 @@ export function calculateGradeSheet(formData: GradeSheetFormValues): GradeSheetC
     remarks,
   };
 }
-

@@ -85,9 +85,9 @@ export function GradeSheetDisplay({
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/60 text-xs sm:text-sm">
                   <TableHead className="w-[30%] sm:w-[40%] whitespace-nowrap">Subject Name</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">Full Marks</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">Pass Marks</TableHead>
-                  <TableHead className="text-center whitespace-nowrap">Obtained Marks</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">Theory Marks</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">Practical Marks</TableHead>
+                  <TableHead className="text-center whitespace-nowrap">Total Obtained</TableHead>
                   <TableHead className="text-center whitespace-nowrap">Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -95,9 +95,13 @@ export function GradeSheetDisplay({
                 {result.subjects.map((subject, index) => (
                   <TableRow key={subject.id || `subject-${index}`}>
                     <TableCell className="font-medium">{subject.subjectName}</TableCell>
-                    <TableCell className="text-center">{subject.fullMarks}</TableCell>
-                    <TableCell className="text-center">{subject.passMarks}</TableCell>
-                    <TableCell className="text-center font-semibold">{subject.obtainedMarks}</TableCell>
+                    <TableCell className="text-center">{`${subject.theoryObtainedMarks} / ${subject.theoryFullMarks}`}</TableCell>
+                    <TableCell className="text-center">
+                      {subject.practicalFullMarks ? `${subject.practicalObtainedMarks || 0} / ${subject.practicalFullMarks}` : 'N/A'}
+                    </TableCell>
+                    <TableCell className="text-center font-semibold">
+                      {(subject.theoryObtainedMarks || 0) + (subject.practicalObtainedMarks || 0)}
+                    </TableCell>
                     <TableCell className="text-center">
                       {result.individualSubjectStatus.find(s => s.subjectName === subject.subjectName)?.status === "Pass" ? (
                         <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 inline" />

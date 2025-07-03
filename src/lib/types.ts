@@ -190,18 +190,38 @@ export type QuestionPaperDisplayFormData = StorableQuestionPaperFormValues;
 export const GradeSheetExamTypes = ["First Term", "Mid Term", "Second Term", "Third Term", "Final Examination", "Unit Test", "Pre-Board"] as const;
 
 export const subjectMarkSchema = z.object({
-  id: z.string(), 
+  id: z.string(),
   subjectName: z.string().min(1, "Subject name is required."),
-  fullMarks: z.coerce.number().min(1, "Full marks > 0").max(200, "Max 200"),
-  passMarks: z.coerce.number().min(0, "Pass marks >= 0").max(200, "Max 200"),
-  obtainedMarks: z.coerce.number().min(0, "Obtained marks >= 0").max(200, "Max 200"),
-}).refine(data => data.obtainedMarks <= data.fullMarks, {
-  message: "Obtained marks cannot exceed full marks.",
-  path: ["obtainedMarks"],
-}).refine(data => data.passMarks <= data.fullMarks, {
-  message: "Pass marks cannot exceed full marks.",
-  path: ["passMarks"],
+  theoryFullMarks: z.coerce.number().min(1, "Full marks > 0").max(200, "Max 200"),
+  theoryPassMarks: z.coerce.number().min(0, "Pass marks >= 0").max(200, "Max 200"),
+  theoryObtainedMarks: z.coerce.number().min(0, "Obtained marks >= 0").max(200, "Max 200"),
+  practicalFullMarks: z.coerce.number().min(0).max(100).optional(),
+  practicalPassMarks: z.coerce.number().min(0).max(100).optional(),
+  practicalObtainedMarks: z.coerce.number().min(0).max(100).optional(),
+}).refine(data => data.theoryObtainedMarks <= data.theoryFullMarks, {
+    message: "Theory obtained marks cannot exceed full marks.",
+    path: ["theoryObtainedMarks"],
+}).refine(data => data.theoryPassMarks <= data.theoryFullMarks, {
+    message: "Theory pass marks cannot exceed full marks.",
+    path: ["theoryPassMarks"],
+}).refine(data => {
+    if (data.practicalFullMarks && data.practicalObtainedMarks !== undefined) {
+        return data.practicalObtainedMarks <= data.practicalFullMarks;
+    }
+    return true;
+}, {
+    message: "Practical obtained marks cannot exceed full marks.",
+    path: ["practicalObtainedMarks"],
+}).refine(data => {
+    if (data.practicalFullMarks && data.practicalPassMarks !== undefined) {
+        return data.practicalPassMarks <= data.practicalFullMarks;
+    }
+    return true;
+}, {
+    message: "Practical pass marks cannot exceed full marks.",
+    path: ["practicalPassMarks"],
 });
+
 
 export type SubjectMarkInput = z.infer<typeof subjectMarkSchema>;
 
