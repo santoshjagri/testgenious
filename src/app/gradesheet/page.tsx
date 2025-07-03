@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -32,6 +33,7 @@ const getNewFormDefaults = (): GradeSheetFormValues => ({
     examType: 'Final Examination',
     academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
     examDate: '', // Set dynamically in effect
+    nepaliExamDate: '',
     subjects: [
         { subjectName: 'Sample Subject', theoryFullMarks: 100, theoryPassMarks: 40, theoryObtainedMarks: 0, id: crypto.randomUUID() }
     ],
@@ -601,3 +603,5 @@ export default function GradesheetPage() {
     </main>
   );
 }
+
+    

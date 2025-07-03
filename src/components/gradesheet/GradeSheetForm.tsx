@@ -167,7 +167,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
             <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><Award className="mr-2 h-5 w-5" />Exam Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <FormField
                 control={form.control}
                 name="examType"
@@ -198,12 +198,14 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                   </FormItem>
                 )}
               />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                <FormField
                 control={form.control}
                 name="examDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="mb-1 sm:mb-1.5 text-sm sm:text-base flex items-center"><CalendarDays className="mr-2 h-4 w-4"/>Exam Date</FormLabel>
+                    <FormLabel className="mb-1 sm:mb-1.5 text-sm sm:text-base flex items-center"><CalendarDays className="mr-2 h-4 w-4"/>Exam Date (A.D.)</FormLabel>
                     <FormControl>
                        <DatePicker
                         date={field.value ? new Date(field.value) : undefined}
@@ -214,6 +216,19 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                       />
                     </FormControl>
                     <FormMessage className="mt-1 sm:mt-2"/>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="nepaliExamDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="mb-1 sm:mb-1.5 text-sm sm:text-base flex items-center"><CalendarDays className="mr-2 h-4 w-4"/>Exam Date (B.S.) (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., 2081-03-25" {...field} className="text-sm sm:text-base"/>
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -328,3 +343,5 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     </Form>
   );
 }
+
+    

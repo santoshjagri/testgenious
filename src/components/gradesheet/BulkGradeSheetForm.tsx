@@ -30,6 +30,7 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
       examType: 'Final Examination',
       academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
       examDate: format(new Date(), "yyyy-MM-dd"),
+      nepaliExamDate: '',
       subjects: [{ id: crypto.randomUUID(), subjectName: '', theoryFullMarks: 100, theoryPassMarks: 40, practicalFullMarks: undefined, practicalPassMarks: undefined }],
       students: [{ id: crypto.randomUUID(), studentName: '', rollNo: '', obtainedMarks: {} }],
     },
@@ -95,7 +96,11 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <FormField name="examType" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Exam Type</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger></FormControl><SelectContent>{GradeSheetExamTypes.map(type => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem> )} />
-              <FormField name="examDate" control={form.control} render={({ field }) => ( <FormItem className="flex flex-col"><FormLabel className="mb-1.5">Exam Date</FormLabel><FormControl><DatePicker date={field.value ? new Date(field.value) : undefined} setDate={(date) => { field.onChange(date ? format(date, "yyyy-MM-dd") : ""); }}/></FormControl><FormMessage /></FormItem> )} />
+               <div />
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              <FormField name="examDate" control={form.control} render={({ field }) => ( <FormItem className="flex flex-col"><FormLabel className="mb-1.5">Exam Date (A.D.)</FormLabel><FormControl><DatePicker date={field.value ? new Date(field.value) : undefined} setDate={(date) => { field.onChange(date ? format(date, "yyyy-MM-dd") : ""); }}/></FormControl><FormMessage /></FormItem> )} />
+              <FormField name="nepaliExamDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Exam Date (B.S.) (Optional)</FormLabel><FormControl><Input placeholder="e.g., 2081-03-25" {...field} /></FormControl><FormMessage /></FormItem> )} />
             </div>
           </CardContent>
         </Card>
@@ -173,7 +178,7 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
                                     name={`students.${studentIndex}.obtainedMarks.${subject.id}.practical`}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormControl><Input type="number" placeholder="Pr." {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)} className="w-16 text-xs" /></FormControl>
+                                            <FormControl><Input type="number" placeholder="Pr." {...field} onChange={e => f.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)} className="w-16 text-xs" /></FormControl>
                                             <FormMessage className="text-xs"/>
                                         </FormItem>
                                     )}
@@ -210,3 +215,5 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
     </Form>
   );
 }
+
+    

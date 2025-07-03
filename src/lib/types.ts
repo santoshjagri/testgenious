@@ -237,6 +237,7 @@ export const gradeSheetFormSchema = z.object({
   academicYear: z.string().min(1, "Academic year is required (e.g., 2023-2024).")
                    .regex(/^\d{4}-\d{4}$/, "Format must be YYYY-YYYY (e.g., 2023-2024)."),
   examDate: z.string().min(1, "Exam date is required."),
+  nepaliExamDate: z.string().optional(),
   subjects: z.array(subjectMarkSchema).min(1, "At least one subject is required."),
 });
 
@@ -314,6 +315,7 @@ export const bulkGradeSheetFormSchema = z.object({
   examType: z.enum(GradeSheetExamTypes).default("Final Examination"),
   academicYear: z.string().min(1, "Academic year is required.").regex(/^\d{4}-\d{4}$/, "Format: YYYY-YYYY"),
   examDate: z.string().min(1, "Exam date is required."),
+  nepaliExamDate: z.string().optional(),
   subjects: z.array(bulkSubjectSchema).min(1, "At least one subject is required."),
   students: z.array(bulkStudentSchema).min(1, "At least one student is required."),
 }).refine(data => {
@@ -393,3 +395,5 @@ export interface StoredIDCard {
   dateGenerated: string; // ISO string
   cardData: StoredIDCardData;
 }
+
+    

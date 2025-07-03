@@ -70,7 +70,8 @@ export function GradeSheetDisplay({
           {result.studentId && <div className="flex items-center"><Hash className="w-3 h-3 mr-1.5"/><strong>Student ID:</strong> {result.studentId}</div>}
           {result.symbolNo && <div className="flex items-center"><Hash className="w-3 h-3 mr-1.5"/><strong>Symbol No:</strong> {result.symbolNo}</div>}
           <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>Academic Year:</strong> {result.academicYear}</div>
-          <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>Exam Date:</strong> {new Date(result.examDate).toLocaleDateString()}</div>
+          <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>Date (A.D.):</strong> {new Date(result.examDate).toLocaleDateString()}</div>
+          {result.nepaliExamDate && <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>Date (B.S.):</strong> {result.nepaliExamDate}</div>}
         </div>
       </CardHeader>
 
@@ -166,3 +167,5 @@ export function GradeSheetDisplay({
     </Card>
   );
 }
+
+    
