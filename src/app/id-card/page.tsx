@@ -7,7 +7,7 @@ import { IDCardForm } from "@/components/id-card/IDCardForm";
 import { IDCardDisplay } from "@/components/id-card/IDCardDisplay";
 import type { IDCardFormValues, StoredIDCardData, StoredIDCard, IDCardTemplate } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { UserSquare2, User, Download, Printer as PrinterIcon, Loader2, ClipboardSignature, Trash2, Eye, ArrowLeft, CalendarDays, School, Search, PlusCircle } from "lucide-react";
+import { UserSquare2, User, Download, Printer as PrinterIcon, Loader2, ClipboardSignature, Trash2, Eye, ArrowLeft, CalendarDays, School, Search, Edit, RotateCcw } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -18,8 +18,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IDCardTemplateArray } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { format } from 'date-fns';
 
 const ID_CARD_LOCAL_STORAGE_KEY = "idCardHistory";
+
+const getNewFormDefaults = (): IDCardFormValues => ({
+  template: 'Classic',
+  institutionName: 'Genesis International School',
+  fullName: 'Alex Doe',
+  classOrCourse: 'Grade 10, Section A',
+  dateOfBirth: '2008-05-12',
+  issueDate: format(new Date(), "yyyy-MM-dd"),
+  expiryDate: format(new Date(new Date().setFullYear(new Date().getFullYear() + 1)), "yyyy-MM-dd"),
+  holderAddress: '123 Future Lane, Innovation City',
+  headerColor: '#0c4a6e',
+  backgroundColor: '#f1f5f9',
+  fontColor: '#0f172a',
+  photo: undefined,
+  logo: undefined,
+});
+
 
 export default function IDCardPage() {
   // Creator states
@@ -29,6 +47,8 @@ export default function IDCardPage() {
   const [isDownloading, setIsDownloading] = React.useState(false);
   const { toast } = useToast();
   const [template, setTemplate] = React.useState<IDCardTemplate>('Classic');
+  const [initialFormValues, setInitialFormValues] = React.useState<IDCardFormValues | undefined>(undefined);
+  const [editingCardId, setEditingCardId] = React.useState<string | null>(null);
   
   // History states
   const [historyItems, setHistoryItems] = React.useState<StoredIDCard[]>([]);
@@ -38,6 +58,14 @@ export default function IDCardPage() {
   // Combined state
   const [activeTab, setActiveTab] = React.useState('creator');
   const router = useRouter();
+
+  React.useEffect(() => {
+    // This effect runs on mount to ensure the form has default values
+    // for creating a new card, but only if not in editing mode.
+    if (!editingCardId) {
+        setInitialFormValues(getNewFormDefaults());
+    }
+  }, []);
 
   React.useEffect(() => {
     if (activeTab === 'history') {
@@ -64,13 +92,30 @@ export default function IDCardPage() {
   const handleFormSubmit = async (values: IDCardFormValues) => {
     setIsProcessing(true);
     setError(null);
-    setGeneratedCard(null);
+    if (!editingCardId) {
+      setGeneratedCard(null);
+    }
 
     try {
       const { logo, photo, ...otherFormValues } = values;
       
-      const photoDataUri = await compressImageAndToDataUri(photo, 0.8, 400);
-      const logoDataUri = logo ? await compressImageAndToDataUri(logo, 0.8, 100) : undefined;
+      let photoDataUri: string;
+      if (photo) {
+        photoDataUri = await compressImageAndToDataUri(photo, 0.8, 400);
+      } else if (editingCardId && generatedCard?.photoDataUri) {
+        photoDataUri = generatedCard.photoDataUri;
+      } else {
+        toast({ title: "Photo Required", description: "Please upload a photo for the ID card.", variant: "destructive" });
+        setIsProcessing(false);
+        return;
+      }
+      
+      let logoDataUri: string | undefined;
+      if (logo) {
+        logoDataUri = await compressImageAndToDataUri(logo, 0.8, 100);
+      } else if (editingCardId && generatedCard?.logoDataUri) {
+        logoDataUri = generatedCard.logoDataUri;
+      }
       
       const cardData: StoredIDCardData = {
         ...otherFormValues,
@@ -80,20 +125,34 @@ export default function IDCardPage() {
       };
 
       setGeneratedCard(cardData);
-      toast({ title: "ID Card Generated!", description: "Your ID Card is ready and saved to ID History." });
 
       if (typeof window !== 'undefined') {
         try {
-          const newHistoryEntry: StoredIDCard = {
-            id: crypto.randomUUID(),
-            dateGenerated: new Date().toISOString(),
-            cardData: cardData,
-          };
           const existingHistoryString = localStorage.getItem(ID_CARD_LOCAL_STORAGE_KEY);
           let existingHistory: StoredIDCard[] = existingHistoryString ? JSON.parse(existingHistoryString) : [];
           
-          existingHistory = [newHistoryEntry, ...existingHistory];
+          if (editingCardId) {
+            existingHistory = existingHistory.map(item =>
+              item.id === editingCardId 
+                ? { ...item, cardData: cardData, dateGenerated: new Date().toISOString() } 
+                : item
+            );
+            toast({ title: "ID Card Updated!", description: "The ID Card has been updated and saved to ID History." });
+          } else {
+            const newHistoryEntry: StoredIDCard = {
+              id: crypto.randomUUID(),
+              dateGenerated: new Date().toISOString(),
+              cardData: cardData,
+            };
+            existingHistory = [newHistoryEntry, ...existingHistory];
+            toast({ title: "ID Card Generated!", description: "Your ID Card is ready and saved to ID History." });
+          }
+
           localStorage.setItem(ID_CARD_LOCAL_STORAGE_KEY, JSON.stringify(existingHistory.slice(0, 50)));
+          setHistoryItems(existingHistory.slice(0, 50));
+          if (editingCardId) {
+            setEditingCardId(null);
+          }
 
         } catch (storageError) {
           console.error("Error saving ID card to local storage:", storageError);
@@ -195,6 +254,46 @@ export default function IDCardPage() {
     setSelectedCardForView(item);
   };
 
+  const handleEditCard = (cardId: string) => {
+    const cardToEdit = historyItems.find((item) => item.id === cardId);
+    if (cardToEdit) {
+      const formValues: IDCardFormValues = {
+        ...cardToEdit.cardData,
+        photo: undefined,
+        logo: undefined,
+      };
+      setInitialFormValues(formValues);
+      setGeneratedCard(cardToEdit.cardData);
+      setEditingCardId(cardToEdit.id);
+      setTemplate(cardToEdit.cardData.template);
+      setActiveTab('creator');
+      toast({
+        title: "Editing ID Card",
+        description: `Loaded card for "${cardToEdit.cardData.fullName}" for editing.`,
+      });
+      window.scrollTo(0, 0);
+    }
+  };
+  
+  const clearFormAndStartNew = () => {
+    setInitialFormValues(getNewFormDefaults());
+    setGeneratedCard(null);
+    setEditingCardId(null);
+    setTemplate('Classic');
+    toast({ title: "Form Cleared", description: "Ready for a new ID card."});
+  };
+
+  if (!initialFormValues) {
+    return (
+        <div className="flex-1 flex justify-center items-center p-6">
+            <div className="flex items-center space-x-2">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-lg text-muted-foreground">Loading ID Card Studio...</p>
+            </div>
+        </div>
+    );
+  }
+
   if (selectedCardForView) {
     const { cardData } = selectedCardForView;
     return (
@@ -228,6 +327,18 @@ export default function IDCardPage() {
         </div>
         
         <TabsContent value="creator">
+           {editingCardId && (
+              <Alert variant="default" className="border-accent bg-accent/10 text-accent-foreground no-print mb-4">
+                  <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <AlertTitle className="text-base sm:text-lg">Editing Mode</AlertTitle>
+                  <AlertDescription className="text-xs sm:text-sm">
+                  You are currently editing a saved ID Card. Make your changes and click the button below to update it.
+                  <Button variant="outline" size="sm" onClick={clearFormAndStartNew} className="ml-2 sm:ml-4 mt-1 sm:mt-0 text-xs">
+                      <RotateCcw className="mr-1 h-3 w-3" /> Create New Instead
+                  </Button>
+                  </AlertDescription>
+              </Alert>
+          )}
           <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
               <Card className="shadow-xl">
@@ -240,7 +351,15 @@ export default function IDCardPage() {
                     <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
                       {IDCardTemplateArray.map(t => <TabsTrigger key={t} value={t}>{t}</TabsTrigger>)}
                     </TabsList>
-                    <div className="mt-6"><IDCardForm key={template} onSubmit={handleFormSubmit} isLoading={isProcessing} template={template} /></div>
+                    <div className="mt-6">
+                      <IDCardForm 
+                        key={editingCardId || template} 
+                        onSubmit={handleFormSubmit} 
+                        isLoading={isProcessing} 
+                        template={template}
+                        initialValues={initialFormValues}
+                      />
+                    </div>
                   </Tabs>
                 </CardContent>
               </Card>
@@ -297,6 +416,7 @@ export default function IDCardPage() {
                   <CardContent className="space-y-2 text-xs flex-grow py-0 pb-3"><p className="mt-2 text-xs text-muted-foreground pt-2 border-t flex items-center"><CalendarDays className="h-3 w-3 mr-1.5"/> Generated: {new Date(item.dateGenerated).toLocaleDateString()}</p></CardContent>
                   <CardFooter className="border-t p-1 flex justify-around items-center">
                     <Button variant="ghost" size="sm" onClick={() => handleViewCard(item)} className="text-primary hover:bg-primary/10 flex-1 text-xs h-8"><Eye className="mr-1 h-3 w-3" /> View</Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleEditCard(item.id)} className="text-foreground hover:bg-secondary flex-1 text-xs h-8"><Edit className="mr-1 h-3 w-3" /> Edit</Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-xs h-8"><Trash2 className="mr-1 h-3 w-3" /> Delete</Button></AlertDialogTrigger>
                         <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete ID Card?</AlertDialogTitle><AlertDialogDescription>Are you sure you want to delete the ID card for "{item.cardData.fullName}"?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteSingleItem(item.id)} className="bg-destructive hover:bg-destructive/90">Yes, Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>

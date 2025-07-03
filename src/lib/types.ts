@@ -358,7 +358,7 @@ export const idCardFormSchema = z.object({
   logo: z.instanceof(File).optional(),
   
   // Card Holder Details
-  photo: z.instanceof(File).refine(file => file, "A photo is required."),
+  photo: z.instanceof(File).optional(),
   fullName: z.string().min(1, "Full name is required."),
   classOrCourse: z.string().min(1, "This field is required."),
   dateOfBirth: z.string().min(1, "Date of birth is required."),
@@ -395,5 +395,3 @@ export interface StoredIDCard {
   dateGenerated: string; // ISO string
   cardData: StoredIDCardData;
 }
-
-    

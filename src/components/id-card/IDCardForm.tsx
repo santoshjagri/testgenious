@@ -16,12 +16,13 @@ interface IDCardFormProps {
   onSubmit: (values: IDCardFormValues) => Promise<void>;
   isLoading: boolean;
   template: IDCardTemplate;
+  initialValues?: IDCardFormValues;
 }
 
-export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
+export function IDCardForm({ onSubmit, isLoading, template, initialValues }: IDCardFormProps) {
   const form = useForm<IDCardFormValues>({
     resolver: zodResolver(idCardFormSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       template: template,
       institutionName: 'Genesis International School',
       fullName: 'Alex Doe',
@@ -35,6 +36,13 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
       fontColor: '#0f172a',
     },
   });
+
+  React.useEffect(() => {
+    if (initialValues) {
+      form.reset(initialValues);
+    }
+  }, [initialValues, form]);
+
 
   React.useEffect(() => {
     form.setValue('template', template);
@@ -110,7 +118,7 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField name="institutionName" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Institution Name</FormLabel><FormControl><Input placeholder="e.g., Genesis International" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                {fileInput("logo", "Institution Logo (Optional)", "PNG or JPG. Recommended: square.")}
+                {fileInput("logo", "Institution Logo (Optional)", "PNG or JPG. If editing, re-upload to change.")}
             </CardContent>
         </Card>
 
@@ -120,7 +128,7 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField name="fullName" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., Alex Doe" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                {fileInput("photo", "Holder's Photo", "PNG or JPG. A clear headshot is best.")}
+                {fileInput("photo", "Holder's Photo", "A clear headshot is best. If editing, re-upload to change.")}
                 <FormField name="classOrCourse" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Role / Class / Dept.</FormLabel><FormControl><Input placeholder="e.g., Grade 10 / B.Sc. CS" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField name="dateOfBirth" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Date of Birth</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem> )} />
                 <FormField name="holderAddress" control={form.control} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Holder's Full Address</FormLabel><FormControl><Input placeholder="e.g., 123 Future Lane" {...field} /></FormControl><FormMessage /></FormItem> )} />
@@ -151,7 +159,9 @@ export function IDCardForm({ onSubmit, isLoading, template }: IDCardFormProps) {
         <Button type="submit" className="w-full text-lg py-3" disabled={isLoading}>
           {isLoading ? (
             <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating ID Card...</>
-          ) : 'Generate ID Card'}
+          ) : (
+            initialValues?.fullName ? "Update ID Card" : "Generate ID Card"
+          )}
         </Button>
       </form>
     </Form>
