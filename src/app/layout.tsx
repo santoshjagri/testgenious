@@ -47,7 +47,7 @@ export default function RootLayout({
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild tooltip="Create New Paper">
-                      <Link href="/">
+                      <Link href="/create-paper">
                         <PlusSquare />
                         <span className="group-data-[collapsible=icon]:hidden">Create New Paper</span>
                       </Link>
