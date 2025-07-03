@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -593,13 +592,10 @@ export default function GradesheetPage() {
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; }
         .gradesheet-wrapper {
-            width: 210mm; /* A4 width */
-            min-height: 297mm; /* A4 height */
+            width: 210mm;
             box-sizing: border-box;
             background: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            page-break-after: always;
         }
       `}</style>
     </main>
