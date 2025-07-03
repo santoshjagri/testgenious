@@ -138,6 +138,7 @@ export default function HistoryPage() {
           formData={displayFormData} 
           questions={selectedPaperForView.generatedPaper} 
           template={template}
+          printableId="question-paper-history-view"
         />
       </div>
     );

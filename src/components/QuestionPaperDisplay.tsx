@@ -84,14 +84,15 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
 
             const pageImgData = pageCanvas.toDataURL('image/png', 0.9); 
             const actualContentHeightMMForThisPage = (sliceForThisPagePx / pxPerMm);
+            
+            if (currentYpx > 0) {
+              pdf.addPage();
+            }
+
             pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
           }
 
           currentYpx += pageSliceHeightPx;
-
-          if (currentYpx < fullCanvasHeightPx) {
-            pdf.addPage();
-          }
         }
         
         const safeSubject = formData.subject?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'paper';
