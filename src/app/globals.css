@@ -574,6 +574,10 @@ body {
     color: black !important;
   }
 
+  .qp-question-item {
+    page-break-inside: avoid;
+  }
+
   /* --- ID Card Print Styles --- */
   @page {
     size: 3.375in 2.125in;
