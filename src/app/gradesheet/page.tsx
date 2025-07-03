@@ -183,9 +183,12 @@ export default function GradesheetPage() {
             const singleStudentSubjects: SubjectMarkInput[] = subjects.map(s => ({
                 id: s.id,
                 subjectName: s.subjectName,
-                theoryFullMarks: s.fullMarks, // Assuming bulk form uses `fullMarks` for theory
-                theoryPassMarks: s.passMarks, // Assuming bulk form uses `passMarks` for theory
-                theoryObtainedMarks: student.obtainedMarks[s.id] || 0,
+                theoryFullMarks: s.theoryFullMarks,
+                theoryPassMarks: s.theoryPassMarks,
+                theoryObtainedMarks: student.obtainedMarks[s.id]?.theory ?? 0,
+                practicalFullMarks: s.practicalFullMarks,
+                practicalPassMarks: s.practicalPassMarks,
+                practicalObtainedMarks: student.obtainedMarks[s.id]?.practical,
             }));
 
             const singleStudentFormValues: GradeSheetFormValues = {

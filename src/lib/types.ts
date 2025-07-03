@@ -230,7 +230,7 @@ export const gradeSheetFormSchema = z.object({
   symbolNo: z.string().optional(),
   studentName: z.string().min(1, "Student name is required."),
   studentClass: z.string().min(1, "Class is required."),
-  rollNo: z.string().min(1, "Roll number is required."),
+  rollNo: z.string().optional(),
   schoolName: z.string().min(1, "School name is required."),
   logo: z.instanceof(File).optional(),
   examType: z.enum(GradeSheetExamTypes).default("Final Examination"),
@@ -280,18 +280,31 @@ export const bulkStudentSchema = z.object({
   studentId: z.string().optional(),
   symbolNo: z.string().optional(),
   studentName: z.string().min(1, "Name is required."),
-  rollNo: z.string().min(1, "Roll No. is required."),
-  obtainedMarks: z.record(z.coerce.number().min(0, ">= 0")),
+  rollNo: z.string().optional(),
+  obtainedMarks: z.record(z.object({
+      theory: z.coerce.number().min(0, ">=0").default(0),
+      practical: z.coerce.number().min(0, ">=0").optional(),
+  })),
 });
 
 export const bulkSubjectSchema = z.object({
   id: z.string(),
   subjectName: z.string().min(1, "Subject name is required."),
-  fullMarks: z.coerce.number().min(1, "Full > 0"),
-  passMarks: z.coerce.number().min(0, "Pass >= 0"),
-}).refine(data => data.passMarks <= data.fullMarks, {
-    message: "Pass cannot exceed Full marks.",
-    path: ["passMarks"],
+  theoryFullMarks: z.coerce.number().min(1, "Full > 0"),
+  theoryPassMarks: z.coerce.number().min(0, "Pass >= 0"),
+  practicalFullMarks: z.coerce.number().min(0).max(100).optional(),
+  practicalPassMarks: z.coerce.number().min(0).max(100).optional(),
+}).refine(data => data.theoryPassMarks <= data.theoryFullMarks, {
+    message: "Theory Pass marks cannot exceed Full marks.",
+    path: ["theoryPassMarks"],
+}).refine(data => {
+    if (data.practicalFullMarks && data.practicalPassMarks !== undefined) {
+        return data.practicalPassMarks <= data.practicalFullMarks;
+    }
+    return true;
+}, {
+    message: "Practical Pass marks cannot exceed full marks.",
+    path: ["practicalPassMarks"],
 });
 
 export const bulkGradeSheetFormSchema = z.object({
@@ -307,8 +320,16 @@ export const bulkGradeSheetFormSchema = z.object({
   for (const student of data.students) {
     for (const subjectId in student.obtainedMarks) {
       const subject = data.subjects.find(s => s.id === subjectId);
-      if (subject && student.obtainedMarks[subjectId] > subject.fullMarks) {
-        return false;
+      if (subject) {
+         const marks = student.obtainedMarks[subjectId];
+         if (marks.theory > subject.theoryFullMarks) {
+             return false;
+         }
+         if (subject.practicalFullMarks && marks.practical !== undefined) {
+             if (marks.practical > subject.practicalFullMarks) {
+                 return false;
+             }
+         }
       }
     }
   }

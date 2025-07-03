@@ -141,7 +141,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 name="rollNo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center text-sm sm:text-base"><Hash className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4"/>Roll No.</FormLabel>
+                    <FormLabel className="flex items-center text-sm sm:text-base"><Hash className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4"/>Roll No. (Opt)</FormLabel>
                     <FormControl><Input placeholder="e.g., 25" {...field} className="text-sm sm:text-base"/></FormControl>
                     <FormMessage />
                   </FormItem>

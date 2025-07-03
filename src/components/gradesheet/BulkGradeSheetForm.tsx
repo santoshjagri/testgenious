@@ -14,6 +14,7 @@ import { Loader2, School, Award, PlusCircle, Trash2, ImagePlus, CalendarDays, Bo
 import { DatePicker } from '@/components/ui/date-picker';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Label } from '@/components/ui/label';
 
 interface BulkGradeSheetFormProps {
   onSubmit: (values: BulkGradeSheetFormValues) => Promise<void>;
@@ -29,7 +30,7 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
       examType: 'Final Examination',
       academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
       examDate: format(new Date(), "yyyy-MM-dd"),
-      subjects: [{ id: crypto.randomUUID(), subjectName: '', fullMarks: 100, passMarks: 40 }],
+      subjects: [{ id: crypto.randomUUID(), subjectName: '', theoryFullMarks: 100, theoryPassMarks: 40, practicalFullMarks: undefined, practicalPassMarks: undefined }],
       students: [{ id: crypto.randomUUID(), studentName: '', rollNo: '', obtainedMarks: {} }],
     },
   });
@@ -47,13 +48,16 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
   const subjects = useWatch({ control: form.control, name: 'subjects' });
 
   const handleAddSubject = () => {
-    appendSubject({ id: crypto.randomUUID(), subjectName: '', fullMarks: 100, passMarks: 40 });
+    appendSubject({ id: crypto.randomUUID(), subjectName: '', theoryFullMarks: 100, theoryPassMarks: 40 });
   };
   
   const handleAddStudent = () => {
-    const newStudentMarks: Record<string, number> = {};
+    const newStudentMarks: Record<string, { theory: number; practical?: number }> = {};
     subjects.forEach(subject => {
-        newStudentMarks[subject.id] = 0;
+        newStudentMarks[subject.id] = { theory: 0 };
+        if (subject.practicalFullMarks) {
+            newStudentMarks[subject.id].practical = 0;
+        }
     });
     appendStudent({ id: crypto.randomUUID(), studentName: '', rollNo: '', obtainedMarks: newStudentMarks });
   };
@@ -100,14 +104,16 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
         <Card className="border-primary/20">
           <CardHeader className="p-3 sm:p-4">
             <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><BookOpen className="mr-2 h-5 w-5" />Define Subjects</CardTitle>
-            <CardDescription>Add all subjects for this gradesheet. Full and pass marks will apply to all students.</CardDescription>
+            <CardDescription>Add all subjects. Practical marks fields are optional.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 p-3 sm:p-4">
             {subjectFields.map((field, index) => (
-              <div key={field.id} className="grid grid-cols-1 sm:grid-cols-8 gap-2 items-end">
-                <FormField name={`subjects.${index}.subjectName`} control={form.control} render={({ field }) => ( <FormItem className="sm:col-span-3"><FormLabel>Subject Name</FormLabel><FormControl><Input placeholder="e.g., Science" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                <FormField name={`subjects.${index}.fullMarks`} control={form.control} render={({ field }) => ( <FormItem className="sm:col-span-2"><FormLabel>Full Marks</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)}/></FormControl><FormMessage /></FormItem> )} />
-                <FormField name={`subjects.${index}.passMarks`} control={form.control} render={({ field }) => ( <FormItem className="sm:col-span-2"><FormLabel>Pass Marks</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)}/></FormControl><FormMessage /></FormItem> )} />
+              <div key={field.id} className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
+                <FormField name={`subjects.${index}.subjectName`} control={form.control} render={({ field }) => ( <FormItem className="sm:col-span-3"><FormLabel className="text-xs">Subject Name</FormLabel><FormControl><Input placeholder="e.g., Science" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                <FormField name={`subjects.${index}.theoryFullMarks`} control={form.control} render={({ field }) => ( <FormItem className="sm:col-span-2"><FormLabel className="text-xs">Theory Full</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)}/></FormControl><FormMessage /></FormItem> )} />
+                <FormField name={`subjects.${index}.theoryPassMarks`} control={form.control} render={({ field }) => ( <FormItem className="sm:col-span-2"><FormLabel className="text-xs">Theory Pass</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)}/></FormControl><FormMessage /></FormItem> )} />
+                <FormField name={`subjects.${index}.practicalFullMarks`} control={form.control} render={({ field }) => ( <FormItem className="sm:col-span-2"><FormLabel className="text-xs">Prac. Full (Opt)</FormLabel><FormControl><Input type="number" {...field} placeholder="Opt." onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)}/></FormControl><FormMessage /></FormItem> )} />
+                <FormField name={`subjects.${index}.practicalPassMarks`} control={form.control} render={({ field }) => ( <FormItem className="sm:col-span-2"><FormLabel className="text-xs">Prac. Pass (Opt)</FormLabel><FormControl><Input type="number" {...field} placeholder="Opt." onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)}/></FormControl><FormMessage /></FormItem> )} />
                 <div className="sm:col-span-1">
                   {subjectFields.length > 1 && <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveSubject(index)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>}
                 </div>
@@ -128,9 +134,17 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[150px]">Student Name</TableHead>
-                    <TableHead className="min-w-[100px]">Roll No.</TableHead>
-                    <TableHead className="min-w-[120px]">Symbol No. (Opt)</TableHead>
-                    {subjects.map(subject => <TableHead key={subject.id} className="min-w-[100px]">{subject.subjectName}</TableHead>)}
+                    <TableHead className="min-w-[100px]">Roll (Opt)</TableHead>
+                    <TableHead className="min-w-[120px]">Symbol (Opt)</TableHead>
+                    {subjects.map((subject, index) => (
+                      <TableHead key={subject.id} className="min-w-[150px]">
+                        {subject.subjectName || `Subject ${index + 1}`}
+                        <div className="text-xs font-normal text-muted-foreground flex gap-x-3 mt-1">
+                            <Label>Theory</Label>
+                            {!!subject.practicalFullMarks && <Label>Practical</Label>}
+                        </div>
+                      </TableHead>
+                    ))}
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -140,13 +154,32 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
                       <TableCell><FormField control={form.control} name={`students.${studentIndex}.studentName`} render={({ field }) => <Input placeholder="Name" {...field} />} /></TableCell>
                       <TableCell><FormField control={form.control} name={`students.${studentIndex}.rollNo`} render={({ field }) => <Input placeholder="Roll" {...field} />} /></TableCell>
                       <TableCell><FormField control={form.control} name={`students.${studentIndex}.symbolNo`} render={({ field }) => <Input placeholder="Symbol" {...field} />} /></TableCell>
-                      {subjects.map((subject, subjectIndex) => (
+                      {subjects.map((subject) => (
                          <TableCell key={subject.id}>
-                           <FormField
-                              control={form.control}
-                              name={`students.${studentIndex}.obtainedMarks.${subject.id}`}
-                              render={({ field }) => <Input type="number" placeholder="Marks" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} />}
-                           />
+                           <div className="flex items-start gap-1">
+                             <FormField
+                                control={form.control}
+                                name={`students.${studentIndex}.obtainedMarks.${subject.id}.theory`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl><Input type="number" placeholder="Th." {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} className="w-16 text-xs" /></FormControl>
+                                        <FormMessage className="text-xs"/>
+                                    </FormItem>
+                                )}
+                             />
+                             {!!subject.practicalFullMarks && (
+                                <FormField
+                                    control={form.control}
+                                    name={`students.${studentIndex}.obtainedMarks.${subject.id}.practical`}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl><Input type="number" placeholder="Pr." {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)} className="w-16 text-xs" /></FormControl>
+                                            <FormMessage className="text-xs"/>
+                                        </FormItem>
+                                    )}
+                                />
+                             )}
+                           </div>
                          </TableCell>
                       ))}
                       <TableCell>
