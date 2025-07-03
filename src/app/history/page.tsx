@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { History as HistoryIcon, Trash2, Eye, ArrowLeft, PlusSquare, FileQuestion, CalendarDays, Palette } from "lucide-react";
+import { History as HistoryIcon, Trash2, Eye, ArrowLeft, PlusSquare, FileQuestion, CalendarDays, Palette, Loader2, Download, Printer as PrinterIcon } from "lucide-react";
 import type { StoredQuestionPaper, ExamTypes } from '@/lib/types'; 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 
@@ -30,6 +32,7 @@ export default function HistoryPage() {
   const [historyItems, setHistoryItems] = useState<StoredQuestionPaper[]>([]);
   const [selectedPaperForView, setSelectedPaperForView] = useState<StoredQuestionPaper | null>(null);
   const [template, setTemplate] = useState('normal');
+  const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -99,6 +102,66 @@ export default function HistoryPage() {
   const handleViewPaper = (item: StoredQuestionPaper) => {
     setSelectedPaperForView(item);
   };
+  
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!selectedPaperForView) {
+        toast({ title: "No Paper Selected", description: "Please view a paper before downloading.", variant: "destructive" });
+        return;
+    }
+
+    setIsDownloading(true);
+    const paperElement = document.getElementById('question-paper-history-view');
+    
+    if (paperElement) {
+      try {
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfPageWidth = pdf.internal.pageSize.getWidth();
+        const pdfPageHeight = pdf.internal.pageSize.getHeight();
+        const marginTopMM = 20, marginBottomMM = 20, marginLeftMM = 15, marginRightMM = 15;
+        const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
+        const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
+        const fullCanvas = await html2canvas(paperElement, { scale: 2, useCORS: true, logging: false });
+        const fullCanvasWidthPx = fullCanvas.width;
+        const fullCanvasHeightPx = fullCanvas.height;
+        const pxPerMm = fullCanvasWidthPx / contentWidthMM; 
+        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97; 
+        let currentYpx = 0; 
+        while (currentYpx < fullCanvasHeightPx) {
+          const remainingHeightPx = fullCanvasHeightPx - currentYpx;
+          const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = fullCanvasWidthPx;
+          pageCanvas.height = sliceForThisPagePx;
+          const pageCtx = pageCanvas.getContext('2d');
+          if (pageCtx) {
+            pageCtx.drawImage(fullCanvas, 0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 0, 0, fullCanvasWidthPx, sliceForThisPagePx );
+            const pageImgData = pageCanvas.toDataURL('image/png', 0.9); 
+            const actualContentHeightMMForThisPage = (sliceForThisPagePx / pxPerMm);
+            if (currentYpx > 0) pdf.addPage();
+            pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
+          }
+          currentYpx += pageSliceHeightPx;
+        }
+        const {formSnapshot} = selectedPaperForView;
+        const safeSubject = formSnapshot.subject?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'paper';
+        const safeClassLevel = formSnapshot.classLevel?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'level';
+        const filename = `question_paper_${safeSubject}_${safeClassLevel}.pdf`;
+        pdf.save(filename);
+        toast({ title: "PDF Downloaded", description: "Paper has been successfully downloaded." });
+      } catch (error) {
+        console.error("Error generating PDF from history:", error);
+        toast({ title: "PDF Generation Failed", variant: "destructive" });
+      }
+    } else {
+        toast({ title: "PDF Generation Error", description: "Could not find the paper content to generate PDF.", variant: "destructive" });
+    }
+    setIsDownloading(false);
+  };
+
 
   if (selectedPaperForView) {
     const displayFormData = {
@@ -108,15 +171,31 @@ export default function HistoryPage() {
 
     return (
       <div className="flex-1 flex flex-col p-2 sm:p-4 md:p-6 lg:p-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 mb-4 sm:mb-6 no-print">
             <Button 
               variant="outline" 
               onClick={() => setSelectedPaperForView(null)} 
-              className="mb-4 sm:mb-6 self-start no-print w-full sm:w-auto"
+              className="w-full sm:w-auto sm:mr-auto"
             >
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to History
             </Button>
+            <Button onClick={handlePrint} variant="outline" className="w-full sm:w-auto">
+                <PrinterIcon className="mr-2 h-4 w-4" /> Print Paper
+            </Button>
+            <Button onClick={handleDownloadPdf} variant="default" disabled={isDownloading} className="w-full sm:w-auto">
+               {isDownloading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" /> Download PDF
+                </>
+              )}
+            </Button>
         </div>
+
          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 no-print my-4 p-4 border rounded-lg bg-card shadow-sm">
             <div className="flex items-center space-x-2">
                 <Palette className="h-4 w-4 text-muted-foreground" />
@@ -139,6 +218,7 @@ export default function HistoryPage() {
           questions={selectedPaperForView.generatedPaper} 
           template={template}
           printableId="question-paper-history-view"
+          showControls={false}
         />
       </div>
     );

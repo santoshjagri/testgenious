@@ -18,9 +18,10 @@ interface QuestionPaperDisplayProps {
   questions: GenerateQuestionsOutput;
   template?: string;
   printableId?: string;
+  showControls?: boolean;
 }
 
-export function QuestionPaperDisplay({ formData, questions, template = 'normal', printableId }: QuestionPaperDisplayProps) {
+export function QuestionPaperDisplay({ formData, questions, template = 'normal', printableId, showControls = true }: QuestionPaperDisplayProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [displayDate, setDisplayDate] = useState('');
 
@@ -136,25 +137,27 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
 
   return (
     <div className="mt-8 sm:mt-12">
-      <div className="flex flex-col sm:flex-row flex-wrap gap-2 mb-4 sm:mb-6 no-print">
-        <Button onClick={handleDownloadPdf} variant="default" className="w-full sm:w-auto shadow-md" disabled={isDownloading}>
-          {isDownloading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-              Downloading...
-            </>
-          ) : (
-            <>
-              <Download className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-              Download Paper (PDF)
-            </>
-          )}
-        </Button>
-        <Button onClick={handlePrint} variant="outline" className="w-full sm:w-auto shadow-md">
-           <PrinterIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-          Print Paper
-        </Button>
-      </div>
+      {showControls && (
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 mb-4 sm:mb-6 no-print">
+          <Button onClick={handleDownloadPdf} variant="default" className="w-full sm:w-auto shadow-md" disabled={isDownloading}>
+            {isDownloading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                Downloading...
+              </>
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                Download Paper (PDF)
+              </>
+            )}
+          </Button>
+          <Button onClick={handlePrint} variant="outline" className="w-full sm:w-auto shadow-md">
+            <PrinterIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+            Print Paper
+          </Button>
+        </div>
+      )}
 
       <Card className="printable-area shadow-2xl rounded-lg" id={printableId ?? 'question-paper'} data-template={template}>
         <CardHeader className="p-4 sm:p-6 qp-header">
