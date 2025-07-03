@@ -30,7 +30,7 @@ export default function HomePage() {
       image: {
         src: 'https://placehold.co/600x400.png',
         alt: 'A modern, professional ID card with blue accents in a clear holder, rendered in 3D.',
-        hint: 'ID card'
+        hint: 'corporate id'
       }
     },
     {
