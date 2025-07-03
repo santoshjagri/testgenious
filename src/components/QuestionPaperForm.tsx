@@ -4,7 +4,6 @@
 import type * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguages, ExamTypes } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -181,7 +180,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   const [showSymbols, setShowSymbols] = useState(false);
   const activeInputRef = useRef<HTMLTextAreaElement | null>(null);
   const { toast } = useToast();
-  const router = useRouter();
   
   const [isListening, setIsListening] = useState(false);
   const [activeSpeechField, setActiveSpeechField] = useState<keyof QuestionPaperFormValues | null>(null);
@@ -501,10 +499,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                   {initialValues ? "Edit the details below to update your question paper." : "Fill in the details below to generate your comprehensive question paper."}
                 </CardDescription>
             </div>
-            <Button variant="outline" onClick={() => router.push('/history')}>
-                <HistoryIcon className="mr-2 h-4 w-4" />
-                Paper History
-            </Button>
         </div>
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
