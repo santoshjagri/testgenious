@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertDialogTitleComponent } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertDialogTitleComponent, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -218,52 +218,64 @@ export default function Home() {
   const handlePrint = () => window.print();
 
   const handleDownloadPdf = async () => {
-    if (!selectedPaperForView) {
-        toast({ title: "No Paper Selected", variant: "destructive" });
+    const elementId = selectedPaperForView ? 'question-paper-history-view' : 'question-paper';
+    const paperElement = document.getElementById(elementId);
+    
+    if (!paperElement) {
+        toast({ title: "PDF Error", description: "Printable element not found.", variant: "destructive" });
         return;
     }
+
     setIsDownloading(true);
-    const paperElement = document.getElementById('question-paper-history-view');
-    if (paperElement) {
-      try {
+    try {
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfPageWidth = pdf.internal.pageSize.getWidth();
         const pdfPageHeight = pdf.internal.pageSize.getHeight();
-        const marginTopMM = 20, marginBottomMM = 20, marginLeftMM = 15, marginRightMM = 15;
+        const marginTopMM = 15, marginBottomMM = 15, marginLeftMM = 12, marginRightMM = 12;
         const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
         const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
+
         const fullCanvas = await html2canvas(paperElement, { scale: 2, useCORS: true, logging: false });
         const fullCanvasWidthPx = fullCanvas.width;
         const fullCanvasHeightPx = fullCanvas.height;
-        const pxPerMm = fullCanvasWidthPx / contentWidthMM; 
-        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.97; 
-        let currentYpx = 0; 
+        const pxPerMm = fullCanvasWidthPx / contentWidthMM;
+        let pageSliceHeightPx = contentHeightMM * pxPerMm;
+        
+        let currentYpx = 0;
+        let isFirstPage = true;
         while (currentYpx < fullCanvasHeightPx) {
-          const remainingHeightPx = fullCanvasHeightPx - currentYpx;
-          const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
-          const pageCanvas = document.createElement('canvas');
-          pageCanvas.width = fullCanvasWidthPx;
-          pageCanvas.height = sliceForThisPagePx;
-          const pageCtx = pageCanvas.getContext('2d');
-          if (pageCtx) {
-            pageCtx.drawImage(fullCanvas, 0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 0, 0, fullCanvasWidthPx, sliceForThisPagePx );
-            const pageImgData = pageCanvas.toDataURL('image/png', 0.9); 
-            const actualContentHeightMMForThisPage = (sliceForThisPagePx / pxPerMm);
-            if (currentYpx > 0) pdf.addPage();
-            pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
-          }
-          currentYpx += pageSliceHeightPx;
+            if (!isFirstPage) {
+                pdf.addPage();
+            }
+            const remainingHeightPx = fullCanvasHeightPx - currentYpx;
+            const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
+            
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width = fullCanvasWidthPx;
+            pageCanvas.height = sliceForThisPagePx;
+            const pageCtx = pageCanvas.getContext('2d');
+            if (pageCtx) {
+                pageCtx.drawImage(fullCanvas, 0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 0, 0, fullCanvasWidthPx, sliceForThisPagePx);
+                const pageImgData = pageCanvas.toDataURL('image/png', 0.95);
+                const actualContentHeightMMForThisPage = sliceForThisPagePx / pxPerMm;
+                pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
+            }
+            currentYpx += pageSliceHeightPx;
+            isFirstPage = false;
         }
-        const {formSnapshot} = selectedPaperForView;
-        const safeSubject = formSnapshot.subject?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'paper';
-        const filename = `question_paper_${safeSubject}_${formSnapshot.classLevel?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'level'}.pdf`;
+
+        const data = selectedPaperForView?.formSnapshot || formSnapshotForDisplay;
+        const safeSubject = data?.subject?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'paper';
+        const filename = `question_paper_${safeSubject}.pdf`;
         pdf.save(filename);
         toast({ title: "PDF Downloaded" });
-      } catch (error) {
+
+    } catch (error) {
+        console.error("PDF generation error:", error);
         toast({ title: "PDF Generation Failed", variant: "destructive" });
-      }
+    } finally {
+        setIsDownloading(false);
     }
-    setIsDownloading(false);
   };
 
   if (selectedPaperForView) {
