@@ -156,8 +156,8 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
         </Button>
       </div>
 
-      <Card className="printable-area shadow-2xl rounded-lg border-2 border-primary/20 bg-white text-black" id={printableId ?? 'question-paper'} data-template={template}>
-        <CardHeader className="p-4 sm:p-6 border-b-2 border-black qp-header">
+      <Card className="printable-area shadow-2xl rounded-lg" id={printableId ?? 'question-paper'} data-template={template}>
+        <CardHeader className="p-4 sm:p-6 qp-header">
             <div className="flex flex-col sm:flex-row items-center sm:items-start w-full gap-4">
                 <div className="flex-shrink-0">
                   {isValidLogoDataUri ? (
@@ -183,13 +183,13 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
                 </div>
                 <div className="flex-grow flex flex-col items-center text-center">
                   <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-0.5 sm:mb-1 qp-title">{formData.institutionName || "ExamGenius AI Institute"}</h1>
-                  {formData.institutionAddress && <p className="text-xs sm:text-sm text-gray-700 mb-1 sm:mb-2">{formData.institutionAddress}</p>}
+                  {formData.institutionAddress && <p className="text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2">{formData.institutionAddress}</p>}
                   <h2 className="text-md sm:text-lg font-semibold mb-0.5 sm:mb-1">{formData.examType}</h2>
-                  {displayDate && <p className="text-xs sm:text-sm text-gray-700">Date: {displayDate}</p>}
+                  {displayDate && <p className="text-xs sm:text-sm text-muted-foreground">Date: {displayDate}</p>}
                 </div>
             </div>
             
-             <div className="grid grid-cols-2 gap-x-2 sm:gap-x-4 gap-y-1 text-xs sm:text-sm mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-300">
+             <div className="grid grid-cols-2 gap-x-2 sm:gap-x-4 gap-y-1 text-xs sm:text-sm mt-3 sm:mt-4 pt-3 sm:pt-4 border-t">
                 <div><strong>Subject:</strong> {formData.subject}</div>
                 <div>{formData.subjectCode ? <><strong>Subject Code:</strong> {formData.subjectCode}</> : <span>&nbsp;</span>}</div>
                 <div><strong>Class/Level:</strong> {formData.classLevel}</div>
@@ -201,20 +201,20 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
 
         <CardContent className="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6">
           {formData.instructions && (
-            <div className="mb-3 sm:mb-4 p-2 border border-gray-300 rounded-md bg-gray-50 qp-instructions">
+            <div className="mb-3 sm:mb-4 p-2 border rounded-md qp-instructions">
               <div className="flex items-center mb-1 sm:mb-1.5">
-                <Info className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-blue-600" />
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-700">Instructions for Students:</h3>
+                <Info className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                <h3 className="text-xs sm:text-sm font-semibold">Instructions for Students:</h3>
               </div>
-              <p className="whitespace-pre-line text-xs text-gray-700">{formData.instructions}</p>
+              <p className="whitespace-pre-line text-xs">{formData.instructions}</p>
             </div>
           )}
 
           {questions.mcqs && questions.mcqs.length > 0 && (
             <section aria-labelledby="mcq-section-title">
-              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400 qp-section-header">
-                <ListOrdered className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-gray-700" />
-                <h2 id="mcq-section-title" className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Multiple Choice Questions</h2>
+              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-t-md border-b-2 qp-section-header">
+                <ListOrdered className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
+                <h2 id="mcq-section-title" className="text-sm sm:text-base md:text-lg font-semibold">Section {getSectionLetter()}: Multiple Choice Questions</h2>
               </div>
               <div className="space-y-3 sm:space-y-4 text-sm sm:text-base">
                 {questions.mcqs.map((questionText, index) => (
@@ -228,11 +228,11 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
 
           {questions.veryShortQuestions && questions.veryShortQuestions.length > 0 && (
             <>
-            <Separator className="my-4 sm:my-6 border-gray-300" />
+            <Separator className="my-4 sm:my-6" />
             <section aria-labelledby="very-short-questions-title">
-              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400 qp-section-header">
-                <FileQuestion className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-gray-700" />
-                <h2 id="very-short-questions-title" className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Very Short Answer Questions</h2>
+              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-t-md border-b-2 qp-section-header">
+                <FileQuestion className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
+                <h2 id="very-short-questions-title" className="text-sm sm:text-base md:text-lg font-semibold">Section {getSectionLetter()}: Very Short Answer Questions</h2>
               </div>
               {renderQuestionList(questions.veryShortQuestions)}
             </section>
@@ -241,11 +241,11 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
 
           {questions.fillInTheBlanks && questions.fillInTheBlanks.length > 0 && (
             <>
-            <Separator className="my-4 sm:my-6 border-gray-300" />
+            <Separator className="my-4 sm:my-6" />
             <section aria-labelledby="fitb-section-title">
-              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400 qp-section-header">
-                <PencilLine className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-gray-700" />
-                <h2 id="fitb-section-title" className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Fill in the Blanks</h2>
+              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-t-md border-b-2 qp-section-header">
+                <PencilLine className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
+                <h2 id="fitb-section-title" className="text-sm sm:text-base md:text-lg font-semibold">Section {getSectionLetter()}: Fill in the Blanks</h2>
               </div>
               {renderQuestionList(questions.fillInTheBlanks)}
             </section>
@@ -254,11 +254,11 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
 
           {questions.trueFalseQuestions && questions.trueFalseQuestions.length > 0 && (
             <>
-            <Separator className="my-4 sm:my-6 border-gray-300" />
+            <Separator className="my-4 sm:my-6" />
             <section aria-labelledby="tf-section-title">
-              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400 qp-section-header">
-                <ClipboardCheck className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-gray-700" />
-                <h2 id="tf-section-title" className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: True or False</h2>
+              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-t-md border-b-2 qp-section-header">
+                <ClipboardCheck className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
+                <h2 id="tf-section-title" className="text-sm sm:text-base md:text-lg font-semibold">Section {getSectionLetter()}: True or False</h2>
               </div>
               {renderQuestionList(questions.trueFalseQuestions)}
             </section>
@@ -267,11 +267,11 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
           
           {questions.shortQuestions && questions.shortQuestions.length > 0 && (
             <>
-            <Separator className="my-4 sm:my-6 border-gray-300" />
+            <Separator className="my-4 sm:my-6" />
             <section aria-labelledby="short-questions-title">
-              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400 qp-section-header">
-                <FileText className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-gray-700" />
-                <h2 id="short-questions-title" className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Short Answer Questions</h2>
+              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-t-md border-b-2 qp-section-header">
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
+                <h2 id="short-questions-title" className="text-sm sm:text-base md:text-lg font-semibold">Section {getSectionLetter()}: Short Answer Questions</h2>
               </div>
               {renderQuestionList(questions.shortQuestions)}
             </section>
@@ -280,11 +280,11 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
 
           {questions.longQuestions && questions.longQuestions.length > 0 && (
             <>
-            <Separator className="my-4 sm:my-6 border-gray-300" />
+            <Separator className="my-4 sm:my-6" />
             <section aria-labelledby="long-questions-title">
-              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400 qp-section-header">
-                <FileSignature className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-gray-700" />
-                <h2 id="long-questions-title" className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Long Answer Questions</h2>
+              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-t-md border-b-2 qp-section-header">
+                <FileSignature className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
+                <h2 id="long-questions-title" className="text-sm sm:text-base md:text-lg font-semibold">Section {getSectionLetter()}: Long Answer Questions</h2>
               </div>
               {renderQuestionList(questions.longQuestions)}
             </section>
@@ -293,18 +293,18 @@ export function QuestionPaperDisplay({ formData, questions, template = 'normal',
 
           {questions.numericalPracticalQuestions && questions.numericalPracticalQuestions.length > 0 && (
             <>
-            <Separator className="my-4 sm:my-6 border-gray-300" />
+            <Separator className="my-4 sm:my-6" />
             <section aria-labelledby="num-prac-questions-title">
-              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 bg-gray-100 rounded-t-md border-b-2 border-gray-400 qp-section-header">
-                <CalculatorIcon className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-gray-700" />
-                <h2 id="num-prac-questions-title" className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">Section {getSectionLetter()}: Numerical / Practical Questions</h2>
+              <div className="flex items-center mb-2 sm:mb-3 p-1.5 sm:p-2 rounded-t-md border-b-2 qp-section-header">
+                <CalculatorIcon className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
+                <h2 id="num-prac-questions-title" className="text-sm sm:text-base md:text-lg font-semibold">Section {getSectionLetter()}: Numerical / Practical Questions</h2>
               </div>
                {renderQuestionList(questions.numericalPracticalQuestions)}
             </section>
             </>
           )}
         </CardContent>
-        <div className="p-3 sm:p-4 border-t border-gray-300 text-center text-gray-500 qp-footer">
+        <div className="p-3 sm:p-4 border-t text-center qp-footer">
             <div className="w-full">
                 <p className="my-1 sm:my-2 text-xs sm:text-sm font-medium">Best Of Luck!</p>
             </div>

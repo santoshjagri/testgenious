@@ -180,8 +180,38 @@ body {
  border-bottom: 2px solid hsl(var(--primary));
 }
 
-/* Question Paper Template Styles */
-/* Note: The 'normal' template uses the default component styles. */
+/* --- Question Paper Template Styles --- */
+
+/* Base styles for normal template */
+.printable-area[data-template="normal"] .qp-header {
+  border-bottom: 2px solid hsl(var(--border));
+}
+.printable-area[data-template="normal"] .qp-header .grid {
+  border-top-color: hsl(var(--border));
+}
+.printable-area[data-template="normal"] .qp-instructions {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--border));
+}
+.printable-area[data-template="normal"] .qp-instructions .text-primary {
+  color: hsl(var(--primary));
+}
+.printable-area[data-template="normal"] .qp-instructions h3 {
+  color: hsl(var(--foreground));
+}
+.printable-area[data-template="normal"] .qp-instructions p {
+  color: hsl(var(--muted-foreground));
+}
+.printable-area[data-template="normal"] .qp-section-header {
+  background-color: hsl(var(--muted));
+  border-color: hsl(var(--border));
+  color: hsl(var(--card-foreground));
+}
+.printable-area[data-template="normal"] .qp-footer {
+  border-top-color: hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+}
+
 
 /* --- Good Template --- */
 .printable-area[data-template="good"] .qp-header {
@@ -196,9 +226,22 @@ body {
   border-color: hsl(var(--border));
   color: hsl(var(--card-foreground));
 }
+.printable-area[data-template="good"] .qp-section-header > * {
+  color: inherit;
+}
 .printable-area[data-template="good"] .qp-instructions {
   background-color: hsl(var(--accent) / 0.1);
   border-color: hsl(var(--accent) / 0.4);
+}
+.printable-area[data-template="good"] .qp-instructions,
+.printable-area[data-template="good"] .qp-instructions > * {
+  color: hsl(var(--accent-foreground));
+}
+.printable-area[data-template="good"] .qp-instructions h3 {
+   color: hsl(var(--accent-foreground));
+}
+.printable-area[data-template="good"] .qp-instructions p {
+   color: hsl(var(--accent-foreground) / 0.9);
 }
 
 
@@ -212,12 +255,13 @@ body {
   border-bottom: none;
 }
 .printable-area[data-template="better"] .qp-header,
-.printable-area[data-template="better"] .qp-header .text-gray-700,
+.printable-area[data-template="better"] .qp-header .text-muted-foreground,
 .printable-area[data-template="better"] .qp-header strong {
   color: hsl(var(--primary-foreground)) !important;
 }
 .printable-area[data-template="better"] .qp-header .grid {
    color: hsl(var(--primary-foreground)) !important;
+   border-top-color: hsl(var(--primary-foreground) / 0.5);
 }
 .printable-area[data-template="better"] .qp-section-header {
   background-color: hsl(var(--primary) / 0.15);
@@ -232,7 +276,7 @@ body {
 /* --- Best Template --- */
 .printable-area[data-template="best"] {
   font-family: "Times New Roman", Times, serif;
-  border: 1px solid #aaa;
+  border: 1px solid hsl(var(--border));
   box-shadow: 0 0 5px rgba(0,0,0,0.1);
   outline: 6px solid hsl(var(--primary) / 0.1);
   outline-offset: 0;
@@ -253,6 +297,9 @@ body {
   border-bottom: 2px double hsl(var(--primary));
   padding-bottom: 1rem;
 }
+.printable-area[data-template="best"] .qp-header .grid {
+  border-top-color: hsl(var(--primary));
+}
 .printable-area[data-template="best"] .qp-title {
   font-size: 1.75rem;
   letter-spacing: 1px;
@@ -260,8 +307,8 @@ body {
 .printable-area[data-template="best"] .qp-section-header {
   background: transparent;
   border: none;
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
+  border-top: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
   margin-top: 1rem;
   margin-bottom: 1rem;
   text-align: center;
@@ -273,13 +320,14 @@ body {
 .printable-area[data-template="best"] .qp-footer {
   font-style: italic;
   padding: 1rem;
+  border-top-color: hsl(var(--border));
 }
 .printable-area[data-template="best"] .qp-footer::before {
   content: " ";
   display: block;
   width: 80px;
   margin: 0 auto 8px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid hsl(var(--border));
 }
 
 
