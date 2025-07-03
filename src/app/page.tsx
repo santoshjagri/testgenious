@@ -29,8 +29,8 @@ export default function HomePage() {
       linkText: 'Design ID Cards',
       image: {
         src: 'https://placehold.co/600x400.png',
-        alt: 'A collection of modern, professional ID cards with blue accents.',
-        hint: 'blue portrait'
+        alt: 'A modern, professional ID card with blue accents in a clear holder, rendered in 3D.',
+        hint: 'ID card'
       }
     },
     {
