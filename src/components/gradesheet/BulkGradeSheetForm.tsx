@@ -28,13 +28,24 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
       schoolName: 'ExamGenius Academy',
       studentClass: '',
       examType: 'Final Examination',
-      academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
-      examDate: format(new Date(), "yyyy-MM-dd"),
+      academicYear: '', // Set statically
+      examDate: '', // Set statically
       nepaliExamDate: '',
       subjects: [{ id: crypto.randomUUID(), subjectName: '', theoryFullMarks: 100, theoryPassMarks: 40, practicalFullMarks: undefined, practicalPassMarks: undefined }],
       students: [{ id: crypto.randomUUID(), studentName: '', rollNo: '', obtainedMarks: {} }],
     },
   });
+
+  // Set date-dependent default values on the client-side to avoid hydration errors
+  React.useEffect(() => {
+    form.reset({
+      ...form.getValues(),
+      academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
+      examDate: format(new Date(), "yyyy-MM-dd"),
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const { fields: subjectFields, append: appendSubject, remove: removeSubject } = useFieldArray({
     control: form.control,
@@ -215,5 +226,3 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
     </Form>
   );
 }
-
-    
