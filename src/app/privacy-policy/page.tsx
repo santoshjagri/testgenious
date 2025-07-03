@@ -27,12 +27,12 @@ export default function PrivacyPolicyPage() {
             </div>
             
             <p>
-              Welcome to ExamGenius AI. Your privacy is important to us. This Privacy Policy explains how we handle your information when you use our application.
+              Welcome to EduGenius AI. Your privacy is important to us. This Privacy Policy explains how we handle your information when you use our application.
             </p>
             
             <h2>1. Information We Handle</h2>
             <p>
-              ExamGenius AI is designed with privacy as a priority. The core functionality operates directly within your web browser.
+              EduGenius AI is designed with privacy as a priority. The core functionality operates directly within your web browser.
             </p>
             <ul>
               <li><strong>Local Data Storage:</strong> All the data you create, including question papers, gradesheets, ID cards, and their respective histories, is stored exclusively in your browser's local storage. This data is not transmitted to, or stored on, our servers. It remains on your device.</li>

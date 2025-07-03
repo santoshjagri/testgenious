@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -41,7 +42,7 @@ export default function HomePage() {
               Revolutionize Your School's Workflow
             </h1>
             <p className="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground">
-              EduGenius Suite is the ultimate toolkit for educators. Save time and reduce administrative burden with our powerful, AI-driven solutions for creating papers, ID cards, and gradesheets.
+              EduGenius AI is the ultimate toolkit for educators. Save time and reduce administrative burden with our powerful, AI-driven solutions for creating papers, ID cards, and gradesheets.
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Button asChild size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-primary/30 transition-shadow">
