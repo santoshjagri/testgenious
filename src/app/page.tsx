@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -16,8 +17,8 @@ export default function HomePage() {
       linkText: 'Create a Paper',
       image: {
         src: 'https://placehold.co/600x400.png',
-        alt: 'AI generating a test paper.',
-        hint: 'exam paper'
+        alt: 'AI generating a test paper in a futuristic interface.',
+        hint: 'blue AI'
       }
     },
     {
@@ -28,8 +29,8 @@ export default function HomePage() {
       linkText: 'Design ID Cards',
       image: {
         src: 'https://placehold.co/600x400.png',
-        alt: 'A collection of ID cards.',
-        hint: 'id card'
+        alt: 'A collection of modern, professional ID cards with blue accents.',
+        hint: 'blue portrait'
       }
     },
     {
@@ -40,8 +41,8 @@ export default function HomePage() {
       linkText: 'Generate Gradesheets',
       image: {
         src: 'https://placehold.co/600x400.png',
-        alt: 'A student gradesheet with charts.',
-        hint: 'report card'
+        alt: 'A digital gradesheet with charts and data visualization in blue tones.',
+        hint: 'blue data'
       }
     },
   ];
