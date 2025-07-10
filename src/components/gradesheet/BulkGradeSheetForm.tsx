@@ -189,7 +189,7 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
                                     name={`students.${studentIndex}.obtainedMarks.${subject.id}.practical`}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormControl><Input type="number" placeholder="Pr." {...field} onChange={e => f.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)} className="w-16 text-xs" /></FormControl>
+                                            <FormControl><Input type="number" placeholder="Pr." {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value) || 0)} className="w-16 text-xs" /></FormControl>
                                             <FormMessage className="text-xs"/>
                                         </FormItem>
                                     )}
