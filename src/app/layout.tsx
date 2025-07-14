@@ -1,6 +1,7 @@
 
 import type {Metadata} from 'next';
 import Link from 'next/link';
+import Script from 'next/script';
 import { Home, PlusSquare, History as HistoryIcon, GraduationCap, ClipboardList, Settings, UserSquare2, ClipboardSignature } from 'lucide-react';
 // Removed: import { AuthProvider } from '@/contexts/AuthContext';
 // Removed: import { UserNav } from '@/components/auth/UserNav';
@@ -27,6 +28,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
       </head>
       <body className="font-body antialiased bg-background">
         <ThemeProvider
