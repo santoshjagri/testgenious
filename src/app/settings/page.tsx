@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 
 const PAPER_HISTORY_KEY = "questionPaperHistory";
 const GRADESHEET_HISTORY_KEY = "gradesheetHistory";
@@ -63,6 +64,11 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+               <Alert variant="default" className="border-accent bg-accent/10 text-accent-foreground">
+                  <DatabaseZap className="h-4 w-4" />
+                  <AlertTitle>No Database is Used</AlertTitle>
+                  <p className="text-xs [&_p]:leading-relaxed">All of your data is stored securely in your browser's local storage. It never leaves your device.</p>
+               </Alert>
               <div className="flex items-center justify-between rounded-lg border p-3">
                 <p className="font-medium">Paper History</p>
                 <AlertDialog>
