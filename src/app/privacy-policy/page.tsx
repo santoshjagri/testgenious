@@ -1,17 +1,10 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield } from "lucide-react";
 
 export default function PrivacyPolicyPage() {
-  const [lastUpdated, setLastUpdated] = useState("");
-
-  useEffect(() => {
-    // Set date only on client to avoid hydration mismatch
-    setLastUpdated(new Date().toLocaleDateString());
-  }, []);
 
   return (
     <main className="flex-1 flex flex-col items-center justify-start p-4 sm:p-6 md:p-8">
@@ -23,7 +16,7 @@ export default function PrivacyPolicyPage() {
                     <Shield className="h-8 w-8 text-primary" />
                     Privacy Policy
                 </h1>
-                <p className="text-muted-foreground">Last Updated: {lastUpdated || "..."}</p>
+                <p className="text-muted-foreground">Last Updated: July 29, 2024</p>
             </div>
             
             <p>
