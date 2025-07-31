@@ -5,11 +5,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { FileText, UserSquare2, GraduationCap, ArrowRight } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
-  const { user } = useAuth();
-
   const features = [
     {
       icon: <FileText className="h-8 w-8 text-primary" />,
@@ -49,16 +46,11 @@ export default function HomePage() {
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Button asChild size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-primary/30 transition-shadow">
-                 <Link href={user ? "/dashboard" : "/signup"}>
-                  {user ? "Go to Dashboard" : "Get Started for Free"}
+                 <Link href="/dashboard">
+                  Go to Dashboard
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-               {!user && (
-                <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6">
-                  <Link href="/login">Log In</Link>
-                </Button>
-              )}
             </div>
           </section>
 
@@ -109,3 +101,5 @@ export default function HomePage() {
     </>
   );
 }
+
+    

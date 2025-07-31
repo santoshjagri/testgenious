@@ -5,10 +5,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { FileText, UserSquare2, GraduationCap, Settings, ArrowRight } from 'lucide-react';
-import { AuthGuard } from '@/components/auth/AuthGuard';
 
-
-function DashboardContent() {
+export default function DashboardPage() {
   const tools = [
     {
       icon: <FileText className="h-8 w-8 text-primary" />,
@@ -97,10 +95,4 @@ function DashboardContent() {
   );
 }
 
-export default function DashboardPage() {
-    return (
-        <AuthGuard>
-            <DashboardContent />
-        </AuthGuard>
-    )
-}
+    

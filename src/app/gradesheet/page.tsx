@@ -22,7 +22,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { AuthGuard } from '@/components/auth/AuthGuard';
 
 
 const GRADESHEET_LOCAL_STORAGE_KEY = "gradesheetHistory";
@@ -43,7 +42,7 @@ const getNewFormDefaults = (): GradeSheetFormValues => ({
     subjects: [],
 });
 
-function GradesheetContent() {
+export default function GradesheetPage() {
   const [calculatedResult, setCalculatedResult] = React.useState<CalculatedGradeSheetResult | null>(null);
   const [bulkResults, setBulkResults] = React.useState<CalculatedGradeSheetResult[] | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
@@ -645,10 +644,4 @@ function GradesheetContent() {
   );
 }
 
-export default function GradesheetPage() {
-    return (
-        <AuthGuard>
-            <GradesheetContent />
-        </AuthGuard>
-    )
-}
+    

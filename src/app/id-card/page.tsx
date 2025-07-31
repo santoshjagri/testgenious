@@ -19,7 +19,6 @@ import { IDCardTemplateArray } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
-import { AuthGuard } from '@/components/auth/AuthGuard';
 
 const ID_CARD_LOCAL_STORAGE_KEY = "idCardHistory";
 
@@ -40,7 +39,7 @@ const getNewFormDefaults = (): IDCardFormValues => ({
 });
 
 
-function IDCardContent() {
+export default function IDCardPage() {
   // Creator states
   const [generatedCard, setGeneratedCard] = React.useState<StoredIDCardData | null>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
@@ -437,10 +436,4 @@ function IDCardContent() {
   );
 }
 
-export default function IDCardPage() {
-    return (
-        <AuthGuard>
-            <IDCardContent />
-        </AuthGuard>
-    )
-}
+    

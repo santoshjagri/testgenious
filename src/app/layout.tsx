@@ -6,8 +6,6 @@ import type {Metadata} from 'next';
 import Link from 'next/link';
 import Script from 'next/script';
 import { Home, PlusSquare, History as HistoryIcon, GraduationCap, ClipboardList, Settings, UserSquare2, ClipboardSignature, Lightbulb } from 'lucide-react';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { UserNav } from '@/components/auth/UserNav';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -61,7 +59,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
             <SidebarProvider defaultOpen={true}>
               <Sidebar side="left" collapsible="icon" className="no-print">
                 <SidebarHeader className="p-4 border-b border-sidebar-border">
@@ -114,7 +111,6 @@ export default function RootLayout({
                   </div>
                   <div className="flex items-center gap-4">
                     <ThemeToggle />
-                    <UserNav />
                   </div>
                 </header>
                 <div className="flex-1 overflow-y-auto">
@@ -131,9 +127,10 @@ export default function RootLayout({
                 <Toaster />
               </SidebarInset>
             </SidebarProvider>
-          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
   );
 }
+
+    

@@ -18,7 +18,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertDialogTitleComponent, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { AuthGuard } from '@/components/auth/AuthGuard';
 
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
@@ -29,7 +28,7 @@ const parseManualQuestions = (text?: string): string[] => {
   return text.split('\n').map(q => q.trim()).filter(q => q.length > 0);
 };
 
-function CreatePaperContent() {
+export default function CreatePaperPage() {
   // Creator states
   const [isProcessing, setIsProcessing] = React.useState(false); // Renamed from isLoading
   const [generatedPaper, setGeneratedPaper] = React.useState<ManualQuestionsOutput | null>(null);
@@ -378,10 +377,4 @@ function CreatePaperContent() {
   );
 }
 
-export default function CreatePaperPage() {
-    return (
-        <AuthGuard>
-            <CreatePaperContent />
-        </AuthGuard>
-    )
-}
+    
