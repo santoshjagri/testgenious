@@ -32,7 +32,7 @@ export default function RootLayout({
     // Simulate loading time and then hide the splash screen
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2500); // Splash screen will be visible for 2.5 seconds
+    }, 1500); // Splash screen will be visible for 1.5 seconds
 
     return () => clearTimeout(timer);
   }, []);

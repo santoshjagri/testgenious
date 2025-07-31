@@ -11,7 +11,7 @@ export function SplashScreen() {
   useEffect(() => {
     const fadeOutTimer = setTimeout(() => {
       setIsFadingOut(true);
-    }, 2000); // Start fading out 500ms before it's removed
+    }, 1000); // Start fading out 500ms before it's removed
 
     return () => clearTimeout(fadeOutTimer);
   }, []);
