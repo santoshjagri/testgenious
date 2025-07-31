@@ -45,7 +45,7 @@ export default function HomePage() {
               EduGenius AI is the ultimate toolkit for educators. Save time and reduce administrative burden with our powerful, AI-driven solutions for creating papers, ID cards, and gradesheets.
             </p>
             <div className="mt-10 flex justify-center gap-4">
-              <Button asChild size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-primary/30 transition-shadow">
+              <Button asChild size="lg" className="text-lg px-8 py-6 font-bold border-b-4 border-primary/90 hover:bg-primary/95 active:translate-y-1 active:border-b-2 transition-all duration-150">
                  <Link href="/dashboard">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
