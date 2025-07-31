@@ -16,7 +16,7 @@ import { Loader2, User, BookOpen, CalendarDays, Hash, School, Award, PlusCircle,
 interface GradeSheetFormProps {
   onSubmit: (values: GradeSheetFormValues) => Promise<void>;
   isLoading: boolean;
-  initialValues: GradeSheetFormValues; // Changed to be non-optional
+  initialValues: GradeSheetFormValues; 
 }
 
 const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
@@ -33,8 +33,6 @@ const newSubjectTemplate: Omit<SubjectMarkInput, 'id'> = {
 export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeSheetFormProps) {
   const form = useForm<GradeSheetFormValues>({
     resolver: zodResolver(gradeSheetFormSchema),
-    // The form is now initialized directly with the values from the parent page.
-    // The parent handles both new and editing scenarios.
     defaultValues: initialValues,
   });
 
@@ -44,12 +42,9 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
   });
   
   const [dateType, setDateType] = React.useState(() => {
-    // Set initial date type based on which field has a value
     return initialValues?.nepaliExamDate ? 'BS' : 'AD';
   });
 
-  // This effect ensures the form is reset if the initialValues prop changes,
-  // which can happen if a user navigates between editing different items without a full page reload.
   React.useEffect(() => {
     form.reset(initialValues);
     setDateType(initialValues?.nepaliExamDate ? 'BS' : 'AD');
@@ -65,7 +60,6 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
 
   const handleDateTypeChange = (type: string) => {
     setDateType(type);
-    // Clear the other date field when switching
     if (type === 'AD') {
       form.setValue('nepaliExamDate', '');
     } else {
@@ -293,7 +287,6 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
-                  {/* Theory Marks Section */}
                   <div className="space-y-2 border-r-0 md:border-r md:pr-4 border-dashed">
                       <Label className="text-sm font-semibold">Theory Marks</Label>
                       <div className="grid grid-cols-3 gap-2">
@@ -303,7 +296,6 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                       </div>
                   </div>
 
-                  {/* Practical Marks Section */}
                   <div className="space-y-2">
                       <Label className="text-sm font-semibold">Practical Marks (Optional)</Label>
                       <div className="grid grid-cols-3 gap-2">

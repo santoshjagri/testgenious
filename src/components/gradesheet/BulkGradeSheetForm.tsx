@@ -26,15 +26,16 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
       schoolName: 'ExamGenius Academy',
       studentClass: '',
       examType: 'Final Examination',
-      academicYear: '', // Set statically
+      academicYear: '',
       examDate: '', 
       nepaliExamDate: '',
       subjects: [{ id: crypto.randomUUID(), subjectName: '', theoryFullMarks: 100, theoryPassMarks: 40, practicalFullMarks: undefined, practicalPassMarks: undefined }],
-      students: [{ id: crypto.randomUUID(), studentName: '', rollNo: '', obtainedMarks: {} }],
+      students: [{ id: crypto.randomUUID(), studentName: '', rollNo: '', symbolNo: '', obtainedMarks: {} }],
     },
   });
 
-  // Set date-dependent default values on the client-side to avoid hydration errors
+  const [dateType, setDateType] = React.useState('AD');
+
   React.useEffect(() => {
     form.reset({
       ...form.getValues(),
@@ -43,9 +44,6 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const [dateType, setDateType] = React.useState('AD');
-
 
   const { fields: subjectFields, append: appendSubject, remove: removeSubject } = useFieldArray({
     control: form.control,
@@ -71,7 +69,7 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
             newStudentMarks[subject.id].practical = 0;
         }
     });
-    appendStudent({ id: crypto.randomUUID(), studentName: '', rollNo: '', obtainedMarks: newStudentMarks });
+    appendStudent({ id: crypto.randomUUID(), studentName: '', rollNo: '', symbolNo: '', obtainedMarks: newStudentMarks });
   };
   
   const handleRemoveSubject = (index: number) => {
@@ -99,7 +97,6 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
         
-        {/* --- Shared Info --- */}
         <Card className="border-primary/20">
           <CardHeader className="p-3 sm:p-4">
             <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><School className="mr-2 h-5 w-5" />Shared Information</CardTitle>
@@ -134,7 +131,6 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
           </CardContent>
         </Card>
 
-        {/* --- Subject Definition --- */}
         <Card className="border-primary/20">
           <CardHeader className="p-3 sm:p-4">
             <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><BookOpen className="mr-2 h-5 w-5" />Define Subjects</CardTitle>
@@ -157,7 +153,6 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
           </CardContent>
         </Card>
         
-        {/* --- Student Marks Entry --- */}
         <Card className="border-primary/20">
           <CardHeader className="p-3 sm:p-4">
             <CardTitle className="text-lg sm:text-xl font-semibold text-primary/90 flex items-center"><Users className="mr-2 h-5 w-5" />Student Marks Entry</CardTitle>
