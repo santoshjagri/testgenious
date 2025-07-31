@@ -5,7 +5,7 @@ import type * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguages, ExamTypes } from '@/lib/types';
+import { questionPaperFormSchema, type QuestionPaperFormValues, ExamTypes } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Edit3, Sigma, Mic, MicOff } from 'lucide-react';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, Edit3, Sigma } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -158,34 +158,11 @@ interface QuestionPaperFormProps {
   initialValues?: QuestionPaperFormValues; 
 }
 
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
-}
-
-const languageToCodeMap: { [key: string]: string } = {
-  "English": "en-US", "Nepali": "ne-NP", "Hindi": "hi-IN", "Spanish": "es-ES", 
-  "French": "fr-FR", "German": "de-DE", "Chinese": "zh-CN", "Japanese": "ja-JP", 
-  "Russian": "ru-RU", "Arabic": "ar-SA",
-};
-
 
 export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: QuestionPaperFormProps) {
   const [showSymbols, setShowSymbols] = useState(false);
   const activeInputRef = useRef<HTMLTextAreaElement | null>(null);
   const { toast } = useToast();
-  
-  const [isListening, setIsListening] = useState(false);
-  const [activeSpeechField, setActiveSpeechField] = useState<keyof QuestionPaperFormValues | null>(null);
-  const [isSpeechSupported, setIsSpeechSupported] = useState(false);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
-
-  useEffect(() => {
-    setIsSpeechSupported('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
-  }, []);
-
   
   const form = useForm<QuestionPaperFormValues>({
     resolver: zodResolver(questionPaperFormSchema),
@@ -201,7 +178,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       passMarks: 23,
       timeLimit: '2 hours',
       instructions: '1. All questions are compulsory.\n2. Marks are indicated against each question.\n3. Write neatly and legibly.',
-      generationMode: 'manual',
       manualMcqs: "",
       manualVeryShortQuestions: "",
       manualFillInTheBlanks: "",
@@ -217,68 +193,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       form.reset(initialValues);
     }
   }, [initialValues, form]);
-  
-  const handleToggleSpeech = (fieldName: keyof QuestionPaperFormValues, fieldLabel: string) => {
-    if (!isSpeechSupported) {
-        toast({ title: "Unsupported Browser", description: "Voice input is not supported by your browser.", variant: "destructive" });
-        return;
-    }
-    
-    if (isListening && activeSpeechField === fieldName) {
-        recognitionRef.current?.stop();
-        return;
-    }
-
-    if (isListening) {
-        recognitionRef.current?.stop();
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
-    
-    // Hard-coding language to english, as the language field is removed.
-    recognition.lang = 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onstart = () => {
-        setIsListening(true);
-        setActiveSpeechField(fieldName);
-        toast({ title: `Listening for "${fieldLabel.replace('Questions', '')}"...`, description: "Speak your question. It will stop automatically when you pause." });
-    };
-
-    recognition.onresult = (event) => {
-        let newTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-                newTranscript += event.results[i][0].transcript + '\n';
-            }
-        }
-        
-        if (newTranscript) {
-            const currentVal = form.getValues(fieldName) as string || '';
-            const newVal = currentVal ? `${currentVal}${newTranscript}` : newTranscript;
-            form.setValue(fieldName, newVal, { shouldValidate: true });
-        }
-    };
-
-    recognition.onerror = (event) => {
-        let message = `An error occurred: ${event.error}`;
-        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-            message = "Microphone access was denied. Please enable it in your browser settings.";
-        }
-        toast({ title: "Voice Input Error", description: message, variant: "destructive" });
-    };
-    
-    recognition.onend = () => {
-        setIsListening(false);
-        setActiveSpeechField(null);
-        recognitionRef.current = null;
-    };
-
-    recognition.start();
-  };
   
   const handleSymbolClick = (symbol: string) => {
     const target = activeInputRef.current;
@@ -315,32 +229,11 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                        {showSymbols ? "Hide" : "Show"} Symbols
                     </Button>
                 )}
-                {isSpeechSupported && (
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    className={cn("h-8 w-8", isListening && activeSpeechField === name && "bg-destructive text-destructive-foreground hover:bg-destructive/90")}
-                                    onClick={() => handleToggleSpeech(name, label)}
-                                    disabled={isListening && activeSpeechField !== name && activeSpeechField !== null}
-                                >
-                                    {isListening && activeSpeechField === name ? <MicOff className="h-4 w-4"/> : <Mic className="h-4 w-4"/>}
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{isListening && activeSpeechField === name ? "Stop Recording" : "Record from Mic"}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                )}
              </div>
           </div>
           <FormControl>
             <Textarea
-              placeholder="Enter questions here, one per line. Or click the mic to speak."
+              placeholder="Enter questions here, one per line."
               className="min-h-[80px] sm:min-h-[100px] resize-y text-sm sm:text-base"
               {...field}
               value={field.value as string || ""}
@@ -564,7 +457,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                 <div className="p-3 sm:p-4">
                   <CardTitle className="text-lg sm:text-xl font-headline text-primary flex items-center"><Edit3 className="mr-2 h-5 w-5"/>Manual Question Entry</CardTitle>
                   <CardDescription className="text-sm sm:text-base mt-1">
-                      Type your questions directly, or click the microphone to use voice input.
+                      Type your questions directly.
                   </CardDescription>
                 </div>
                   {showSymbols && (
@@ -600,3 +493,5 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     </Card>
   );
 }
+
+    
