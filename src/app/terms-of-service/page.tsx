@@ -16,7 +16,7 @@ export default function TermsOfServicePage() {
                 <FileText className="h-8 w-8 text-primary" />
                 Terms of Service
               </h1>
-              <p className="text-muted-foreground">Last Updated: July 29, 2024</p>
+              <p className="text-muted-foreground">Last Updated: August 1, 2024</p>
             </div>
             
             <p>
