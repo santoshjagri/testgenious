@@ -68,7 +68,7 @@ export default function GradesheetPage() {
 
   // Load history from local storage
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (activeTab === 'history' && typeof window !== 'undefined') {
       try {
         const storedHistory = localStorage.getItem(GRADESHEET_LOCAL_STORAGE_KEY);
         if (storedHistory) {
@@ -83,19 +83,22 @@ export default function GradesheetPage() {
         });
       }
     }
-  }, [toast, activeTab]); // Reload history when tab is switched to
+  }, [toast, activeTab]);
 
   React.useEffect(() => {
-    const gradeSheetIdToEdit = localStorage.getItem(EDIT_GRADESHEET_ID_KEY);
-    if (gradeSheetIdToEdit) {
-      handleEditGradeSheet(gradeSheetIdToEdit, true); // true to indicate it's from a legacy link
-      localStorage.removeItem(EDIT_GRADESHEET_ID_KEY);
-    } else {
-      setInitialFormValues(getNewFormDefaults());
-      setCalculatedResult(null);
-      setEditingGradeSheetId(null);
+    if (typeof window !== 'undefined') {
+        const gradeSheetIdToEdit = localStorage.getItem(EDIT_GRADESHEET_ID_KEY);
+        if (gradeSheetIdToEdit) {
+            handleEditGradeSheet(gradeSheetIdToEdit, true); // true to indicate it's from a legacy link
+            localStorage.removeItem(EDIT_GRADESHEET_ID_KEY);
+        } else {
+            setInitialFormValues(getNewFormDefaults());
+            setCalculatedResult(null);
+            setEditingGradeSheetId(null);
+        }
     }
-  }, []); // Only run once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filteredHistoryItems = historyItems.filter(item =>
     item.gradesheetData.studentName.toLowerCase().includes(searchQuery.toLowerCase())

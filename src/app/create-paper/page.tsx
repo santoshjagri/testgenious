@@ -18,9 +18,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertDialogTitleComponent, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
-// AI Flow import is removed
-// import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import type { GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 
 
@@ -75,6 +72,7 @@ export default function CreatePaperPage() {
         localStorage.removeItem(EDIT_PAPER_ID_KEY);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleEditPaper = (paperId: string, fromLegacyLink = false) => {
@@ -357,7 +355,7 @@ export default function CreatePaperPage() {
               {historyItems.map((item) => (
                 <Card key={item.id} className="flex flex-col shadow-md hover:shadow-lg transition-shadow duration-200 rounded-lg">
                   <CardHeader className="pb-3"><CardTitle className="text-base font-semibold text-primary flex items-center gap-2"><FileQuestion className="h-5 w-5 flex-shrink-0"/><span className="truncate">{item.formSnapshot.subject}</span></CardTitle><p className="text-sm text-muted-foreground pt-1">{item.formSnapshot.classLevel}</p></CardHeader>
-                  <CardContent className="space-y-2 text-xs flex-grow py-0 pb-3"><p><strong>Exam:</strong> {item.formSnapshot.examType}</p><p><strong>Marks:</strong> {item.formSnapshot.totalMarks}</p><p><strong>Mode:</strong> <span className="capitalize">{item.formSnapshot.generationMode || 'manual'}</span></p><p className="mt-2 text-xs text-muted-foreground pt-2 border-t flex items-center"><CalendarDays className="h-3 w-3 mr-1.5"/>{new Date(item.dateGenerated).toLocaleDateString()}</p></CardContent>
+                  <CardContent className="space-y-2 text-xs flex-grow py-0 pb-3"><p><strong>Exam:</strong> {item.formSnapshot.examType}</p><p><strong>Marks:</strong> {item.formSnapshot.totalMarks}</p><p className="mt-2 text-xs text-muted-foreground pt-2 border-t flex items-center"><CalendarDays className="h-3 w-3 mr-1.5"/>{new Date(item.dateGenerated).toLocaleDateString()}</p></CardContent>
                   <CardFooter className="border-t p-1 flex justify-around items-center">
                     <Button variant="ghost" size="sm" onClick={() => handleViewPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-xs h-8"><Eye className="mr-1 h-3 w-3" /> View</Button>
                     <Button variant="ghost" size="sm" onClick={() => handleEditPaper(item.id)} className="text-foreground hover:bg-secondary flex-1 text-xs h-8"><Edit className="mr-1 h-3 w-3" /> Edit</Button>
@@ -379,5 +377,3 @@ export default function CreatePaperPage() {
     </main>
   );
 }
-
-    

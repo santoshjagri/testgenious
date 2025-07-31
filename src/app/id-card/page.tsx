@@ -65,10 +65,10 @@ export default function IDCardPage() {
     if (!editingCardId) {
         setInitialFormValues(getNewFormDefaults());
     }
-  }, []);
+  }, [editingCardId]);
 
   React.useEffect(() => {
-    if (activeTab === 'history') {
+    if (activeTab === 'history' && typeof window !== 'undefined') {
       try {
         const storedHistory = localStorage.getItem(ID_CARD_LOCAL_STORAGE_KEY);
         if (storedHistory) {

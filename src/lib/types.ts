@@ -139,10 +139,6 @@ export const questionPaperFormSchema = z.object({
   timeLimit: z.string().min(1, "Time limit is required. (e.g., 2 hours, 90 minutes)"),
   instructions: z.string().optional(),
   
-  // This field is kept for data structure compatibility but will not be shown in the UI.
-  // It ensures existing stored data doesn't break.
-  generationMode: z.enum(['ai', 'manual']).default('manual').optional(),
-
   manualMcqs: z.string().optional().describe("Enter one MCQ per line, including marks. E.g., What is 2+2? (1 mark)"),
   manualVeryShortQuestions: z.string().optional().describe("Enter one very short question per line, including marks."),
   manualFillInTheBlanks: z.string().optional().describe("Enter one fill-in-the-blank question per line, including marks."),
@@ -160,14 +156,6 @@ export type QuestionPaperFormValues = z.infer<typeof questionPaperFormSchema>;
 
 export type StorableQuestionPaperFormValues = Omit<QuestionPaperFormValues, 'logo'> & {
   logoDataUri?: string;
-};
-
-// This type remains for history compatibility but is no longer actively used for AI input
-export type AppGenerateQuestionsInput = {
-  logoDataUri?: string;
-  language: (typeof SupportedLanguages)[number];
-  examType: (typeof ExamTypes)[number];
-  customPrompt?: string;
 };
 
 export interface StoredQuestionPaper {
