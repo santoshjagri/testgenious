@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "export": "next export"
+    "start": "next start",
+    "genkit:dev": "node --watch src/ai/dev.ts",
+    "genkit:watch": "genkit-cli flow:start --watch"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.8.0",
