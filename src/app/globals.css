@@ -90,6 +90,38 @@ body {
   }
 }
 
+/* --- Splash Screen --- */
+@keyframes splash-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes splash-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes splash-logo-zoom {
+  from { transform: scale(0.8); }
+  to { transform: scale(1); }
+}
+@keyframes splash-text-appear {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.splash-screen {
+  animation: splash-fade-in 0.5s ease-out forwards;
+}
+.splash-screen.fade-out {
+  animation: splash-fade-out 0.5s ease-in forwards;
+}
+.splash-logo {
+  animation: splash-logo-zoom 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+.splash-text {
+  animation: splash-text-appear 0.8s ease-out 0.5s forwards;
+  opacity: 0;
+}
+
 /* GradeSheet Template Styles */
 .printable-area[data-template="good"] .gs-header {
   background-color: hsl(var(--primary) / 0.05);

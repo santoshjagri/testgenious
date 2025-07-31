@@ -1,4 +1,7 @@
 
+"use client";
+
+import * as React from 'react';
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import Script from 'next/script';
@@ -10,21 +13,35 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from '@/components/theme-toggle';
+import { SplashScreen } from '@/components/system/SplashScreen';
 import './globals.css';
 
-export const metadata: Metadata = {
-  title: 'EduGenius AI',
-  description: 'An AI-powered suite for educators to create papers, ID cards, and gradesheets.',
-};
+// export const metadata: Metadata = {
+//   title: 'EduGenius AI',
+//   description: 'An AI-powered suite for educators to create papers, ID cards, and gradesheets.',
+// };
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // Simulate loading time and then hide the splash screen
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500); // Splash screen will be visible for 2.5 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <title>EduGenius AI</title>
+        <meta name="description" content="An AI-powered suite for educators to create papers, ID cards, and gradesheets." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
@@ -36,6 +53,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased bg-background">
+        {isLoading && <SplashScreen />}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
