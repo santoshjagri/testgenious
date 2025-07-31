@@ -11,8 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, School, Award, PlusCircle, Trash2, ImagePlus, CalendarDays, BookOpen, Users, Hash } from 'lucide-react';
-import { DatePicker } from '@/components/ui/date-picker';
-import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 
@@ -29,7 +27,7 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
       studentClass: '',
       examType: 'Final Examination',
       academicYear: '', // Set statically
-      examDate: '', // Set statically
+      examDate: '', 
       nepaliExamDate: '',
       subjects: [{ id: crypto.randomUUID(), subjectName: '', theoryFullMarks: 100, theoryPassMarks: 40, practicalFullMarks: undefined, practicalPassMarks: undefined }],
       students: [{ id: crypto.randomUUID(), studentName: '', rollNo: '', obtainedMarks: {} }],
@@ -41,10 +39,12 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
     form.reset({
       ...form.getValues(),
       academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
-      examDate: format(new Date(), "yyyy-MM-dd"),
+      examDate: '',
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [dateType, setDateType] = React.useState('AD');
 
 
   const { fields: subjectFields, append: appendSubject, remove: removeSubject } = useFieldArray({
@@ -86,6 +86,15 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
     removeSubject(index);
   }
 
+  const handleDateTypeChange = (type: string) => {
+    setDateType(type);
+    if (type === 'AD') {
+      form.setValue('nepaliExamDate', '');
+    } else {
+      form.setValue('examDate', '');
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
@@ -107,11 +116,20 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <FormField name="examType" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Exam Type</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger></FormControl><SelectContent>{GradeSheetExamTypes.map(type => (<SelectItem key={type} value={type}>{type}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem> )} />
-               <div />
-            </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              <FormField name="examDate" control={form.control} render={({ field }) => ( <FormItem className="flex flex-col"><FormLabel className="mb-1.5">Exam Date (A.D.)</FormLabel><FormControl><DatePicker date={field.value ? new Date(field.value) : undefined} setDate={(date) => { field.onChange(date ? format(date, "yyyy-MM-dd") : ""); }}/></FormControl><FormMessage /></FormItem> )} />
-              <FormField name="nepaliExamDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Exam Date (B.S.) (Optional)</FormLabel><FormControl><Input placeholder="e.g., 2081-03-25" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                <div className="grid grid-cols-2 gap-2">
+                    <FormItem>
+                        <FormLabel>Date Type</FormLabel>
+                        <Select value={dateType} onValueChange={handleDateTypeChange}>
+                            <SelectTrigger><SelectValue/></SelectTrigger>
+                            <SelectContent><SelectItem value="AD">A.D.</SelectItem><SelectItem value="BS">B.S.</SelectItem></SelectContent>
+                        </Select>
+                    </FormItem>
+                    {dateType === 'AD' ? (
+                        <FormField name="examDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Choose Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage/></FormItem> )} />
+                    ) : (
+                        <FormField name="nepaliExamDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Enter Date</FormLabel><FormControl><Input placeholder="e.g., 2081-04-01" {...field} /></FormControl><FormMessage/></FormItem> )} />
+                    )}
+               </div>
             </div>
           </CardContent>
         </Card>

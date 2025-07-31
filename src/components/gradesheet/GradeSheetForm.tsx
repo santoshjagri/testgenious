@@ -12,8 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, User, BookOpen, CalendarDays, Hash, School, Award, PlusCircle, Trash2, ImagePlus } from 'lucide-react';
-import { DatePicker } from '@/components/ui/date-picker';
-import { format } from 'date-fns';
 
 interface GradeSheetFormProps {
   onSubmit: (values: GradeSheetFormValues) => Promise<void>;
@@ -44,11 +42,17 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
     control: form.control,
     name: "subjects",
   });
+  
+  const [dateType, setDateType] = React.useState(() => {
+    // Set initial date type based on which field has a value
+    return initialValues?.nepaliExamDate ? 'BS' : 'AD';
+  });
 
   // This effect ensures the form is reset if the initialValues prop changes,
   // which can happen if a user navigates between editing different items without a full page reload.
   React.useEffect(() => {
     form.reset(initialValues);
+    setDateType(initialValues?.nepaliExamDate ? 'BS' : 'AD');
   }, [initialValues, form]);
 
 
@@ -58,6 +62,17 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
       id: crypto.randomUUID(), 
     });
   };
+
+  const handleDateTypeChange = (type: string) => {
+    setDateType(type);
+    // Clear the other date field when switching
+    if (type === 'AD') {
+      form.setValue('nepaliExamDate', '');
+    } else {
+      form.setValue('examDate', '');
+    }
+  };
+
 
   return (
     <Form {...form}>
@@ -200,38 +215,45 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-               <FormField
-                control={form.control}
-                name="examDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="mb-1 sm:mb-1.5 text-sm sm:text-base flex items-center"><CalendarDays className="mr-2 h-4 w-4"/>Exam Date (A.D.)</FormLabel>
-                    <FormControl>
-                       <DatePicker
-                        date={field.value ? new Date(field.value) : undefined}
-                        setDate={(date) => {
-                          field.onChange(date ? format(date, "yyyy-MM-dd") : "");
-                        }}
-                        className="text-sm sm:text-base"
-                      />
-                    </FormControl>
-                    <FormMessage className="mt-1 sm:mt-2"/>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="nepaliExamDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="mb-1 sm:mb-1.5 text-sm sm:text-base flex items-center"><CalendarDays className="mr-2 h-4 w-4"/>Exam Date (B.S.) (Optional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., 2081-03-25" {...field} className="text-sm sm:text-base"/>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+               <div className="grid grid-cols-2 gap-2">
+                    <FormItem>
+                        <FormLabel className="text-sm sm:text-base">Date Type</FormLabel>
+                        <Select value={dateType} onValueChange={handleDateTypeChange}>
+                            <FormControl>
+                                <SelectTrigger><SelectValue/></SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="AD">A.D.</SelectItem>
+                                <SelectItem value="BS">B.S.</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </FormItem>
+                    {dateType === 'AD' ? (
+                        <FormField
+                            control={form.control}
+                            name="examDate"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-sm sm:text-base">Choose Date</FormLabel>
+                                    <FormControl><Input type="date" {...field} /></FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                    ) : (
+                         <FormField
+                            control={form.control}
+                            name="nepaliExamDate"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-sm sm:text-base">Enter Date</FormLabel>
+                                    <FormControl><Input placeholder="e.g., 2081-04-01" {...field} /></FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                    )}
+               </div>
             </div>
           </CardContent>
         </Card>

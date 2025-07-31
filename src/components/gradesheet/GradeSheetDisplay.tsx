@@ -24,6 +24,10 @@ export function GradeSheetDisplay({
 }: GradeSheetDisplayProps) {
   
   const isValidLogoDataUri = result.logoDataUri && result.logoDataUri.startsWith('data:');
+  
+  const displayDate = result.examDate ? new Date(result.examDate).toLocaleDateString() : result.nepaliExamDate;
+  const dateLabel = result.examDate ? 'Date (A.D.):' : 'Date (B.S.):';
+
 
   return (
     <Card className="shadow-2xl printable-area" id={printableId} data-template={template}>
@@ -70,8 +74,7 @@ export function GradeSheetDisplay({
           {result.studentId && <div className="flex items-center"><Hash className="w-3 h-3 mr-1.5"/><strong>Student ID:</strong> {result.studentId}</div>}
           {result.symbolNo && <div className="flex items-center"><Hash className="w-3 h-3 mr-1.5"/><strong>Symbol No:</strong> {result.symbolNo}</div>}
           <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>Academic Year:</strong> {result.academicYear}</div>
-          <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>Date (A.D.):</strong> {new Date(result.examDate).toLocaleDateString()}</div>
-          {result.nepaliExamDate && <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>Date (B.S.):</strong> {result.nepaliExamDate}</div>}
+          {displayDate && <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>{dateLabel}</strong> {displayDate}</div>}
         </div>
       </CardHeader>
 
@@ -167,5 +170,3 @@ export function GradeSheetDisplay({
     </Card>
   );
 }
-
-    

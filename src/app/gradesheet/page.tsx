@@ -39,9 +39,6 @@ const getNewFormDefaults = (): GradeSheetFormValues => ({
     academicYear: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
     examDate: '', 
     nepaliExamDate: '',
-    subjects: [
-        { subjectName: 'Sample Subject', theoryFullMarks: 100, theoryPassMarks: 40, theoryObtainedMarks: 0, id: crypto.randomUUID() }
-    ],
 });
 
 export default function GradesheetPage() {
