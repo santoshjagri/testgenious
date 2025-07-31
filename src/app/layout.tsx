@@ -65,7 +65,8 @@ export default function RootLayout({
             <Sidebar side="left" collapsible="icon" className="no-print">
               <SidebarHeader className="p-4 border-b border-sidebar-border">
                 <Link href="/" className="flex items-center gap-3 text-lg font-semibold text-sidebar-primary hover:text-sidebar-primary/90 transition-colors">
-                  <Image src="/logo.png" alt="EduGenius AI Logo" width={140} height={32} className="object-contain" />
+                  <Home />
+                  <span className="group-data-[collapsible=icon]:hidden">EduGenius AI</span>
                 </Link>
               </SidebarHeader>
               <SidebarContent className="p-2">
