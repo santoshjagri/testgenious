@@ -226,7 +226,7 @@ export default function CreatePaperPage() {
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfPageWidth = pdf.internal.pageSize.getWidth();
         const pdfPageHeight = pdf.internal.pageSize.getHeight();
-        const marginTopMM = 15, marginBottomMM = 15, marginLeftMM = 12, marginRightMM = 12;
+        const marginTopMM = 15, marginBottomMM = 15, marginLeftMM = 10, marginRightMM = 10;
         const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
         const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
 
@@ -234,14 +234,10 @@ export default function CreatePaperPage() {
         const fullCanvasWidthPx = fullCanvas.width;
         const fullCanvasHeightPx = fullCanvas.height;
         const pxPerMm = fullCanvasWidthPx / contentWidthMM;
-        let pageSliceHeightPx = contentHeightMM * pxPerMm;
+        let pageSliceHeightPx = contentHeightMM * pxPerMm * 0.98;
         
         let currentYpx = 0;
-        let isFirstPage = true;
         while (currentYpx < fullCanvasHeightPx) {
-            if (!isFirstPage) {
-                pdf.addPage();
-            }
             const remainingHeightPx = fullCanvasHeightPx - currentYpx;
             const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
             
@@ -253,10 +249,13 @@ export default function CreatePaperPage() {
                 pageCtx.drawImage(fullCanvas, 0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 0, 0, fullCanvasWidthPx, sliceForThisPagePx);
                 const pageImgData = pageCanvas.toDataURL('image/png', 0.95);
                 const actualContentHeightMMForThisPage = sliceForThisPagePx / pxPerMm;
+
+                if (currentYpx > 0) {
+                    pdf.addPage();
+                }
                 pdf.addImage(pageImgData, 'PNG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
             }
             currentYpx += pageSliceHeightPx;
-            isFirstPage = false;
         }
 
         const data = selectedPaperForView?.formSnapshot || formSnapshotForDisplay;
@@ -380,3 +379,5 @@ export default function CreatePaperPage() {
     </main>
   );
 }
+
+    
