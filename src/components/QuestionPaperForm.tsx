@@ -3,13 +3,12 @@
 
 import type * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { questionPaperFormSchema, type QuestionPaperFormValues, SupportedLanguages, ExamTypes } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Form,
@@ -21,8 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Brain, Edit3, Lightbulb, MessageSquareText, Sparkles, CalendarIcon, Sigma, Mic, MicOff, History as HistoryIcon } from 'lucide-react';
-import { generateQuestions, type GenerateQuestionsInput, type GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
+import { Loader2, FileText, Building, Type, Code, ListOrdered, PencilLine, ClipboardCheck, CalculatorIcon, FileSignature, MapPin, ImagePlus, FileQuestion, LanguagesIcon, Edit3, Sigma, Mic, MicOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -160,7 +158,6 @@ interface QuestionPaperFormProps {
   initialValues?: QuestionPaperFormValues; 
 }
 
-// Add this type declaration for the SpeechRecognition API
 declare global {
   interface Window {
     SpeechRecognition: typeof SpeechRecognition;
@@ -176,7 +173,6 @@ const languageToCodeMap: { [key: string]: string } = {
 
 
 export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: QuestionPaperFormProps) {
-  const [isProcessingAiToManual, setIsProcessingAiToManual] = useState(false);
   const [showSymbols, setShowSymbols] = useState(false);
   const activeInputRef = useRef<HTMLTextAreaElement | null>(null);
   const { toast } = useToast();
@@ -187,7 +183,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
-    // This check needs to be in useEffect to avoid server-side rendering errors.
     setIsSpeechSupported('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
   }, []);
 
@@ -206,16 +201,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       passMarks: 23,
       timeLimit: '2 hours',
       instructions: '1. All questions are compulsory.\n2. Marks are indicated against each question.\n3. Write neatly and legibly.',
-      language: "English",
-      customPrompt: '',
-      generationMode: 'ai',
-      mcqCount: 5,
-      veryShortQuestionCount: 0,
-      fillInTheBlanksCount: 0,
-      trueFalseCount: 0,
-      shortQuestionCount: 3,
-      longQuestionCount: 2,
-      numericalPracticalCount: 0,
+      generationMode: 'manual',
       manualMcqs: "",
       manualVeryShortQuestions: "",
       manualFillInTheBlanks: "",
@@ -229,46 +215,8 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
   useEffect(() => {
     if (initialValues) {
       form.reset(initialValues);
-    } else {
-      form.reset({
-        institutionName: 'ExamGenius AI Institute',
-        institutionAddress: '',
-        logo: undefined, 
-        classLevel: '',
-        subject: '',
-        subjectCode: '',
-        examType: 'Final Examination',
-        manualDate: '',
-        totalMarks: 70,
-        passMarks: 23,
-        timeLimit: '2 hours',
-        instructions: '1. All questions are compulsory.\n2. Marks are indicated against each question.\n3. Write neatly and legibly.',
-        language: "English",
-        customPrompt: '',
-        generationMode: 'ai',
-        mcqCount: 5,
-        veryShortQuestionCount: 0,
-        fillInTheBlanksCount: 0,
-        trueFalseCount: 0,
-        shortQuestionCount: 3,
-        longQuestionCount: 2,
-        numericalPracticalCount: 0,
-        manualMcqs: "",
-        manualVeryShortQuestions: "",
-        manualFillInTheBlanks: "",
-        manualTrueFalseQuestions: "",
-        manualShortQuestions: "",
-        manualLongQuestions: "",
-        manualNumericalPracticalQuestions: "",
-      });
     }
   }, [initialValues, form]);
-
-
-  const generationMode = useWatch({
-    control: form.control,
-    name: 'generationMode',
-  });
   
   const handleToggleSpeech = (fieldName: keyof QuestionPaperFormValues, fieldLabel: string) => {
     if (!isSpeechSupported) {
@@ -276,13 +224,11 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
         return;
     }
     
-    // If listening and it's the current field's button clicked, stop it.
     if (isListening && activeSpeechField === fieldName) {
         recognitionRef.current?.stop();
         return;
     }
 
-    // Stop any other field that might be listening before starting a new one.
     if (isListening) {
         recognitionRef.current?.stop();
     }
@@ -291,8 +237,8 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
     
-    const langValue = form.getValues('language');
-    recognition.lang = languageToCodeMap[langValue] || 'en-US';
+    // Hard-coding language to english, as the language field is removed.
+    recognition.lang = 'en-US';
     recognition.continuous = false;
     recognition.interimResults = false;
 
@@ -332,66 +278,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
     };
 
     recognition.start();
-  };
-
-
-  const handleProcessAiToManual = async () => {
-    setIsProcessingAiToManual(true);
-    const values = form.getValues();
-
-    const aiInput: GenerateQuestionsInput = {
-      classLevel: values.classLevel,
-      subject: values.subject,
-      totalMarks: values.totalMarks,
-      passMarks: values.passMarks,
-      timeLimit: values.timeLimit,
-      instructions: values.instructions || 'All questions are compulsory.',
-      examType: values.examType,
-      institutionName: values.institutionName || 'ExamGenius AI Institute',
-      institutionAddress: values.institutionAddress || '',
-      subjectCode: values.subjectCode || '',
-      language: values.language,
-      customPrompt: values.customPrompt,
-      mcqCount: values.mcqCount,
-      veryShortQuestionCount: values.veryShortQuestionCount,
-      shortQuestionCount: values.shortQuestionCount,
-      longQuestionCount: values.longQuestionCount,
-      fillInTheBlanksCount: values.fillInTheBlanksCount,
-      trueFalseCount: values.trueFalseCount,
-      numericalPracticalCount: values.numericalPracticalCount,
-    };
-
-    try {
-      const result: GenerateQuestionsOutput = await generateQuestions(aiInput);
-      
-      form.setValue('manualMcqs', result.mcqs?.join('\n') || '');
-      form.setValue('manualVeryShortQuestions', result.veryShortQuestions?.join('\n') || '');
-      form.setValue('manualFillInTheBlanks', result.fillInTheBlanks?.join('\n') || '');
-      form.setValue('manualTrueFalseQuestions', result.trueFalseQuestions?.join('\n') || '');
-      form.setValue('manualShortQuestions', result.shortQuestions?.join('\n') || '');
-      form.setValue('manualLongQuestions', result.longQuestions?.join('\n') || '');
-      form.setValue('manualNumericalPracticalQuestions', result.numericalPracticalQuestions?.join('\n') || '');
-      
-      form.setValue('generationMode', 'manual');
-      toast({
-        title: "AI Draft Complete!",
-        description: "Questions populated in manual fields. Review and edit as needed, then click 'Update/Generate Question Paper'.",
-      });
-
-    } catch (error) {
-      console.error("Error processing AI to manual:", error);
-      let errorMessage = "Failed to get AI draft. Please try again.";
-      if (error instanceof Error) {
-        errorMessage = error.message.substring(0, 200);
-      }
-      toast({
-        title: "AI Draft Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessingAiToManual(false);
-    }
   };
   
   const handleSymbolClick = (symbol: string) => {
@@ -467,24 +353,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
       )}
     />
   );
-  
-  const aiCountField = (name: keyof QuestionPaperFormValues, label: string, icon: React.ReactNode, description?: string) => (
-     <FormField
-        control={form.control}
-        name={name}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="flex items-center text-sm sm:text-base">{icon}{label}</FormLabel>
-            <FormControl>
-              <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} value={field.value as number || 0} className="text-sm sm:text-base"/>
-            </FormControl>
-            {description && <FormDescription className="text-xs sm:text-sm">{description}</FormDescription>}
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-  );
-
 
   return (
     <Card className="w-full max-w-3xl mx-auto shadow-xl no-print">
@@ -493,7 +361,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
             <div className="flex-grow">
                 <CardTitle className="text-2xl sm:text-3xl font-headline text-primary flex items-center">
                   <FileText className="mr-2 sm:mr-3 h-6 w-6 sm:h-8 sm:w-8" />
-                  ExamGenius AI
+                  ExamGenius
                 </CardTitle>
                 <CardDescription className="font-body text-sm sm:text-base">
                   {initialValues ? "Edit the details below to update your question paper." : "Fill in the details below to generate your comprehensive question paper."}
@@ -625,45 +493,6 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
                   )}
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <FormField
-                  control={form.control}
-                  name="language"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center text-sm sm:text-base"><LanguagesIcon className="mr-2 h-4 w-4" />Language for Questions</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="text-sm sm:text-base">
-                            <SelectValue placeholder="Select language for questions" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {SupportedLanguages.map(lang => (
-                            <SelectItem key={lang} value={lang} className="text-sm sm:text-base">{lang}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription className="text-xs sm:text-sm">AI and Voice Input will use this language.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="manualDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center text-sm sm:text-base"><CalendarIcon className="mr-2 h-4 w-4" />Paper Date (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 2024-07-15" {...field} value={field.value || ""} className="text-sm sm:text-base"/>
-                      </FormControl>
-                      <FormDescription className="text-xs sm:text-sm">Enter if specific date needed. Else, today's date is used.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
             </div>
 
             <div className="space-y-4 sm:space-y-6">
@@ -716,7 +545,7 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
               name="instructions"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center text-sm sm:text-base"><MessageSquareText className="mr-2 h-4 w-4" />Instructions for Students</FormLabel>
+                  <FormLabel className="flex items-center text-sm sm:text-base">Instructions for Students</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="e.g., All questions are compulsory. Marks are indicated..."
@@ -730,130 +559,32 @@ export function QuestionPaperForm({ onSubmit, isLoading, initialValues }: Questi
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="generationMode"
-              render={({ field }) => (
-                <FormItem className="space-y-2 sm:space-y-3">
-                  <FormLabel className="text-base sm:text-lg font-semibold flex items-center"><Brain className="mr-2 h-5 w-5 text-primary" />Question Generation Method</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-4"
-                    >
-                      <FormItem className="flex items-center space-x-2 sm:space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="ai" />
-                        </FormControl>
-                        <FormLabel className="font-normal flex items-center text-sm sm:text-base"><Brain className="mr-2 h-4 w-4"/>AI Generate Questions</FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-2 sm:space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="manual" />
-                        </FormControl>
-                        <FormLabel className="font-normal flex items-center text-sm sm:text-base"><Edit3 className="mr-2 h-4 w-4"/>Manually Enter Questions</FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {generationMode === 'ai' && (
-              <Card className="bg-secondary/30 p-3 sm:p-4 border border-primary/20">
-                <CardHeader className="p-1 sm:p-2">
-                   <CardTitle className="text-lg sm:text-xl font-headline text-primary">AI Question Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="p-1 sm:p-2 space-y-4 sm:space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="customPrompt"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center text-sm sm:text-base"><Lightbulb className="mr-2 h-4 w-4" />Specific Instructions/Topics for AI (Optional)</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="e.g., Focus on Chapter 5, or include questions about renewable energy."
-                              className="min-h-[70px] sm:min-h-[80px] resize-y text-sm sm:text-base"
-                              {...field}
-                              value={field.value || ""}
-                            />
-                          </FormControl>
-                           <FormDescription className="text-xs sm:text-sm">Provide keywords, topics, or specific instructions to guide the AI.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                   <CardDescription className="pt-2 sm:pt-4 border-t text-sm sm:text-base">Specify the number of questions for each type for AI generation.</CardDescription>
-                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                    {aiCountField("mcqCount", "MCQs", <ListOrdered className="mr-2 h-4 w-4" />)}
-                    {aiCountField("veryShortQuestionCount", "Very Short Answer", <FileQuestion className="mr-2 h-4 w-4" />)}
-                    {aiCountField("fillInTheBlanksCount", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />)}
-                    {aiCountField("trueFalseCount", "True/False", <ClipboardCheck className="mr-2 h-4 w-4" />)}
-                    {aiCountField("shortQuestionCount", "Short Answer", <FileText className="mr-2 h-4 w-4" />)}
-                    {aiCountField("longQuestionCount", "Long Answer", <FileSignature className="mr-2 h-4 w-4" />)}
-                    {aiCountField("numericalPracticalCount", "Numerical/Practical", <CalculatorIcon className="mr-2 h-4 w-4" />, "If applicable to subject.")}
-                   </div>
-                   <div className="pt-2 sm:pt-4 border-t">
-                      <Button 
-                        type="button" 
-                        onClick={handleProcessAiToManual} 
-                        disabled={isProcessingAiToManual || isLoading}
-                        variant="outline"
-                        className="w-full text-sm sm:text-base"
-                      >
-                        {isProcessingAiToManual ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                            Processing AI Draft...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                            Generate AI Draft
-                          </>
-                        )}
-                      </Button>
-                      <FormDescription className="mt-1 sm:mt-2 text-center text-xs sm:text-sm">
-                        Click this to let AI generate questions based on the counts above and populate them into the 'Manually Enter Questions' section below. You can then edit them before final submission.
-                      </FormDescription>
-                   </div>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="bg-secondary/30 border border-primary/20">
+              <CardHeader className="p-0">
+                <div className="p-3 sm:p-4">
+                  <CardTitle className="text-lg sm:text-xl font-headline text-primary flex items-center"><Edit3 className="mr-2 h-5 w-5"/>Manual Question Entry</CardTitle>
+                  <CardDescription className="text-sm sm:text-base mt-1">
+                      Type your questions directly, or click the microphone to use voice input.
+                  </CardDescription>
+                </div>
+                  {showSymbols && (
+                      <div className="sticky top-0 z-10 bg-secondary/95 backdrop-blur-sm shadow-md border-b border-t border-border">
+                          <SymbolPalette onSymbolClick={handleSymbolClick} />
+                      </div>
+                  )}
+              </CardHeader>
+               <CardContent className="p-3 sm:p-4 space-y-4 sm:space-y-6">
+                  {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, true)}
+                  {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />)}
+                  {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />)}
+               </CardContent>
+            </Card>
 
-            {generationMode === 'manual' && (
-              <Card className="bg-secondary/30 border border-primary/20">
-                <CardHeader className="p-0">
-                  <div className="p-3 sm:p-4">
-                    <CardTitle className="text-lg sm:text-xl font-headline text-primary">Manual Question Entry</CardTitle>
-                    <CardDescription className="text-sm sm:text-base mt-1">
-                        Type your questions directly, or click the microphone to use voice input.
-                    </CardDescription>
-                  </div>
-                    {showSymbols && (
-                        <div className="sticky top-0 z-10 bg-secondary/95 backdrop-blur-sm shadow-md border-b border-t border-border">
-                            <SymbolPalette onSymbolClick={handleSymbolClick} />
-                        </div>
-                    )}
-                </CardHeader>
-                 <CardContent className="p-3 sm:p-4 space-y-4 sm:space-y-6">
-                    {manualQuestionField("manualMcqs", "Multiple Choice Questions", <ListOrdered className="mr-2 h-4 w-4" />, true)}
-                    {manualQuestionField("manualVeryShortQuestions", "Very Short Answer Questions", <FileQuestion className="mr-2 h-4 w-4" />)}
-                    {manualQuestionField("manualFillInTheBlanks", "Fill in the Blanks", <PencilLine className="mr-2 h-4 w-4" />)}
-                    {manualQuestionField("manualTrueFalseQuestions", "True/False Questions", <ClipboardCheck className="mr-2 h-4 w-4" />)}
-                    {manualQuestionField("manualShortQuestions", "Short Answer Questions", <FileText className="mr-2 h-4 w-4" />)}
-                    {manualQuestionField("manualLongQuestions", "Long Answer Questions", <FileSignature className="mr-2 h-4 w-4" />)}
-                    {manualQuestionField("manualNumericalPracticalQuestions", "Numerical/Practical Questions", <CalculatorIcon className="mr-2 h-4 w-4" />)}
-                 </CardContent>
-              </Card>
-            )}
-
-
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-md sm:text-lg py-2.5 sm:py-3" disabled={isLoading || isProcessingAiToManual}>
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-md sm:text-lg py-2.5 sm:py-3" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />

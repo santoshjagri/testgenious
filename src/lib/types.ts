@@ -1,5 +1,5 @@
 
-import type { GenerateQuestionsInput as AIInputType, GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
+import type { GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 import { z } from 'zod';
 
 export const SupportedLanguages = [
@@ -138,17 +138,10 @@ export const questionPaperFormSchema = z.object({
   passMarks: z.coerce.number().min(1, "Pass marks must be at least 1.").max(1000, "Pass marks cannot exceed 1000."),
   timeLimit: z.string().min(1, "Time limit is required. (e.g., 2 hours, 90 minutes)"),
   instructions: z.string().optional(),
-  language: z.enum(SupportedLanguages).default("English"),
-  customPrompt: z.string().optional().describe("Specific instructions or topics for the AI."),
-  generationMode: z.enum(['ai', 'manual']).default('ai'),
-
-  mcqCount: z.coerce.number().min(0).max(50).default(5),
-  veryShortQuestionCount: z.coerce.number().min(0).max(30).default(0),
-  fillInTheBlanksCount: z.coerce.number().min(0).max(30).default(0),
-  trueFalseCount: z.coerce.number().min(0).max(30).default(0),
-  shortQuestionCount: z.coerce.number().min(0).max(20).default(3),
-  longQuestionCount: z.coerce.number().min(0).max(10).default(2),
-  numericalPracticalCount: z.coerce.number().min(0).max(10).default(0),
+  
+  // This field is kept for data structure compatibility but will not be shown in the UI.
+  // It ensures existing stored data doesn't break.
+  generationMode: z.enum(['ai', 'manual']).default('manual').optional(),
 
   manualMcqs: z.string().optional().describe("Enter one MCQ per line, including marks. E.g., What is 2+2? (1 mark)"),
   manualVeryShortQuestions: z.string().optional().describe("Enter one very short question per line, including marks."),
@@ -169,7 +162,8 @@ export type StorableQuestionPaperFormValues = Omit<QuestionPaperFormValues, 'log
   logoDataUri?: string;
 };
 
-export type AppGenerateQuestionsInput = Omit<AIInputType, 'examType' | 'language'> & {
+// This type remains for history compatibility but is no longer actively used for AI input
+export type AppGenerateQuestionsInput = {
   logoDataUri?: string;
   language: (typeof SupportedLanguages)[number];
   examType: (typeof ExamTypes)[number];

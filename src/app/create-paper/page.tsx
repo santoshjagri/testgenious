@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -5,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
 import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, ExamTypes } from '@/lib/types';
-import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal, Edit, RotateCcw, Palette, History as HistoryIcon, Trash2, Eye, ArrowLeft, PlusSquare, FileQuestion, CalendarDays, Download, Printer as PrinterIcon, Loader2 } from "lucide-react";
@@ -19,6 +19,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+// AI Flow import is removed
+// import { generateQuestions, type GenerateQuestionsOutput, type GenerateQuestionsInput } from '@/ai/flows/generate-questions';
+import type { GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
+
+
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
 const EDIT_PAPER_ID_KEY = "editPaperId";
 
@@ -29,7 +34,7 @@ const parseManualQuestions = (text?: string): string[] => {
 
 export default function CreatePaperPage() {
   // Creator states
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isProcessing, setIsProcessing] = React.useState(false); // Renamed from isLoading
   const [generatedPaper, setGeneratedPaper] = React.useState<GenerateQuestionsOutput | null>(null);
   const [formSnapshotForDisplay, setFormSnapshotForDisplay] = React.useState<QuestionPaperDisplayFormData | null>(null);
   const [editingPaperId, setEditingPaperId] = React.useState<string | null>(null);
@@ -78,7 +83,7 @@ export default function CreatePaperPage() {
     
     if (paperToEdit) {
       const formValues: QuestionPaperFormValues = { ...paperToEdit.formSnapshot, logo: undefined };
-      if (paperToEdit.formSnapshot.generationMode === 'manual' && paperToEdit.generatedPaper) {
+      if (paperToEdit.generatedPaper) {
           const { generatedPaper: gp } = paperToEdit;
           formValues.manualMcqs = gp.mcqs?.join('\n') || "";
           formValues.manualVeryShortQuestions = gp.veryShortQuestions?.join('\n') || "";
@@ -102,49 +107,40 @@ export default function CreatePaperPage() {
 
 
   const handleFormSubmit = async (values: QuestionPaperFormValues) => {
-    setIsLoading(true);
+    setIsProcessing(true);
     if (!editingPaperId) {
         setGeneratedPaper(null);
         setFormSnapshotForDisplay(null);
     }
     let logoDataUri: string | undefined = undefined;
     if (values.logo) {
-      try { logoDataUri = await fileToDataUri(values.logo); } catch (error) { toast({ title: "Logo Error", variant: "destructive" }); setIsLoading(false); return; }
+      try { logoDataUri = await fileToDataUri(values.logo); } catch (error) { toast({ title: "Logo Error", variant: "destructive" }); setIsProcessing(false); return; }
     } else if (editingPaperId && formSnapshotForDisplay?.logoDataUri) {
       logoDataUri = formSnapshotForDisplay.logoDataUri;
     }
-    const storableFormValues: StorableQuestionPaperFormValues = { ...values, logo: undefined, logoDataUri: logoDataUri };
+    const storableFormValues = { ...values, logo: undefined, logoDataUri: logoDataUri };
     const displayData: QuestionPaperDisplayFormData = { ...storableFormValues };
+    
     try {
-      let result: GenerateQuestionsOutput;
-      if (values.generationMode === 'manual') {
-        result = {
-          mcqs: parseManualQuestions(values.manualMcqs),
-          veryShortQuestions: parseManualQuestions(values.manualVeryShortQuestions),
-          fillInTheBlanks: parseManualQuestions(values.manualFillInTheBlanks),
-          trueFalseQuestions: parseManualQuestions(values.manualTrueFalseQuestions),
-          shortQuestions: parseManualQuestions(values.manualShortQuestions),
-          longQuestions: parseManualQuestions(values.manualLongQuestions),
-          numericalPracticalQuestions: parseManualQuestions(values.manualNumericalPracticalQuestions),
-        };
-        // clean up optional empty arrays
-        if (result.veryShortQuestions?.length === 0) delete result.veryShortQuestions;
-        if (result.fillInTheBlanks?.length === 0) delete result.fillInTheBlanks;
-        if (result.trueFalseQuestions?.length === 0) delete result.trueFalseQuestions;
-        if (result.numericalPracticalQuestions?.length === 0) delete result.numericalPracticalQuestions;
+      // Logic now only handles manual mode
+      const result: GenerateQuestionsOutput = {
+        mcqs: parseManualQuestions(values.manualMcqs),
+        veryShortQuestions: parseManualQuestions(values.manualVeryShortQuestions),
+        fillInTheBlanks: parseManualQuestions(values.manualFillInTheBlanks),
+        trueFalseQuestions: parseManualQuestions(values.manualTrueFalseQuestions),
+        shortQuestions: parseManualQuestions(values.manualShortQuestions),
+        longQuestions: parseManualQuestions(values.manualLongQuestions),
+        numericalPracticalQuestions: parseManualQuestions(values.manualNumericalPracticalQuestions),
+      };
+      
+      // Clean up optional empty arrays
+      if (result.veryShortQuestions?.length === 0) delete result.veryShortQuestions;
+      if (result.fillInTheBlanks?.length === 0) delete result.fillInTheBlanks;
+      if (result.trueFalseQuestions?.length === 0) delete result.trueFalseQuestions;
+      if (result.numericalPracticalQuestions?.length === 0) delete result.numericalPracticalQuestions;
 
-        toast({ title: editingPaperId ? "Manual Paper Updated" : "Manual Paper Prepared" });
-      } else {
-        const aiInput: GenerateQuestionsInput = {
-          classLevel: values.classLevel, subject: values.subject, totalMarks: values.totalMarks, passMarks: values.passMarks, timeLimit: values.timeLimit,
-          instructions: values.instructions || 'All questions are compulsory.', examType: values.examType, institutionName: values.institutionName || 'ExamGenius AI Institute',
-          institutionAddress: values.institutionAddress || '', subjectCode: values.subjectCode || '', language: values.language, customPrompt: values.customPrompt,
-          mcqCount: values.mcqCount, veryShortQuestionCount: values.veryShortQuestionCount, shortQuestionCount: values.shortQuestionCount, longQuestionCount: values.longQuestionCount,
-          fillInTheBlanksCount: values.fillInTheBlanksCount, trueFalseCount: values.trueFalseCount, numericalPracticalCount: values.numericalPracticalCount,
-        };
-        result = await generateQuestions(aiInput);
-        toast({ title: editingPaperId ? "AI Paper Updated!" : "Success!", description: "AI Question paper generated and saved to history." });
-      }
+      toast({ title: editingPaperId ? "Manual Paper Updated" : "Manual Paper Prepared", description: "Paper saved to history." });
+      
       setGeneratedPaper(result);
       setFormSnapshotForDisplay(displayData);
 
@@ -172,7 +168,7 @@ export default function CreatePaperPage() {
       if (error instanceof Error) errorMessage = error.message.substring(0, 200);
       toast({ title: "Error Processing Paper", description: errorMessage, variant: "destructive" });
     } finally {
-      setIsLoading(false);
+      setIsProcessing(false);
     }
   };
 
@@ -321,8 +317,8 @@ export default function CreatePaperPage() {
                     </AlertDescription>
                 </Alert>
             )}
-            <QuestionPaperForm key={editingPaperId || 'new'} onSubmit={handleFormSubmit} isLoading={isLoading} initialValues={initialFormValues} />
-            {isLoading && (
+            <QuestionPaperForm key={editingPaperId || 'new'} onSubmit={handleFormSubmit} isLoading={isProcessing} initialValues={initialFormValues} />
+            {isProcessing && (
               <div className="flex justify-center items-center p-6 sm:p-10 bg-card rounded-lg shadow-md">
                 <div className="animate-pulse flex flex-col items-center space-y-2">
                   <svg className="animate-spin h-10 w-10 sm:h-12 sm:w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -330,7 +326,7 @@ export default function CreatePaperPage() {
                 </div>
               </div>
             )}
-            {!isLoading && generatedPaper && formSnapshotForDisplay && (
+            {!isProcessing && generatedPaper && formSnapshotForDisplay && (
               <div className="animate-fadeInUp">
                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 no-print my-4 p-4 border rounded-lg bg-card shadow-sm">
                     <div className="flex items-center space-x-2"><Palette className="h-4 w-4 text-muted-foreground" /><Label htmlFor="template-select" className="text-sm font-medium">Template</Label>
@@ -362,7 +358,7 @@ export default function CreatePaperPage() {
               {historyItems.map((item) => (
                 <Card key={item.id} className="flex flex-col shadow-md hover:shadow-lg transition-shadow duration-200 rounded-lg">
                   <CardHeader className="pb-3"><CardTitle className="text-base font-semibold text-primary flex items-center gap-2"><FileQuestion className="h-5 w-5 flex-shrink-0"/><span className="truncate">{item.formSnapshot.subject}</span></CardTitle><p className="text-sm text-muted-foreground pt-1">{item.formSnapshot.classLevel}</p></CardHeader>
-                  <CardContent className="space-y-2 text-xs flex-grow py-0 pb-3"><p><strong>Exam:</strong> {item.formSnapshot.examType}</p><p><strong>Marks:</strong> {item.formSnapshot.totalMarks}</p><p><strong>Mode:</strong> <span className="capitalize">{item.formSnapshot.generationMode}</span></p><p className="mt-2 text-xs text-muted-foreground pt-2 border-t flex items-center"><CalendarDays className="h-3 w-3 mr-1.5"/>{new Date(item.dateGenerated).toLocaleDateString()}</p></CardContent>
+                  <CardContent className="space-y-2 text-xs flex-grow py-0 pb-3"><p><strong>Exam:</strong> {item.formSnapshot.examType}</p><p><strong>Marks:</strong> {item.formSnapshot.totalMarks}</p><p><strong>Mode:</strong> <span className="capitalize">{item.formSnapshot.generationMode || 'manual'}</span></p><p className="mt-2 text-xs text-muted-foreground pt-2 border-t flex items-center"><CalendarDays className="h-3 w-3 mr-1.5"/>{new Date(item.dateGenerated).toLocaleDateString()}</p></CardContent>
                   <CardFooter className="border-t p-1 flex justify-around items-center">
                     <Button variant="ghost" size="sm" onClick={() => handleViewPaper(item)} className="text-primary hover:bg-primary/10 flex-1 text-xs h-8"><Eye className="mr-1 h-3 w-3" /> View</Button>
                     <Button variant="ghost" size="sm" onClick={() => handleEditPaper(item.id)} className="text-foreground hover:bg-secondary flex-1 text-xs h-8"><Edit className="mr-1 h-3 w-3" /> Edit</Button>
