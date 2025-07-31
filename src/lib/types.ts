@@ -230,9 +230,12 @@ export const gradeSheetFormSchema = z.object({
   examType: z.enum(GradeSheetExamTypes).default("Final Examination"),
   academicYear: z.string().min(1, "Academic year is required (e.g., 2023-2024).")
                    .regex(/^\d{4}-\d{4}$/, "Format must be YYYY-YYYY (e.g., 2023-2024)."),
-  examDate: z.string().min(1, "Exam date is required."),
+  examDate: z.string().optional(),
   nepaliExamDate: z.string().optional(),
   subjects: z.array(subjectMarkSchema).min(1, "At least one subject is required."),
+}).refine(data => !!data.examDate || !!data.nepaliExamDate, {
+  message: "Either an A.D. or B.S. date is required.",
+  path: ["examDate"], // Report error on the first date field for simplicity
 });
 
 export type GradeSheetFormValues = z.infer<typeof gradeSheetFormSchema>;
@@ -308,10 +311,13 @@ export const bulkGradeSheetFormSchema = z.object({
   studentClass: z.string().min(1, "Class is required."),
   examType: z.enum(GradeSheetExamTypes).default("Final Examination"),
   academicYear: z.string().min(1, "Academic year is required.").regex(/^\d{4}-\d{4}$/, "Format: YYYY-YYYY"),
-  examDate: z.string().min(1, "Exam date is required."),
+  examDate: z.string().optional(),
   nepaliExamDate: z.string().optional(),
   subjects: z.array(bulkSubjectSchema).min(1, "At least one subject is required."),
   students: z.array(bulkStudentSchema).min(1, "At least one student is required."),
+}).refine(data => !!data.examDate || !!data.nepaliExamDate, {
+  message: "Either an A.D. or B.S. date is required.",
+  path: ["examDate"], 
 }).refine(data => {
   for (const student of data.students) {
     for (const subjectId in student.obtainedMarks) {

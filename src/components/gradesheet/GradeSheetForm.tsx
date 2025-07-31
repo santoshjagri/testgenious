@@ -337,7 +337,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
             )}
             {form.formState.errors.subjects?.message && (
                  <FormMessage className="text-xs sm:text-sm font-medium text-destructive">
-                    {form.formState.errors.message}
+                    {form.formState.errors.subjects.message}
                  </FormMessage>
             )}
           </CardContent>
