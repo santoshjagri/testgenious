@@ -45,7 +45,7 @@ export default function DashboardPage() {
           
           <section className="text-center py-12 md:py-16">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground animate-fadeInUp">
-              Dashboard
+              Our Tools
             </h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground animate-fadeInUp" style={{ animationDelay: '200ms', opacity: 0 }}>
               Select one of the EduGenius AI tools below to get started.
@@ -94,5 +94,3 @@ export default function DashboardPage() {
     </>
   );
 }
-
-    
