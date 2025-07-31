@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from '@/components/theme-toggle';
 import { SplashScreen } from '@/components/system/SplashScreen';
 import './globals.css';
+import Image from 'next/image';
 
 // export const metadata: Metadata = {
 //   title: 'EduGenius AI',
@@ -64,8 +65,7 @@ export default function RootLayout({
             <Sidebar side="left" collapsible="icon" className="no-print">
               <SidebarHeader className="p-4 border-b border-sidebar-border">
                 <Link href="/" className="flex items-center gap-3 text-lg font-semibold text-sidebar-primary hover:text-sidebar-primary/90 transition-colors">
-                  <Home className="h-7 w-7" />
-                  <span className="group-data-[collapsible=icon]:hidden">EduGenius AI</span>
+                  <Image src="/logo.png" alt="EduGenius AI Logo" width={140} height={32} className="object-contain" />
                 </Link>
               </SidebarHeader>
               <SidebarContent className="p-2">
