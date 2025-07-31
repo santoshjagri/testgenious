@@ -21,7 +21,7 @@ export function SplashScreen() {
         "splash-screen fixed inset-0 z-[101] flex flex-col items-center justify-center bg-background",
         isFadingOut && "fade-out"
     )}>
-      <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center p-4">
         <div className="splash-logo p-4 bg-primary/10 rounded-full mb-4 ring-8 ring-primary/5">
            <GraduationCap className="h-16 w-16 text-primary" />
         </div>
