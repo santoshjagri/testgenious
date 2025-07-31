@@ -7,7 +7,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "genkit:dev": "node --watch src/ai/dev.ts",
     "genkit:watch": "genkit-cli flow:start --watch"
   },
   "dependencies": {
