@@ -3,7 +3,7 @@
 
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { GraduationCap } from 'lucide-react';
 
 export function SplashScreen() {
   const [isFadingOut, setIsFadingOut] = useState(false);
@@ -23,7 +23,7 @@ export function SplashScreen() {
     )}>
       <div className="flex flex-col items-center justify-center">
         <div className="splash-logo p-4 bg-primary/10 rounded-full mb-4 ring-8 ring-primary/5">
-           <Image src="/logo.png" alt="EduGenius AI Logo" width={80} height={80} className="object-contain" />
+           <GraduationCap className="h-16 w-16 text-primary" />
         </div>
         <h1 className="splash-text text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
           EduGenius AI
