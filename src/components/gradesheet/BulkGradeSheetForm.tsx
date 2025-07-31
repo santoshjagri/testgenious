@@ -122,9 +122,9 @@ export function BulkGradeSheetForm({ onSubmit, isLoading }: BulkGradeSheetFormPr
                         </Select>
                     </FormItem>
                     {dateType === 'AD' ? (
-                        <FormField name="examDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Enter Date</FormLabel><FormControl><Input placeholder="e.g., 2024-07-29" {...field} /></FormControl><FormMessage/></FormItem> )} />
+                        <FormField name="examDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Enter Date</FormLabel><FormControl><Input placeholder="YYYY-MM-DD" {...field} /></FormControl><FormMessage/></FormItem> )} />
                     ) : (
-                        <FormField name="nepaliExamDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Enter Date</FormLabel><FormControl><Input placeholder="e.g., 2081-04-01" {...field} /></FormControl><FormMessage/></FormItem> )} />
+                        <FormField name="nepaliExamDate" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Enter Date</FormLabel><FormControl><Input placeholder="YYYY-MM-DD" {...field} /></FormControl><FormMessage/></FormItem> )} />
                     )}
                </div>
             </div>

@@ -229,7 +229,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-sm sm:text-base">Enter Date</FormLabel>
-                                    <FormControl><Input placeholder="e.g., 2024-07-29" {...field} /></FormControl>
+                                    <FormControl><Input placeholder="YYYY-MM-DD" {...field} /></FormControl>
                                     <FormMessage/>
                                 </FormItem>
                             )}
@@ -241,7 +241,7 @@ export function GradeSheetForm({ onSubmit, isLoading, initialValues }: GradeShee
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-sm sm:text-base">Enter Date</FormLabel>
-                                    <FormControl><Input placeholder="e.g., 2081-04-01" {...field} /></FormControl>
+                                    <FormControl><Input placeholder="YYYY-MM-DD" {...field} /></FormControl>
                                     <FormMessage/>
                                 </FormItem>
                             )}
