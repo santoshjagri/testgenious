@@ -47,7 +47,7 @@ export default function HomePage() {
             <div className="mt-10 flex justify-center gap-4">
               <Button asChild size="lg" className="text-lg px-8 py-6 shadow-lg hover:shadow-primary/30 transition-shadow">
                  <Link href="/dashboard">
-                  Go to Dashboard
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -101,5 +101,3 @@ export default function HomePage() {
     </>
   );
 }
-
-    
