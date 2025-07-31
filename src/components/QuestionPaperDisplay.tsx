@@ -3,7 +3,7 @@
 
 import type * as React from 'react';
 import { useState, useEffect } from 'react';
-import type { GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
+import type { ManualQuestionsOutput } from '@/lib/types';
 import type { QuestionPaperDisplayFormData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import html2canvas from 'html2canvas';
 
 interface QuestionPaperDisplayProps {
   formData: QuestionPaperDisplayFormData;
-  questions: GenerateQuestionsOutput;
+  questions: ManualQuestionsOutput;
   template?: string;
   printableId?: string;
   showControls?: boolean;

@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
-import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, ExamTypes } from '@/lib/types';
+import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, ExamTypes, ManualQuestionsOutput } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal, Edit, RotateCcw, Palette, History as HistoryIcon, Trash2, Eye, ArrowLeft, PlusSquare, FileQuestion, CalendarDays, Download, Printer as PrinterIcon, Loader2 } from "lucide-react";
@@ -18,7 +18,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertDialogTitleComponent, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import type { GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
 
 
 const LOCAL_STORAGE_KEY = "questionPaperHistory";
@@ -32,7 +31,7 @@ const parseManualQuestions = (text?: string): string[] => {
 export default function CreatePaperPage() {
   // Creator states
   const [isProcessing, setIsProcessing] = React.useState(false); // Renamed from isLoading
-  const [generatedPaper, setGeneratedPaper] = React.useState<GenerateQuestionsOutput | null>(null);
+  const [generatedPaper, setGeneratedPaper] = React.useState<ManualQuestionsOutput | null>(null);
   const [formSnapshotForDisplay, setFormSnapshotForDisplay] = React.useState<QuestionPaperDisplayFormData | null>(null);
   const [editingPaperId, setEditingPaperId] = React.useState<string | null>(null);
   const [initialFormValues, setInitialFormValues] = React.useState<QuestionPaperFormValues | undefined>(undefined);
@@ -121,7 +120,7 @@ export default function CreatePaperPage() {
     
     try {
       // Logic now only handles manual mode
-      const result: GenerateQuestionsOutput = {
+      const result: ManualQuestionsOutput = {
         mcqs: parseManualQuestions(values.manualMcqs),
         veryShortQuestions: parseManualQuestions(values.manualVeryShortQuestions),
         fillInTheBlanks: parseManualQuestions(values.manualFillInTheBlanks),

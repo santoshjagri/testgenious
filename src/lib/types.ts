@@ -1,5 +1,5 @@
 
-import type { GenerateQuestionsOutput } from '@/ai/flows/generate-questions';
+
 import { z } from 'zod';
 
 export const SupportedLanguages = [
@@ -158,11 +158,23 @@ export type StorableQuestionPaperFormValues = Omit<QuestionPaperFormValues, 'log
   logoDataUri?: string;
 };
 
+// This type defines the structure of the manually entered questions.
+// It is now independent of any AI flow.
+export interface ManualQuestionsOutput {
+  mcqs?: string[];
+  veryShortQuestions?: string[];
+  fillInTheBlanks?: string[];
+  trueFalseQuestions?: string[];
+  shortQuestions?: string[];
+  longQuestions?: string[];
+  numericalPracticalQuestions?: string[];
+}
+
 export interface StoredQuestionPaper {
   id: string;
   dateGenerated: string;
   formSnapshot: StorableQuestionPaperFormValues;
-  generatedPaper: GenerateQuestionsOutput;
+  generatedPaper: ManualQuestionsOutput;
 }
 
 export type QuestionPaperDisplayFormData = StorableQuestionPaperFormValues;

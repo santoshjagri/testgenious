@@ -1,4 +1,2 @@
-import { config } from 'dotenv';
-config();
-
-import '@/ai/flows/generate-questions.ts';
+// This file is intentionally left blank.
+// AI features have been removed from this application.
