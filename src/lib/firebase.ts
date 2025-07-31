@@ -11,6 +11,14 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Validate that the essential Firebase config variables are present.
+// This provides a more helpful error message if the .env file is not set up.
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  throw new Error(
+    'Firebase environment variables are not set. Please add your Firebase project credentials to the .env file.'
+  );
+}
+
 let app: FirebaseApp;
 let auth: Auth;
 
