@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
                     <Shield className="h-8 w-8 text-primary" />
                     Privacy Policy
                 </h1>
-                <p className="text-muted-foreground">Last Updated: August 1, 2024</p>
+                <p className="text-muted-foreground">Last Updated: August 1, 2025</p>
             </div>
             
             <p>
