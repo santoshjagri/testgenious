@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "src/ai/flows/**/*.ts": {
-      "runtime": "nodejs18.x"
-    }
-  }
-}
