@@ -25,8 +25,8 @@ export function SplashScreen() {
         <div className="splash-logo p-4 bg-primary/10 rounded-full mb-4 ring-8 ring-primary/5">
            <GraduationCap className="h-16 w-16 text-primary" />
         </div>
-        <h1 className="splash-text text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
-          EduGenius AI
+        <h1 className="splash-text text-3xl md:text-4xl font-extrabold tracking-tight text-foreground text-center px-4">
+          Welcome to EduGenius AI 👋👋👋
         </h1>
       </div>
     </div>
