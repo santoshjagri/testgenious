@@ -74,12 +74,12 @@ export function GradeSheetDisplay({
           {result.studentId && <div className="flex items-center"><Hash className="w-3 h-3 mr-1.5"/><strong>Student ID:</strong> {result.studentId}</div>}
           {result.symbolNo && <div className="flex items-center"><Hash className="w-3 h-3 mr-1.5"/><strong>Symbol No:</strong> {result.symbolNo}</div>}
           <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>Academic Year:</strong> {result.academicYear}</div>
-          {displayDate && <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>{dateLabel}</strong> {displayDate}</div>}
+          {displayDate && <div className="flex items-center"><CalendarCheck2-2 className="w-3 h-3 mr-1.5"/><strong>{dateLabel}</strong> {displayDate}</div>}
         </div>
       </CardHeader>
 
-      <CardContent className="p-3 sm:p-4">
-        <div className="mb-3">
+      <CardContent className="p-3 sm:p-4 text-center">
+        <div className="mb-3 inline-block w-full max-w-4xl text-left">
             <div className="flex items-center mb-2">
                 <BookOpen className="h-5 w-5 mr-2 text-primary/80" />
                 <h3 className="text-base sm:text-lg font-semibold text-primary/90">Subject Performance</h3>
@@ -122,7 +122,7 @@ export function GradeSheetDisplay({
 
         <Separator className="my-3 bg-primary/15" />
 
-        <div className="gs-summary">
+        <div className="gs-summary inline-block w-full max-w-4xl text-left">
             <div className="flex items-center mb-2">
                 <Star className="h-5 w-5 mr-2 text-primary/80" />
                 <h3 className="text-base sm:text-lg font-semibold text-primary/90">Overall Summary</h3>
@@ -181,3 +181,5 @@ export function GradeSheetDisplay({
     </Card>
   );
 }
+
+    
