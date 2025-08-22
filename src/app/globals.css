@@ -215,14 +215,11 @@ body {
 .printable-area[data-template="best"] .gs-footer {
   color: hsl(var(--muted-foreground));
   margin-top: 1.5rem;
-  padding-top: 2.5rem;
+  padding-top: 1.5rem;
   border-top: 1px solid hsl(var(--border));
 }
 .printable-area[data-template="best"] .gs-footer .signature-line {
-  border-top-width: 1px !important;
-  border-top-style: dotted !important;
-  border-top-color: hsl(var(--foreground)) !important;
-  font-weight: 600 !important;
+  border-top: 1px dotted hsl(var(--foreground));
 }
 
 
@@ -682,4 +679,3 @@ body {
     
 
     
-
