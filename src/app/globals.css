@@ -194,7 +194,7 @@ body {
 
 
 .printable-area[data-template="best"] {
-  border: 1px solid hsl(var(--border));
+  border: 2px solid hsl(var(--foreground) / 0.7);
   box-shadow: 0 4px 12px -4px rgb(0 0 0 / 0.1);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   position: relative;
@@ -696,6 +696,7 @@ body {
     
 
     
+
 
 
 
