@@ -123,6 +123,18 @@ body {
 }
 
 /* GradeSheet Template Styles */
+.gs-footer .signature-container {
+    width: 200px;
+}
+.gs-footer .signature-line {
+    border-top: 1px dotted hsl(var(--foreground));
+    padding-top: 2.5rem;
+}
+.gs-footer .signature-title {
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
 .printable-area[data-template="good"] .gs-header {
   background-color: hsl(var(--primary) / 0.05);
   border-bottom: 1px solid hsl(var(--primary) / 0.3);
@@ -214,8 +226,13 @@ body {
   border: 1px solid hsl(var(--border));
   background-color: hsl(var(--background));
 }
-.printable-area[data-template="best"] .gs-footer {
-  display: none;
+.printable-area[data-template="best"] .gs-footer .signature-line {
+    border-top: 1px dotted hsl(var(--foreground));
+    padding-top: 2.5rem;
+    font-weight: bold;
+}
+.printable-area[data-template="best"] .gs-footer .signature-title {
+    margin-top: 0.5rem;
 }
 
 
@@ -675,4 +692,5 @@ body {
     
 
     
+
 
