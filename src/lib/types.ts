@@ -232,7 +232,7 @@ export const gradeSheetFormSchema = z.object({
                    .regex(/^\d{4}-\d{4}$/, "Format must be YYYY-YYYY (e.g., 2023-2024)."),
   examDate: z.string().optional(),
   nepaliExamDate: z.string().optional(),
-  subjects: z.array(subjectMarkSchema).min(1, "At least one subject is required."),
+  subjects: z.array(subjectMarkSchema).min(1, "At least one subject is required.").max(12, "A maximum of 12 subjects can be added to ensure the gradesheet fits on one page."),
 }).refine(data => !!data.examDate || !!data.nepaliExamDate, {
   message: "Either an A.D. or B.S. date is required.",
   path: ["examDate"], // Report error on the first date field for simplicity
