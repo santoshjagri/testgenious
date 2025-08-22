@@ -342,7 +342,6 @@ export default function GradesheetPage() {
         try {
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfPageWidth = pdf.internal.pageSize.getWidth();
-            const pdfPageHeight = pdf.internal.pageSize.getHeight();
             const canvas = await html2canvas(paperElement, { scale: 3, useCORS: true, logging: false });
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
             const imgWidth = pdfPageWidth;
@@ -351,7 +350,7 @@ export default function GradesheetPage() {
             let heightLeft = imgHeight;
             let position = 0;
             const pageMargin = 10;
-            const effectivePageHeight = pdfPageHeight - 2 * pageMargin;
+            const effectivePageHeight = pdf.internal.pageSize.getHeight() - 2 * pageMargin;
 
             if (heightLeft <= effectivePageHeight) {
                 pdf.addImage(imgData, 'JPEG', 0, pageMargin, imgWidth, imgHeight);
@@ -393,36 +392,24 @@ export default function GradesheetPage() {
         let isFirstPageOfPdf = true;
         for (const el of Array.from(elements)) {
             const pageElement = el as HTMLElement;
+            if (!isFirstPageOfPdf) {
+                pdf.addPage();
+            } else {
+                isFirstPageOfPdf = false;
+            }
+
+            const canvas = await html2canvas(pageElement, { scale: 3, useCORS: true, logging: false });
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
             const pdfPageWidth = pdf.internal.pageSize.getWidth();
-            const pdfPageHeight = pdf.internal.pageSize.getHeight();
-            const marginTopMM = 15, marginBottomMM = 15, marginLeftMM = 10, marginRightMM = 10;
-            const contentWidthMM = pdfPageWidth - marginLeftMM - marginRightMM;
-            const contentHeightMM = pdfPageHeight - marginTopMM - marginBottomMM;
-            const fullCanvas = await html2canvas(pageElement, { scale: 3, useCORS: true, logging: false });
-            const fullCanvasWidthPx = fullCanvas.width;
-            const fullCanvasHeightPx = fullCanvas.height;
-            const pxPerMm = fullCanvasWidthPx / contentWidthMM;
-            const pageSliceHeightPx = contentHeightMM * pxPerMm * 0.98;
-            let currentYpx = 0;
-            while (currentYpx < fullCanvasHeightPx) {
-                if (!isFirstPageOfPdf) {
-                    pdf.addPage();
-                } else {
-                    isFirstPageOfPdf = false;
-                }
-                const remainingHeightPx = fullCanvasHeightPx - currentYpx;
-                const sliceForThisPagePx = Math.min(pageSliceHeightPx, remainingHeightPx);
-                const pageCanvas = document.createElement('canvas');
-                pageCanvas.width = fullCanvasWidthPx;
-                pageCanvas.height = sliceForThisPagePx;
-                const pageCtx = pageCanvas.getContext('2d');
-                if (pageCtx) {
-                    pageCtx.drawImage(fullCanvas, 0, currentYpx, fullCanvasWidthPx, sliceForThisPagePx, 0, 0, fullCanvasWidthPx, sliceForThisPagePx);
-                    const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.95);
-                    const actualContentHeightMMForThisPage = sliceForThisPagePx / pxPerMm;
-                    pdf.addImage(pageImgData, 'JPEG', marginLeftMM, marginTopMM, contentWidthMM, actualContentHeightMMForThisPage);
-                }
-                currentYpx += pageSliceHeightPx;
+            const imgWidth = pdfPageWidth;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            const pageMargin = 10;
+            const effectivePageHeight = pdf.internal.pageSize.getHeight() - 2 * pageMargin;
+
+            if (imgHeight <= effectivePageHeight) {
+                pdf.addImage(imgData, 'JPEG', 0, pageMargin, imgWidth, imgHeight);
+            } else {
+                pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
             }
         }
         
@@ -632,5 +619,3 @@ export default function GradesheetPage() {
     </main>
   );
 }
-
-    

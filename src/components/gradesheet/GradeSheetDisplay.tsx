@@ -30,7 +30,7 @@ export function GradeSheetDisplay({
 
 
   return (
-    <Card className="shadow-2xl printable-area" id={printableId} data-template={template}>
+    <Card className="shadow-2xl printable-area text-center" id={printableId} data-template={template}>
       <CardHeader className="bg-primary/5 p-3 sm:p-4 border-b-2 border-primary/20 gs-header">
         <div className="flex flex-col sm:flex-row items-center sm:items-start w-full gap-2 sm:gap-4 mb-2 sm:mb-3">
             <div className="flex-shrink-0 order-1 sm:order-none">
@@ -67,7 +67,7 @@ export function GradeSheetDisplay({
         
         <Separator className="my-1 sm:my-2 bg-primary/15" />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-x-2 sm:gap-x-4 gap-y-1 text-xs sm:text-sm text-foreground/80">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-x-2 sm:gap-x-4 gap-y-1 text-xs sm:text-sm text-foreground/80 text-left">
           <div className="flex items-center"><User className="w-3 h-3 mr-1.5"/><strong>Student:</strong> {result.studentName}</div>
           <div className="flex items-center"><School className="w-3 h-3 mr-1.5"/><strong>Class:</strong> {result.studentClass}</div>
           <div className="flex items-center"><Hash className="w-3 h-3 mr-1.5"/><strong>Roll No:</strong> {result.rollNo}</div>
@@ -166,7 +166,7 @@ export function GradeSheetDisplay({
         </div>
       </CardContent>
       <CardFooter className="p-4 sm:p-6 border-t border-primary/10 flex-col items-center text-center space-y-1 gs-footer">
-          <div className="flex justify-between w-full text-xs sm:text-sm text-muted-foreground mt-8 sm:mt-12 pt-4">
+          <div className="flex justify-between w-full text-xs sm:text-sm text-muted-foreground mt-8 sm:mt-12">
               <div className="text-center w-1/3">
                   <div className="border-t border-black border-dotted w-3/4 mx-auto pt-2 font-bold">Class Teacher</div>
               </div>
