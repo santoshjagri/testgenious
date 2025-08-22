@@ -171,11 +171,13 @@ body {
 .printable-area[data-template="better"] .gs-summary-box .text-primary {
   color: hsl(var(--foreground));
 }
-.printable-area[data-template="better"] .gs-footer {
-  background-color: transparent;
-  border-top: 1px solid hsl(var(--border));
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
+.printable-area[data-template="better"] .gs-footer .signature-line {
+    border-top: 1px dotted hsl(var(--foreground));
+    padding-top: 2.5rem;
+    font-weight: bold;
+}
+.printable-area[data-template="better"] .gs-footer .signature-title {
+    margin-top: 0.25rem;
 }
 
 
@@ -213,14 +215,7 @@ body {
   background-color: hsl(var(--background));
 }
 .printable-area[data-template="best"] .gs-footer {
-  color: hsl(var(--muted-foreground));
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid hsl(var(--border));
-}
-.printable-area[data-template="best"] .signature-line {
-  border-top: 1px dotted hsl(var(--foreground) / 0.8);
-  font-weight: bold;
+  display: none;
 }
 
 
@@ -618,7 +613,7 @@ body {
   .printable-area[data-template="best"] .gs-table thead {
     color: black !important;
   }
-  .printable-area[data-template="best"] .gs-footer .signature-line {
+  .printable-area .signature-container .signature-line {
       border-top-color: black !important;
   }
 
@@ -680,3 +675,4 @@ body {
     
 
     
+
