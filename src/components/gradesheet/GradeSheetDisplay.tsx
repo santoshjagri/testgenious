@@ -74,7 +74,7 @@ export function GradeSheetDisplay({
           {result.studentId && <div className="flex items-center"><Hash className="w-3 h-3 mr-1.5"/><strong>Student ID:</strong> {result.studentId}</div>}
           {result.symbolNo && <div className="flex items-center"><Hash className="w-3 h-3 mr-1.5"/><strong>Symbol No:</strong> {result.symbolNo}</div>}
           <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>Academic Year:</strong> {result.academicYear}</div>
-          {displayDate && <div className="flex items-center"><CalendarCheck2-2 className="w-3 h-3 mr-1.5"/><strong>{dateLabel}</strong> {displayDate}</div>}
+          {displayDate && <div className="flex items-center"><CalendarCheck2 className="w-3 h-3 mr-1.5"/><strong>{dateLabel}</strong> {displayDate}</div>}
         </div>
       </CardHeader>
 
@@ -181,5 +181,3 @@ export function GradeSheetDisplay({
     </Card>
   );
 }
-
-    
