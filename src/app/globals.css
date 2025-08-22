@@ -227,7 +227,7 @@ body {
   background-color: hsl(var(--background));
 }
 .printable-area[data-template="best"] .gs-footer {
-  padding-top: 1rem;
+  padding-top: 1.5rem;
   padding-bottom: 1rem;
 }
 .printable-area[data-template="best"] .gs-footer .signature-line {
@@ -700,3 +700,6 @@ body {
 
 
 
+
+
+    
