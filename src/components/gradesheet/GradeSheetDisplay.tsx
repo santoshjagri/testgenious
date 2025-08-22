@@ -28,19 +28,6 @@ export function GradeSheetDisplay({
   const displayDate = result.examDate ? new Date(result.examDate).toLocaleDateString() : result.nepaliExamDate;
   const dateLabel = result.examDate ? 'Date (A.D.):' : 'Date (B.S.):';
 
-  const footerContent = (
-    <div className="flex justify-around w-full mt-8 sm:mt-12 text-xs sm:text-sm">
-      <div className="signature-container text-center">
-        <div className="signature-line w-full border-t border-dotted border-foreground font-bold"></div>
-        <p className="signature-title mt-1">Class Teacher</p>
-      </div>
-      <div className="signature-container text-center">
-        <div className="signature-line w-full border-t border-dotted border-foreground font-bold"></div>
-        <p className="signature-title mt-1">Principal</p>
-      </div>
-    </div>
-  );
-
   return (
     <Card className="shadow-2xl printable-area" id={printableId} data-template={template}>
       <CardHeader className="bg-primary/5 p-3 sm:p-4 border-b-2 border-primary/20 gs-header">
@@ -176,7 +163,7 @@ export function GradeSheetDisplay({
             )}
           </div>
         </div>
-         {template === 'best' && (
+        {template === 'best' && (
           <div className="p-3 sm:p-4 text-center gs-footer">
             <div className="flex justify-around w-full mt-4 text-xs sm:text-sm">
               <div className="signature-container text-center">
@@ -193,16 +180,18 @@ export function GradeSheetDisplay({
           </div>
         )}
       </CardContent>
-       {template !== 'best' && (
+      {template !== 'best' && (
         <CardFooter className="p-3 sm:p-4 text-center gs-footer">
             <div className="flex justify-around w-full text-xs sm:text-sm">
               <div className="signature-container text-center">
                 <div className="signature-line w-full"></div>
-                <p className="signature-title mt-1">Class Teacher</p>
+                <p className="font-bold mb-1">Checked By</p>
+                <p className="signature-title">Class Teacher</p>
               </div>
               <div className="signature-container text-center">
                 <div className="signature-line w-full"></div>
-                <p className="signature-title mt-1">Principal</p>
+                <p className="font-bold mb-1">Verified By</p>
+                <p className="signature-title">Principal</p>
               </div>
             </div>
         </CardFooter>
