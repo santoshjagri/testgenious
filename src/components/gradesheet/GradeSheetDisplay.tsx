@@ -165,19 +165,16 @@ export function GradeSheetDisplay({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="p-4 sm:p-6 border-t border-primary/10 flex-col items-center text-center space-y-1 gs-footer">
+      <CardFooter className="p-4 sm:p-6 border-t border-primary/10 gs-footer">
           <div className="flex justify-between w-full text-xs sm:text-sm text-muted-foreground">
-              <div className="text-center w-1/3">
-                  <div className="signature-line w-3/4 mx-auto mt-12 mb-2"></div>
-                  <div className="font-bold">Class Teacher</div>
+              <div className="text-center w-1/3 pt-12 signature-line">
+                  Class Teacher
               </div>
-              <div className="text-center w-1/3">
-                  <div className="signature-line w-3/4 mx-auto mt-12 mb-2"></div>
-                  <div className="font-bold">Principal</div>
+              <div className="text-center w-1/3 pt-12 signature-line">
+                  Principal
               </div>
-              <div className="text-center w-1/3">
-                   <div className="signature-line w-3/4 mx-auto mt-12 mb-2"></div>
-                  <div className="font-bold">Date</div>
+              <div className="text-center w-1/3 pt-12 signature-line">
+                  Date
               </div>
           </div>
       </CardFooter>
