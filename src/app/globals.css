@@ -173,18 +173,16 @@ body {
 
 
 .printable-area[data-template="best"] {
-  border: 2px solid hsl(var(--primary) / 0.7);
-  outline: 4px solid hsl(var(--primary) / 0.1);
-  outline-offset: 4px;
+  border: 1px solid hsl(var(--border));
   box-shadow: 0 4px 12px -4px rgb(0 0 0 / 0.1);
-  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   position: relative;
+  border-radius: var(--radius);
 }
 .printable-area[data-template="best"] .gs-header {
-  background: transparent;
+  background: hsl(var(--primary) / 0.05);
   color: hsl(var(--primary));
-  border-bottom: 2px solid hsl(var(--primary) / 0.8);
-  border-bottom-color: hsl(var(--primary) / 0.8);
+  border-bottom: 1px solid hsl(var(--primary) / 0.2);
 }
 .printable-area[data-template="best"] .gs-title,
 .printable-area[data-template="best"] .gs-header .text-muted-foreground,
@@ -192,27 +190,25 @@ body {
   color: inherit !important;
 }
 .printable-area[data-template="best"] .gs-table thead {
-  background-color: hsl(var(--primary) / 0.08);
-  color: hsl(var(--primary));
-  font-weight: bold;
-  border-bottom: 1px solid hsl(var(--primary) / 0.5);
+  color: hsl(var(--foreground) / 0.8);
+  font-weight: 600;
+  background-color: transparent;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.printable-area[data-template="best"] .gs-table tbody tr:not(:last-child) {
+    border-bottom: 1px solid hsl(var(--border) / 0.7);
 }
 .printable-area[data-template="best"] .gs-table tr:hover {
-  background-color: hsl(var(--accent) / 0.3);
+  background-color: hsl(var(--accent) / 0.1);
 }
 .printable-area[data-template="best"] .gs-summary-box {
-  border-left: 4px solid hsl(var(--primary));
-  padding-left: 1rem;
-  background-color: transparent;
-  border-radius: 0;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--background));
 }
-.printable-area[data-template="best"] .gs-footer:after {
- content: " ";
- display: block;
- width: 100px;
- margin: 8px auto 0;
- border-bottom: 2px solid hsl(var(--primary));
+.printable-area[data-template="best"] .gs-footer {
+  color: hsl(var(--muted-foreground));
 }
+
 
 /* --- Question Paper Template Styles --- */
 
@@ -664,3 +660,4 @@ body {
     
 
     
+
