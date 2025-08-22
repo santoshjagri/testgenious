@@ -30,7 +30,7 @@ export function GradeSheetDisplay({
 
 
   return (
-    <Card className="shadow-2xl printable-area text-center" id={printableId} data-template={template}>
+    <Card className="shadow-2xl printable-area" id={printableId} data-template={template}>
       <CardHeader className="bg-primary/5 p-3 sm:p-4 border-b-2 border-primary/20 gs-header">
         <div className="flex flex-col sm:flex-row items-center sm:items-start w-full gap-2 sm:gap-4 mb-2 sm:mb-3">
             <div className="flex-shrink-0 order-1 sm:order-none">
@@ -165,20 +165,6 @@ export function GradeSheetDisplay({
           </div>
         </div>
       </CardContent>
-      {template !== 'best' && (
-        <CardFooter className="p-4 sm:p-6 border-t border-primary/10 gs-footer">
-          <div className="flex justify-around w-full text-xs sm:text-sm text-muted-foreground">
-              <div className="text-center w-1/3 px-2 signature-container">
-                  <div className="signature-line"></div>
-                  <div className="signature-title font-bold">Class Teacher</div>
-              </div>
-              <div className="text-center w-1/3 px-2 signature-container">
-                  <div className="signature-line"></div>
-                  <div className="signature-title font-bold">Principal</div>
-              </div>
-          </div>
-        </CardFooter>
-      )}
     </Card>
   );
 }
