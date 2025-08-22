@@ -168,13 +168,13 @@ export function GradeSheetDisplay({
       <CardFooter className="p-4 sm:p-6 border-t border-primary/10 flex-col items-center text-center space-y-1 gs-footer">
           <div className="flex justify-between w-full text-xs sm:text-sm text-muted-foreground mt-8 sm:mt-12 pt-4">
               <div className="text-center w-1/3">
-                  <div className="border-t border-dotted w-3/4 mx-auto pt-2">Class Teacher</div>
+                  <div className="border-t border-black border-dotted w-3/4 mx-auto pt-2 font-bold">Class Teacher</div>
               </div>
               <div className="text-center w-1/3">
-                  <div className="border-t border-dotted w-3/4 mx-auto pt-2">Principal</div>
+                  <div className="border-t border-black border-dotted w-3/4 mx-auto pt-2 font-bold">Principal</div>
               </div>
               <div className="text-center w-1/3">
-                  <div className="border-t w-3/4 mx-auto pt-2">Date</div>
+                  <div className="border-t border-black border-dotted w-3/4 mx-auto pt-2 font-bold">Date</div>
               </div>
           </div>
       </CardFooter>
