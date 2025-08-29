@@ -19,7 +19,7 @@ const GRADING_SCALE: GradingRule[] = [
   { minPercentage: 0, grade: 'NG', gpa: 0.0 }, // Not Graded / Fail
 ];
 
-const OVERALL_PASS_PERCENTAGE_THRESHOLD = 40; // Example: Student needs at least 40% overall to pass
+const OVERALL_PASS_PERCENTAGE_THRESHOLD = 40; // Student needs at least 40% overall to pass
 
 export function calculateGradeSheet(formData: GradeSheetFormValues): GradeSheetCalculationOutput {
   let totalObtainedMarks = 0;
@@ -68,6 +68,11 @@ export function calculateGradeSheet(formData: GradeSheetFormValues): GradeSheetC
   const overallPercentagePass = percentage >= OVERALL_PASS_PERCENTAGE_THRESHOLD;
   const resultStatus = allSubjectsPassed && overallPercentagePass ? "Pass" : "Fail";
   
+  // If the result is fail, but the grade isn't 'NG', set it to 'NG'
+  if (resultStatus === "Fail") {
+      calculatedGrade = 'NG';
+  }
+
   // Remarks
   let remarks = "";
   if (resultStatus === "Pass") {
