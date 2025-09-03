@@ -2,7 +2,6 @@
 "use client";
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
 import { IDCardForm } from "@/components/id-card/IDCardForm";
 import { IDCardDisplay } from "@/components/id-card/IDCardDisplay";
 import type { IDCardFormValues, StoredIDCardData, StoredIDCard, IDCardTemplate } from "@/lib/types";
@@ -57,7 +56,6 @@ export default function IDCardPage() {
   
   // Combined state
   const [activeTab, setActiveTab] = React.useState('creator');
-  const router = useRouter();
 
   React.useEffect(() => {
     // This effect runs on mount to ensure the form has default values
@@ -400,7 +398,16 @@ export default function IDCardPage() {
             {historyItems.length > 0 && (
               <AlertDialog>
                 <AlertDialogTrigger asChild><Button variant="destructive" className="no-print w-full sm:w-auto"><Trash2 className="mr-2 h-4 w-4" /> Clear All History</Button></AlertDialogTrigger>
-                <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This will permanently delete all saved ID cards.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={clearHistory}>Yes, clear history</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>This will permanently delete all saved ID cards.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={clearHistory}>Yes, clear history</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
               </AlertDialog>
             )}
           </div>
@@ -419,7 +426,16 @@ export default function IDCardPage() {
                     <Button variant="ghost" size="sm" onClick={() => handleEditCard(item.id)} className="text-foreground hover:bg-secondary flex-1 text-xs h-8"><Edit className="mr-1 h-3 w-3" /> Edit</Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-xs h-8"><Trash2 className="mr-1 h-3 w-3" /> Delete</Button></AlertDialogTrigger>
-                        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete ID Card?</AlertDialogTitle><AlertDialogDescription>Are you sure you want to delete the ID card for "{item.cardData.fullName}"?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteSingleItem(item.id)} className="bg-destructive hover:bg-destructive/90">Yes, Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete ID Card?</AlertDialogTitle>
+                            <AlertDialogDescription>Are you sure you want to delete the ID card for "{item.cardData.fullName}"?</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteSingleItem(item.id)} className="bg-destructive hover:bg-destructive/90">Yes, Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
                     </AlertDialog>
                   </CardFooter>
                 </Card>
@@ -435,5 +451,3 @@ export default function IDCardPage() {
     </main>
   );
 }
-
-    

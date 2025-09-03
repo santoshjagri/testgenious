@@ -2,7 +2,6 @@
 "use client";
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
 import { QuestionPaperForm } from '@/components/QuestionPaperForm';
 import { QuestionPaperDisplay } from '@/components/QuestionPaperDisplay';
 import type { QuestionPaperFormValues, StoredQuestionPaper, QuestionPaperDisplayFormData, ExamTypes, ManualQuestionsOutput } from '@/lib/types';
@@ -15,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertDialogTitleComponent, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -30,7 +29,7 @@ const parseManualQuestions = (text?: string): string[] => {
 
 export default function CreatePaperPage() {
   // Creator states
-  const [isProcessing, setIsProcessing] = React.useState(false); // Renamed from isLoading
+  const [isProcessing, setIsProcessing] = React.useState(false); 
   const [generatedPaper, setGeneratedPaper] = React.useState<ManualQuestionsOutput | null>(null);
   const [formSnapshotForDisplay, setFormSnapshotForDisplay] = React.useState<QuestionPaperDisplayFormData | null>(null);
   const [editingPaperId, setEditingPaperId] = React.useState<string | null>(null);
@@ -45,7 +44,6 @@ export default function CreatePaperPage() {
   const [template, setTemplate] = React.useState('normal');
   const [activeTab, setActiveTab] = React.useState('creator');
   const { toast } = useToast();
-  const router = useRouter();
 
   // Load history on tab switch
   React.useEffect(() => {
@@ -343,7 +341,16 @@ export default function CreatePaperPage() {
             {historyItems.length > 0 && (
               <AlertDialog>
                 <AlertDialogTrigger asChild><Button variant="destructive" className="no-print w-full sm:w-auto"><Trash2 className="mr-2 h-4 w-4" /> Clear All History</Button></AlertDialogTrigger>
-                <AlertDialogContent><AlertDialogHeader><AlertDialogTitleComponent>Are you absolutely sure?</AlertDialogTitleComponent><AlertDialogDescription>This will permanently delete all saved question papers.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={clearHistory}>Yes, clear history</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>This will permanently delete all saved question papers.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={clearHistory}>Yes, clear history</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
               </AlertDialog>
             )}
           </div>
@@ -360,7 +367,16 @@ export default function CreatePaperPage() {
                     <Button variant="ghost" size="sm" onClick={() => handleEditPaper(item.id)} className="text-foreground hover:bg-secondary flex-1 text-xs h-8"><Edit className="mr-1 h-3 w-3" /> Edit</Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-xs h-8"><Trash2 className="mr-1 h-3 w-3" /> Delete</Button></AlertDialogTrigger>
-                        <AlertDialogContent><AlertDialogHeader><AlertDialogTitleComponent>Delete Paper?</AlertDialogTitleComponent><AlertDialogDescription>Are you sure you want to delete the paper for "{item.formSnapshot.subject}"?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteSingleItem(item.id)} className="bg-destructive hover:bg-destructive/90">Yes, Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Paper?</AlertDialogTitle>
+                            <AlertDialogDescription>Are you sure you want to delete the paper for "{item.formSnapshot.subject}"?</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteSingleItem(item.id)} className="bg-destructive hover:bg-destructive/90">Yes, Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
                     </AlertDialog>
                   </CardFooter>
                 </Card>

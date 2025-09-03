@@ -2,7 +2,6 @@
 "use client";
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
 import { GradeSheetForm } from "@/components/gradesheet/GradeSheetForm";
 import { GradeSheetDisplay } from "@/components/gradesheet/GradeSheetDisplay";
 import type { GradeSheetFormValues, CalculatedGradeSheetResult, StoredGradeSheet, GradeSheetCalculationOutput, SubjectMarkInput, BulkGradeSheetFormValues } from "@/lib/types";
@@ -53,7 +52,6 @@ export default function GradesheetPage() {
   const [initialFormValues, setInitialFormValues] = React.useState<GradeSheetFormValues | undefined>(undefined);
   const [editingGradeSheetId, setEditingGradeSheetId] = React.useState<string | null>(null);
   const [entryMode, setEntryMode] = React.useState<'single' | 'bulk'>('single');
-  const router = useRouter();
   
   const [template, setTemplate] = React.useState('normal');
   const [showGradeGpa, setShowGradeGpa] = React.useState(true);
@@ -543,8 +541,14 @@ export default function GradesheetPage() {
                               <Button variant="destructive" className="no-print w-full sm:w-auto"><Trash2 className="mr-2 h-4 w-4" /> Clear All History</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
-                              <AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete all your saved gradesheets from history.</AlertDialogDescription></AlertDialogHeader>
-                              <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={clearHistory}>Yes, clear history</AlertDialogAction></AlertDialogFooter>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>This action cannot be undone. This will permanently delete all your saved gradesheets from history.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={clearHistory}>Yes, clear history</AlertDialogAction>
+                              </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
                         )}
@@ -564,7 +568,16 @@ export default function GradesheetPage() {
                                 <Button variant="ghost" size="sm" onClick={() => handleEditGradeSheet(item.id)} className="text-foreground hover:bg-secondary flex-1 text-xs h-8"><Edit className="mr-1 h-3 w-3" /> Recorrect</Button>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 flex-1 text-xs h-8"><Trash2 className="mr-1 h-3 w-3" /></Button></AlertDialogTrigger>
-                                    <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Gradesheet?</AlertDialogTitle><AlertDialogDescription>Are you sure you want to delete the gradesheet for "{item.gradesheetData.studentName} - {item.gradesheetData.examType}"? This action cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteSingleItem(item.id)} className="bg-destructive hover:bg-destructive/90">Yes, Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete Gradesheet?</AlertDialogTitle>
+                                        <AlertDialogDescription>Are you sure you want to delete the gradesheet for "{item.gradesheetData.studentName} - {item.gradesheetData.examType}"? This action cannot be undone.</AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => deleteSingleItem(item.id)} className="bg-destructive hover:bg-destructive/90">Yes, Delete</AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
                                 </AlertDialog>
                             </CardFooter>
                             </Card>
